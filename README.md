@@ -114,7 +114,7 @@ zing scores nine dimensions. The three that most directly reveal 货不对板
 | **protocol** | OpenAI-compatibility conformance: multi-turn, stop sequences, response shape, error schema — and a determinism sub-check for response caching that ignores temperature/seed |
 | **reliability** | Concurrent success rate and latency (HTTP 429 throttling bucketed separately) |
 | **connectivity** | Endpoint reachability and the advertised `/v1/models` list |
-| **security** | Transport (HTTPS), header hygiene, secret echo |
+| **security** | Transport (HTTPS), header hygiene, secret echo; hidden injected system prompt (fixed input-token overhead + leak), in-flight response/tool-call tampering via known-answer canaries (URL/package substitution), and prompt-prefix caching (timing) |
 
 See [docs/METHODOLOGY.md](docs/METHODOLOGY.md) for the technique behind each check,
 which relay trick it maps to, and its false-positive caveats.
@@ -140,7 +140,7 @@ zing check --base-url ... --model gpt-4o --suite deep --judge \
 |---|---|---|
 | `smoke` | connectivity, security | very low |
 | `standard` | + protocol, model_identity, capability, streaming, billing, reliability | low–medium |
-| `deep` | + context_window, determinism, quality_judge (if `--judge`) | higher (long-context probes cost tokens) |
+| `deep` | + context_window, determinism, injected_prompt, integrity, prompt_cache, quality_judge (if `--judge`) | higher (long-context & timing probes cost tokens) |
 | `full` | everything | highest |
 
 The context-window probe is bounded by `--max-context-tokens` (default 200K) so

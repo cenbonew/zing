@@ -12,6 +12,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`/v1/messages`) as well as OpenAI Chat Completions, behind one detector
   interface. The protocol is auto-detected from the base_url/model or forced with
   `--api openai|anthropic` (and `--target-api` / `--baseline-api` for `compare`).
+- **Three new `deep`-suite security detectors** (formerly roadmap):
+  - `injected_prompt` — detects a hidden, silently-prepended system prompt from a
+    large *fixed* input-token overhead (measured across two message sizes) plus a
+    leak probe; needs both signals to warn.
+  - `integrity` — known-answer URL/package canaries catch in-flight response/tool-call
+    tampering (value substituted, structure preserved). CRITICAL only when a trusted
+    baseline returns the canary intact; otherwise MEDIUM.
+  - `prompt_cache` — flags prompt-prefix caching by TTFT timing (informational; states
+    that cross-user cache sharing is not provable from a single key).
 - Automated PyPI publishing via GitHub Actions + Trusted Publishing
   (`.github/workflows/release.yml`); see `docs/PUBLISHING.md`.
 

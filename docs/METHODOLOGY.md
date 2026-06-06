@@ -537,15 +537,17 @@ processing-ms / 组织头），在**自身空闲**时发单个探针，观察 re
 
 ## security — Privacy, cache & integrity / 隐私、缓存与完整性
 
-> **Implementation status.** This section describes the full methodology zing aims
-> for; not all of it ships in v0.1.0. **Implemented today:** the `security` detector
-> checks transport (HTTPS), revealing upstream/proxy headers, and verbatim API-key
-> echo; the **cache-correctness** probe (high-temperature byte-identical output) ships
-> as part of the `determinism` detector under the **protocol** dimension (it is
-> suppressed for reasoning models that legitimately ignore sampling). **Roadmap /
-> not yet implemented:** cross-user prefix-cache leak (with honeytoken),
-> injected-system-prompt leak, and response/tool-call tampering diffs. Treat the
-> roadmap probes below as design intent, not current behavior.
+> **Implementation status.** **Implemented today:** the `security` detector checks
+> transport (HTTPS), revealing upstream/proxy headers, and verbatim API-key echo; the
+> **cache-correctness** probe (high-temperature byte-identical output) ships in the
+> `determinism` detector under the **protocol** dimension (suppressed for reasoning
+> models). The roadmap probes are now also implemented as their own detectors:
+> `injected_prompt` (hidden system-prompt via a fixed input-token overhead plus a
+> leak probe), `integrity` (response/tool-call tampering via known-answer URL/package
+> canaries — CRITICAL only when a trusted baseline corroborates), and `prompt_cache`
+> (prompt-prefix caching by TTFT timing). **Still a documented limitation:** *cross-user*
+> cache sharing and black-box prompt-logging are NOT provable from a single key — the
+> `prompt_cache` detector reports prefix caching as INFO and says so explicitly.
 
 **Catches / 命中的伎俩.** `privacy.prompt-logging-leakage` (prompts stored or leaked
 via cross-user cache sharing), `cache.ignore-temperature` (caches by prompt only and
@@ -652,13 +654,13 @@ The 16 relay tricks from the research map onto zing's dimensions as follows.
 | 7 | `stream.fake-streaming` | medium | streaming | inter-chunk timing; compare TTFT/total vs known-streaming baseline |
 | 8 | `billing.usage-inflation` | high | billing | tokenizer audit; fit reported=a·computed+b; flag slope/intercept |
 | 9 | `billing.missing-usage` | medium | billing (+ protocol) | usage presence + arithmetic consistency; `include_usage` |
-| 10 | `privacy.prompt-logging-leakage` _(roadmap)_ | high | security | cross-user prefix-cache timing (distinct keys); logging itself unprovable |
+| 10 | `privacy.prompt-logging-leakage` | high | security | `prompt_cache` detects prefix caching by TTFT (INFO); *cross-user* sharing & logging stay unprovable from one key |
 | 11 | `infra.shared-upstream-key` _(roadmap)_ | high | reliability | quota-decrement-while-idle, premature 429, leaked upstream request-ids |
 | 12 | `cache.ignore-temperature` | medium | protocol (determinism) | identical high-temp outputs + TTFT collapse; suppressed for reasoning models |
-| 13 | `prompt.injected-system-prompt` _(roadmap)_ | medium | security (+ billing) | leak probe + prompt_tokens overcount + baseline delta (≥2 indicators) |
+| 13 | `prompt.injected-system-prompt` | medium | security (+ billing) | `injected_prompt`: fixed input-token overhead (≥2 sizes) + leak probe |
 | 14 | `throttle.rate-limit-quality` | medium | reliability | 429s bucketed out of the success rate; longitudinal/load-conditioned probing is roadmap |
 | 15 | `capability.json-tool-fakery` | medium | capability (+ protocol) | adversarial schema / forced tool over many trials; measure rates |
-| 16 | `integrity.response-tampering` _(roadmap)_ | critical | security | differential byte-diff vs trusted provider on constrained/forced outputs |
+| 16 | `integrity.response-tampering` | critical | security | `integrity`: known-answer URL/package canaries; CRITICAL when a trusted baseline corroborates |
 
 **Two-method principle / 双方法原则.** For the headline 货不对板 question, zing
 deliberately combines **identity fingerprinting** (catches outright substitution)
