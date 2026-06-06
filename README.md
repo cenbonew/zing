@@ -39,14 +39,16 @@ zing turns "this feels off" into a reproducible report.
 Requires Python 3.10+.
 
 ```bash
-# from source (until published to PyPI)
+# from PyPI
+pip install zing-audit          # the `zing` command
+
+# or from source
 git clone https://github.com/cenbonew/zing
 cd zing
 pip install -e .
-
-# or with uv
-uv pip install -e .
 ```
+
+(Maintainers: see [docs/PUBLISHING.md](docs/PUBLISHING.md) for the release process.)
 
 Optional: install the `tokenizers` extra for accurate OpenAI-family token
 counting in the billing audit:
