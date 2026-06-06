@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zing-audit"
-version = "0.1.0"
+version = "0.2.0"
 description = "LLM relay reality check — a CLI that audits whether an API relay actually serves the model it claims (货不对板检测)."
 readme = "README.md"
 license = "Apache-2.0"
