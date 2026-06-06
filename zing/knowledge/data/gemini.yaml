@@ -1,0 +1,508 @@
+# zing knowledge base — Google (Gemini API / Google AI for Developers; also Vertex AI / Gemini Enterprise Agent Platform)
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: gemini
+display_name: Google (Gemini API / Google AI for Developers; also Vertex AI / Gemini Enterprise Agent Platform)
+openai_compatible: true
+base_url_hints:
+- https://generativelanguage.googleapis.com/v1beta/openai/
+- https://generativelanguage.googleapis.com/v1beta/
+- REGION-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/google/models/
+default_tool_format: gemini_function
+models:
+- id: gemini-3.1-pro-preview
+  aliases:
+  - gemini-3.1-pro
+  - Gemini 3.1 Pro
+  family: gemini-3
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  - pdf
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: Current flagship as of mid-2026, released 2026-02-19. Preview status. ~2x reasoning boost over Gemini 3 Pro. Reasoning-first MoE; reasoning cannot be fully disabled. Enforces thought_signature on function-call turns (strict 400 if omitted). 3.5 Pro announced 'coming soon' (~June 2026) but not GA at time of research.
+- id: gemini-3-pro-preview
+  aliases:
+  - gemini-3-pro
+  - Gemini 3 Pro
+  family: gemini-3
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  - pdf
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: 'Released 2025-11-18. Sparse MoE, reasoning-first. Adjustable thinking_level (low/high). Strict thought_signature enforcement on multi-turn tool use (missing -> 400). Benchmarks: GPQA Diamond high-80s/90s.'
+- id: gemini-3.5-flash
+  aliases:
+  - gemini-3.5-flash-05-2026
+  - Gemini 3.5 Flash
+  family: gemini-3
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  - pdf
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: GA 2026-05-19. Internal version 3.5-flash-05-2026. Pricing ~$1.50 in / $9.00 out per 1M (notably higher-tier Flash). 'Most intelligent model for sustained frontier agentic/coding'. Thinking model with adjustable levels; thought_signature enforced.
+- id: gemini-3-flash-preview
+  aliases:
+  - google/gemini-3-flash-preview
+  - Gemini 3 Flash
+  family: gemini-3
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  - pdf
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: 'Released 2025-12-17. Configurable thinking levels: minimal/low/medium/high. Pricing $0.50 in / $3.00 out per 1M (audio in $1.00). Uses ~30% fewer tokens than 2.5 Pro at highest thinking. thought_signature enforced even at minimal thinking.'
+- id: gemini-3.1-flash-lite
+  aliases:
+  - Gemini 3.1 Flash-Lite
+  family: gemini-3
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  - pdf
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: Stable. Cheapest/fastest frontier-class tier of the 3.x line. Thinking-capable.
+- id: gemini-2.5-pro
+  aliases:
+  - Gemini 2.5 Pro
+  family: gemini-2.5
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: Legacy-but-still-available flagship of 2.5 line. Thinking model; reasoning cannot be disabled. Does NOT strictly enforce thought_signature (optional) — key behavioral split vs Gemini 3.x. PDF support via file input.
+- id: gemini-2.5-flash
+  aliases:
+  - Gemini 2.5 Flash
+  family: gemini-2.5
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: Workhorse, native tool use. Thinking can be toggled/budgeted (thinking_budget incl. 0 to disable) unlike Pro. thought_signature optional (not strictly enforced).
+- id: gemini-2.5-flash-lite
+  aliases:
+  - Gemini 2.5 Flash-Lite
+  family: gemini-2.5
+  context_window_tokens: 1048576
+  max_output_tokens: 65536
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  reasoning: true
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: Lowest-latency 2.5 tier. Thinking optional. Same 1M context.
+- id: gemini-embedding-001
+  aliases:
+  - Gemini Embedding
+  - gemini-embedding-2
+  family: gemini-embedding
+  context_window_tokens: 2048
+  max_output_tokens: -1
+  knowledge_cutoff: 2025-01
+  tokenizer: gemini
+  modalities:
+  - text
+  reasoning: false
+  tool_format: ''
+  supports_tools: false
+  supports_json_mode: false
+  supports_json_schema: false
+  usage_in_stream: false
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: Embedding model; output is a vector not tokens. Gemini Embedding 2 adds multimodal. Use /v1beta/openai/embeddings or models.embedContent.
+- id: gemini-2.0-flash
+  aliases:
+  - DISCONTINUED
+  family: gemini-2.0
+  context_window_tokens: 1048576
+  max_output_tokens: 8192
+  knowledge_cutoff: 2024-08
+  tokenizer: gemini
+  modalities:
+  - text
+  - image
+  - audio
+  - video
+  reasoning: false
+  tool_format: gemini_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - gemini
+  - google
+  - google deepmind
+  - deepmind
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  notes: SHUT DOWN 2026-06-01 (along with gemini-2.0-flash-lite). A relay that still serves gemini-2.0-flash after that date, or that maps it to something live, is a strong货不对板 signal. Listed only for detection; not a current model.
+fingerprints:
+- id: self-id
+  signal: self-identification
+  prompt: Who are you? State your exact model name and the company that trained you in one sentence. Do not include any disclaimer.
+  native_expected: Identifies as Gemini, built/trained by Google (Google DeepMind). Will name the Gemini family; will not claim to be GPT, Claude, Llama, Qwen, or 'an OpenAI model'.
+  downgrade_signal: Claims to be ChatGPT/GPT-4/GPT-5, Claude, Llama, Qwen, DeepSeek, or 'developed by OpenAI/Anthropic'; or generic 'I am a large language model' with no Google attribution.
+  pure_code_checkable: true
+  expect_contains_any:
+  - Gemini
+  - Google
+  - DeepMind
+  expect_not_contains:
+  - GPT
+  - OpenAI
+  - ChatGPT
+  - Claude
+  - Anthropic
+  - Llama
+  - Qwen
+  - DeepSeek
+  - Mistral
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: knowledge-cutoff
+  signal: knowledge cutoff date
+  prompt: What is your training data knowledge cutoff? Answer with just the month and year, formatted as YYYY-MM, and nothing else.
+  native_expected: January 2025, i.e. '2025-01' (consistent across Gemini 2.5 and all 3.x models).
+  downgrade_signal: Returns a different cutoff such as 2023-04 (GPT-4), 2023-12, 2024-04, 2024-10 (Claude), 2024-06, or 'April 2024' etc., indicating a non-Gemini backend.
+  pure_code_checkable: true
+  expect_contains:
+  - 2025-01
+  expect_not_contains:
+  - 2023-04
+  - 2023-12
+  - 2024-04
+  - 2024-06
+  - 2024-10
+  max_tokens: 32
+  temperature: 0
+  weight: 1
+- id: true-max-output
+  signal: true max-output-length / context handling
+  prompt: Output the integer sequence starting at 1, one number per line (1, 2, 3, ...), and continue without stopping until you are cut off. Do not summarize or stop early.
+  native_expected: Streams a long monotonic sequence and terminates with finishReason='MAX_TOKENS'; the candidate token count approaches the requested maxOutputTokens up to the model ceiling of 65536 (native) — i.e. it can exceed the old 8192 ceiling of legacy models.
+  downgrade_signal: finishReason='STOP' far below the cap, hard truncation near 4096/8192 tokens, or refusal — indicating a substituted/quantized model with a smaller real output ceiling than advertised.
+  pure_code_checkable: true
+  expect_regex: 1\s*\n\s*2\s*\n\s*3
+  max_tokens: 65536
+  temperature: 0
+  weight: 1
+- id: factual-recall-pro-size
+  signal: factual recall distinguishing model size (Pro vs cheap substitute)
+  prompt: 'In one line each, give the SHA-style short answer: (1) the 50th digit of pi after the decimal point, (2) the chemical formula of caffeine, (3) the ICAO airport code for Tromso, Norway. Format strictly as ''1: X | 2: Y | 3: Z''.'
+  native_expected: 'Gemini Pro-tier answers all correctly: 1: 0, 2: C8H10N4O2, 3: ENTC. Maintains the exact requested ''n: value | ...'' format.'
+  downgrade_signal: A small/quantized substitute hallucinates digits of pi, gives wrong caffeine formula, or wrong/invented ICAO code, and/or breaks the strict output format.
+  pure_code_checkable: true
+  expect_contains:
+  - C8H10N4O2
+  - ENTC
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: reasoning-trap-bat-ball
+  signal: reasoning-vs-non-reasoning tell (multi-step trap)
+  prompt: A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost? Reply with only the dollar amount, e.g. $0.05.
+  native_expected: Gemini 3.x / 2.5 reasoning models answer $0.05 (correct after reasoning).
+  downgrade_signal: Returns the intuitive-but-wrong $0.10 — typical of a small non-reasoning substitute masquerading as a thinking-capable Gemini.
+  pure_code_checkable: true
+  expect_contains:
+  - '0.05'
+  expect_not_contains:
+  - '0.10'
+  max_tokens: 64
+  temperature: 0
+  weight: 1
+relay_red_flags:
+- No thoughtSignature returned on functionCall parts for a model advertised as Gemini 3.x (3 Pro / 3 Flash / 3.5 Flash / 3.1 Pro), or no HTTP 400 when the signature is stripped on the follow-up turn — the single strongest tell that the backend is not native Gemini 3. (Handled by dedicated thought-signature detector, not the generic fingerprint runner.)
+- 'Reasoning can be fully turned off on a Pro/3.x model: native generateContent with thinkingConfig.thinkingBudget=0 (or compat reasoning_effort:''none'') still yields usageMetadata.thoughtsTokenCount > 0 on Gemini 3 Pro / 2.5 Pro; a backend that honors ''none'' / always returns 0 thoughts on a Pro tier is not native Gemini. (Dedicated reasoning/thinkingConfig detector.)'
+- usageMetadata missing thoughtsTokenCount (or it is always 0) while the model claims to be a thinking model.
+- models.countTokens endpoint absent or erroring, or token counts that match OpenAI tiktoken cl100k/o200k instead of Gemini SentencePiece for the same string (e.g. 'strawberry hello hello hello 🍓🍓 こんにちは'). (Dedicated tokenizer/countTokens detector.)
+- Self-ID as GPT/Claude/Llama/Qwen/DeepSeek, or knowledge cutoff that is not January 2025.
+- Max output truncates near 4096/8192 with finishReason STOP instead of reaching toward the 65536 ceiling with MAX_TOKENS.
+- OpenAI-compat layer rejects unknown params with a 400 'unknown/unsupported parameter' error (e.g. frobnicate_level / top_logprobs) — real Gemini silently ignores them; a 400 indicates a passthrough to a different OpenAI-compatible provider. (Dedicated parameter-rejection detector.)
+- Serving a 200 response for discontinued ids gemini-2.0-flash / gemini-2.0-flash-lite after 2026-06-01 — Google returns 404/400; a 200 means silent routing to another live model (classic货不对板). (Dedicated discontinued-model detector.)
+- Context window that accepts far fewer than ~1,048,576 input tokens (relay truncating context while advertising 1M), or that errors well before ~1M tokens.
+- Response body shaped like raw OpenAI (choices[].message only) when hitting the NATIVE generateContent path that should return candidates[]/usageMetadata — indicates a translation shim over a non-Gemini backend.
+- No safetyRatings array on native responses, or safety/refusal style that does not match Gemini's (Gemini returns finishReason SAFETY + blockReason rather than a free-text moralizing refusal).
+sources:
+- https://ai.google.dev/gemini-api/docs/models
+- https://ai.google.dev/gemini-api/docs/changelog
+- https://ai.google.dev/gemini-api/docs/openai
+- https://ai.google.dev/gemini-api/docs/function-calling
+- https://ai.google.dev/gemini-api/docs/thought-signatures
+- https://blog.google/products/gemini/gemini-3-flash/
+- https://blog.google/products/gemini/gemini-3/
+- https://deepmind.google/models/gemini/pro/
+- https://deepmind.google/models/model-cards/gemini-3-1-pro/
+- https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-3-Pro-Model-Card.pdf
+- https://openrouter.ai/google/gemini-3-flash-preview
+- https://openrouter.ai/google/gemini-2.5-pro
+- https://openrouter.ai/google/gemini-2.5-flash
+- https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/3-pro
+- https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/3-flash
+- https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-pro
+- https://github.com/HaoooWang/llm-knowledge-cutoff-dates
+- https://github.com/google/adk-python/issues/3705
+- https://github.com/langchain-ai/langchain-google/issues/1364
+- https://llm-stats.com/blog/research/gemini-3.5-flash-launch
+- https://en.wikipedia.org/wiki/Gemini_(language_model)

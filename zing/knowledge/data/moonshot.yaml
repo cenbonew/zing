@@ -1,0 +1,450 @@
+# zing knowledge base — Moonshot AI (月之暗面 / Kimi)
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: moonshot
+display_name: Moonshot AI (月之暗面 / Kimi)
+openai_compatible: true
+base_url_hints:
+- https://api.moonshot.ai/v1
+- https://api.moonshot.cn/v1
+- https://api.moonshot.ai/v1/chat/completions
+- https://api.moonshot.cn/v1/chat/completions
+default_tool_format: openai_function
+models:
+- id: kimi-k2.6
+  aliases:
+  - kimi-k2-6
+  - moonshotai/Kimi-K2.6
+  - Kimi-K2.6
+  family: kimi-k2
+  context_window_tokens: 262144
+  max_output_tokens: 32768
+  knowledge_cutoff: ~April 2025 (officially undisclosed for K2.6)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  - vision
+  - image
+  - video
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  - k2
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Current flagship as of mid-2026. 1T total / 32B activated MoE (384 experts, 8 active/token, 61 layers, MLA attention, SwiGLU, MoonViT 400M vision encoder). 256K context (262,144). Thinking mode ENABLED BY DEFAULT (disable via thinking={"type":"disabled"}); emits reasoning_content separate from content. Fixed temperature 1.0 recommended for thinking. Recommend max_tokens>=16000 to avoid truncating reasoning+content. Default max output 32768 (32k); some serving stacks advertise output up to full 256K.
+- id: kimi-k2.5
+  aliases:
+  - kimi-k2-5
+  - moonshotai/Kimi-K2.5
+  - Kimi-K2.5
+  family: kimi-k2
+  context_window_tokens: 262144
+  max_output_tokens: 32768
+  knowledge_cutoff: ~April 2025 (undisclosed)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  - vision
+  - image
+  - video
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  - k2
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Previous-generation flagship still active. 1T/32B MoE, 256K context, multi-turn tool calling, vision input, structured outputs, thinking + non-thinking modes.
+- id: moonshot-v1-128k
+  aliases: []
+  family: moonshot-v1
+  context_window_tokens: 131072
+  max_output_tokens: 4096
+  knowledge_cutoff: ~2023/2024 (undisclosed; legacy)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy non-reasoning chat model, 131,072 ctx. Pricing ~$2/M in, $5/M out. NOT a thinking model — no reasoning_content. Still listed/active on platform.moonshot.* model list. Output cap typically 4k (legacy moonshot-v1 default). Supports json_object mode but schema enforcement is weaker/less reliable than K2.x.
+- id: moonshot-v1-32k
+  aliases: []
+  family: moonshot-v1
+  context_window_tokens: 32768
+  max_output_tokens: 4096
+  knowledge_cutoff: ~2023/2024 (undisclosed; legacy)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy non-reasoning chat model, 32,768 ctx. Pricing ~$1/M in, $3/M out. No thinking. A relay claiming 32k that fails beyond ~32,768 tokens is consistent; one that silently truncates well below is suspect. json_object supported; schema enforcement weaker than K2.x.
+- id: moonshot-v1-8k
+  aliases: []
+  family: moonshot-v1
+  context_window_tokens: 8192
+  max_output_tokens: 4096
+  knowledge_cutoff: ~2023/2024 (undisclosed; legacy)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy non-reasoning chat model, 8,192 ctx. Pricing ~$0.20/M in, $2/M out (cheapest). Common downgrade TARGET — a relay billing K2.6 but routing to moonshot-v1-8k will fail any prompt+output exceeding 8,192 tokens. json_object supported; schema enforcement weaker than K2.x.
+- id: moonshot-v1-8k-vision-preview
+  aliases: []
+  family: moonshot-v1
+  context_window_tokens: 8192
+  max_output_tokens: 8192
+  knowledge_cutoff: ~2024 (undisclosed; legacy)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  - vision
+  - image
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy 8k-context vision-preview variant (moonshot-v1). Non-reasoning. Per official FAQ the output is context-bound (8*1024 - prompt_tokens, platform max_tokens ceiling 32k) rather than a fixed 4096. json_object supported; schema enforcement weaker than K2.x.
+- id: moonshot-v1-32k-vision-preview
+  aliases: []
+  family: moonshot-v1
+  context_window_tokens: 32768
+  max_output_tokens: 32768
+  knowledge_cutoff: ~2024 (undisclosed; legacy)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  - vision
+  - image
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy 32k-context vision-preview variant (moonshot-v1). Non-reasoning. Output is context-bound (32*1024 - prompt_tokens, platform max_tokens ceiling 32k). json_object supported; schema enforcement weaker than K2.x.
+- id: moonshot-v1-128k-vision-preview
+  aliases: []
+  family: moonshot-v1
+  context_window_tokens: 131072
+  max_output_tokens: 32768
+  knowledge_cutoff: ~2024 (undisclosed; legacy)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  - vision
+  - image
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy 128k-context vision-preview variant (moonshot-v1). Non-reasoning. Output is context-bound (128*1024 - prompt_tokens) but capped by the platform-wide 32k max_tokens ceiling. json_object supported; schema enforcement weaker than K2.x.
+- id: kimi-k2-thinking
+  aliases:
+  - moonshotai/Kimi-K2-Thinking
+  family: kimi-k2
+  context_window_tokens: 262144
+  max_output_tokens: 32768
+  knowledge_cutoff: ~April 2025 (undisclosed)
+  tokenizer: moonshot-bpe
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - kimi
+  - moonshot
+  - 月之暗面
+  - k2
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - deepseek
+  - llama
+  - meta
+  fingerprints: []
+  notes: 'DEPRECATED as a standalone hosted API model on the Kimi platform (superseded by K2.6''s built-in thinking), but open weights remain on HuggingFace and it is still served by 3rd-party relays/providers. 1T/32B MoE, 256K ctx, native INT4 QAT (weight-only on MoE, ~2x speed). Distinctive: ''Stable Long-Horizon Agency'' — coherent across 200-300 consecutive tool calls. Emits reasoning_content. Useful as a downgrade target to detect (a relay may serve cheaper K2-Thinking weights while billing K2.6).'
+fingerprints:
+- id: self-id
+  signal: self-identification
+  prompt: In one short sentence, who are you and which company created you? Answer in English.
+  native_expected: 'Identifies as Kimi, created by Moonshot AI (月之暗面). Genuine system-prompted form: ''You are Kimi, an AI assistant created by Moonshot AI.'''
+  downgrade_signal: Claims to be GPT/ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), Qwen, DeepSeek, or a generic 'large language model' with no Moonshot/Kimi attribution — strong evidence of a substituted backend.
+  pure_code_checkable: true
+  expect_contains_any:
+  - Kimi
+  - Moonshot
+  - 月之暗面
+  expect_not_contains:
+  - GPT
+  - OpenAI
+  - ChatGPT
+  - Claude
+  - Anthropic
+  - Gemini
+  - Qwen
+  - DeepSeek
+  - Llama
+  max_tokens: 128
+  temperature: 0
+  weight: 2
+- id: knowledge-cutoff
+  signal: knowledge-cutoff / factual recall
+  prompt: What is the most recent event or fact you are confident about? State the approximate month and year of your knowledge cutoff, and name your own model version (e.g. K2.5, K2.6).
+  native_expected: K2.6/K2.5 cluster knowledge around early-to-mid 2025 (commonly cited ~April 2025) and, if grounded, will name itself as a K2-series Moonshot model. Plausibly knows 2024-early-2025 events.
+  downgrade_signal: States a cutoff of 2021/2022/2023 (typical of older GPT-3.5/Llama-2-class substitutes), or confidently names itself as a non-Kimi model, or has no knowledge past 2023 — indicates a cheaper/older substituted backend.
+  pure_code_checkable: false
+  expect_not_contains:
+  - '2021'
+  - '2022'
+  - '2023'
+  max_tokens: 256
+  temperature: 0
+  weight: 1
+- id: tokenizer-cjk-echo
+  signal: tokenizer artifact (CJK / vocab)
+  prompt: 'Repeat this exact string back verbatim, then on a new line state how many tokens it was for you: 月之暗面Kimi开放平台🌙'
+  native_expected: Moonshot's ~160K-vocab BPE handles mixed CJK + emoji efficiently; verbatim echo is exact. Token counts reported are consistent with Moonshot's tokenizer (and the /tokenizers/estimate-token-count or usage.prompt_tokens endpoint can corroborate).
+  downgrade_signal: Corrupted/garbled CJK or emoji in the echo (mojibake), or self-reported token counts grossly inconsistent with Moonshot's tokenizer, suggests a different tokenizer/model. Best cross-checked against usage.prompt_tokens from the same request.
+  pure_code_checkable: true
+  expect_contains:
+  - 月之暗面
+  - Kimi
+  - 开放平台
+  - 🌙
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: max-output
+  signal: max-output-length
+  prompt: Output the integers from 1 to 5000, one per line, with no commentary. Do not stop early.
+  native_expected: K2.6 can produce long outputs (default cap 32768 output tokens; counting to 5000 fits within budget if max_tokens high enough). Completes or runs to the configured large cap.
+  downgrade_signal: Hard stop near 4096 tokens (the legacy moonshot-v1 default output cap) when billed as K2.6 indicates routing to a legacy/cheaper model. An API error rejecting max_tokens=40000 as too large also flags a smaller backend.
+  pure_code_checkable: true
+  expect_regex: \b5000\b
+  max_tokens: 40000
+  temperature: 0
+  weight: 1
+- id: chinese-competence
+  signal: refusal/format style (Chinese language competence)
+  prompt: 用中文回答:请简要介绍你自己,并说明你的训练截止时间。
+  native_expected: Fluent native Chinese response (Moonshot is a China-origin lab; Chinese is first-class), self-identifies as Kimi / 月之暗面 Moonshot AI, comfortable bilingual handling.
+  downgrade_signal: Awkward/translated-feeling Chinese, refusal to use Chinese, or self-identifying as a Western model (ChatGPT/Claude) in the Chinese reply — signals a substituted non-Kimi backend.
+  pure_code_checkable: false
+  expect_contains_any:
+  - Kimi
+  - 月之暗面
+  - Moonshot
+  expect_not_contains:
+  - ChatGPT
+  - OpenAI
+  - Claude
+  - Anthropic
+  - Gemini
+  max_tokens: 256
+  temperature: 0
+  weight: 1
+relay_red_flags:
+- Model self-identifies as GPT/Claude/Gemini/Qwen/DeepSeek instead of Kimi / Moonshot AI when billed as a Moonshot model
+- Billed as kimi-k2.6 but NEVER returns a reasoning_content field (thinking is on by default for K2.6) — suggests routing to a non-reasoning or non-Kimi model [reasoning_content channel detector]
+- context_length_exceeded errors well below the advertised 256K (e.g. fails past 8k/32k/128k) on a model sold as K2.6/K2.5 — silent downgrade to moonshot-v1-* or smaller [long-context/needle detector]
+- Hard output truncation near 4096 tokens when billed as K2.6 (legacy moonshot-v1 default cap) — wrong/cheaper backend
+- tool_call ids never follow the native functions.{name}:{idx} pattern AND no Kimi special-token artifacts ever appear — combined with non-Kimi self-id, points to a foreign backend [tool-call inspection detector]
+- Raw native special tokens <|tool_calls_section_begin|>, <|tool_call_begin|>, <|tool_call_argument_begin|> leaking into content/reasoning_content (a real Kimi-stack bug — confirms Kimi weights but a misconfigured relay)
+- 'Ignores or errors on Moonshot-specific features: partial:true prefill mode, thinking parameter, prompt_cache_key — a generic OpenAI relay faking Moonshot [parameter-handling detector]'
+- Self-reported knowledge cutoff in 2021-2023 when K2.x clusters around early-2025 — older substituted model
+- Mojibake/garbled CJK or emoji output, or usage.prompt_tokens wildly inconsistent with Moonshot's ~160K-vocab tokenizer — different tokenizer/model
+- Serving the deprecated kimi-k2-thinking / kimi-k2-0905-preview / kimi-latest weights while billing the newer kimi-k2.6 (cheaper retired model substituted for current flagship)
+- temperature=0 greedy determinism with full thinking on a model billed K2.6, contradicting Moonshot's documented fixed temperature 1.0 thinking behavior [parameter-handling detector]
+- 'Cross-region key confusion: a .cn-only key working against api.moonshot.ai (or vice versa) implies a proxy is re-keying upstream rather than passing through the native endpoint'
+- Total inability to emit a tool call when tool_choice='required' on a model billed as K2.x — strong downgrade flag [tool-call inspection detector]
+- Loses track of the counter, stops early, or narrates instead of calling tools across a long multi-step tool loop (K2.x documented stable across 200-300 consecutive tool calls) [long-horizon agentic detector]
+sources:
+- https://platform.kimi.ai/docs/models
+- https://platform.kimi.ai/docs/guide/kimi-k2-6-quickstart
+- https://platform.kimi.ai/docs/guide/use-kimi-k2-thinking-model
+- https://platform.kimi.ai/docs/pricing/chat-v1
+- https://huggingface.co/moonshotai/Kimi-K2.6
+- https://huggingface.co/moonshotai/Kimi-K2-Thinking
+- https://github.com/MoonshotAI/Kimi-K2/blob/main/docs/tool_call_guidance.md
+- https://huggingface.co/moonshotai/Kimi-K2-Instruct/blob/main/docs/tool_call_guidance.md
+- https://platform.moonshot.ai/
+- https://docs.litellm.ai/docs/providers/moonshot
+- https://openrouter.ai/moonshotai/kimi-k2.6
+- https://moonshotai.github.io/Kimi-K2/
+- https://cloudprice.net/models/moonshot-1-8k
+- https://docs.together.ai/docs/kimi-k2.5-quickstart

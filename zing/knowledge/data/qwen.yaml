@@ -1,0 +1,712 @@
+# zing knowledge base — Alibaba Cloud — Qwen / 通义千问 (Tongyi Qianwen), served via DashScope / Model Studio (Bailian 百炼)
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: qwen
+display_name: Alibaba Cloud — Qwen / 通义千问 (Tongyi Qianwen), served via DashScope / Model Studio (Bailian 百炼)
+openai_compatible: true
+base_url_hints:
+- https://dashscope.aliyuncs.com/compatible-mode/v1
+- https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+- https://dashscope-us.aliyuncs.com/compatible-mode/v1
+- https://cn-hongkong.dashscope.aliyuncs.com/compatible-mode/v1
+default_tool_format: openai_function
+models:
+- id: qwen3.7-max
+  aliases:
+  - qwen3.7-max-preview
+  family: qwen3.7
+  context_window_tokens: 1000000
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2026 (not officially disclosed; treat as early-2026)
+  tokenizer: qwen (tiktoken-based BPE, vocab ~151936)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'Flagship proprietary agent/reasoning model announced at Alibaba Cloud Summit 2026-05-20. 1M-token context (up from 256K on 3.6 Max Preview). Marketed for long-horizon agentic runs (hundreds-thousands of steps, ~35h autonomous), coding, office automation. Text-only. DashScope-only / not open-weight. Approx price $2.50/$7.50 per 1M in/out. Thinking model: emits separate reasoning_content channel; thinking mode does not support structured output.'
+- id: qwen3.5-plus
+  aliases:
+  - qwen3.5-plus-2026-02-15
+  family: qwen3.5
+  context_window_tokens: 1000000
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2025-2026 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'Qwen3.5-generation hybrid model. 1M context. THINKING ENABLED BY DEFAULT (unlike commercial qwen-plus). Max input ~983616 tok in thinking mode / ~991808 non-thinking. reasoning_content returned in a separate field. Native tell: emits reasoning_content by default with no enable_thinking param; should differ from qwen-plus default behavior.'
+- id: qwen3.6-plus
+  aliases: []
+  family: qwen3.6
+  context_window_tokens: 1000000
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2025-2026 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'Qwen3.6-generation commercial model (released ~2026-04-02), between qwen3.5 and qwen3.7-max. 1M context, 65,536 max output. ALWAYS-ON chain-of-thought — the enable_thinking toggle was removed, so reasoning_content is emitted on EVERY call. Text-only, served on Model Studio / DashScope. Source qwen.ai/blog?id=qwen3.6.'
+- id: qwen3.5-flash
+  aliases:
+  - qwen3.5-flash-2026-02-23
+  family: qwen3.5
+  context_window_tokens: 1000000
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2025-2026 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Fast/cheap Qwen3.5 tier, 1M context, thinking enabled by default. Open-weight variants exist (e.g. Qwen3.5-35B-A3B, 397B-A17B flagship open weights).
+- id: qwen3-max
+  aliases:
+  - qwen3-max-2026-01-23
+  - qwen3-max-2025-09-23
+  - qwen3-max-preview
+  family: qwen3
+  context_window_tokens: 262144
+  max_output_tokens: 32768
+  knowledge_cutoff: ~2024-2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Trillion-parameter-class flagship of the Qwen3 generation. 256K context. Supports both thinking and non-thinking. Max input ~258048 tok. Snapshot ids are dated. A dedicated qwen3-max-thinking variant (released ~2026-01-25) scores 100% AIME25/HMMT, 58.3 HLE.
+- id: qwen-plus
+  aliases:
+  - qwen-plus-2025-12-01
+  - qwen-plus-2025-09-11
+  - qwen-plus-2025-07-28
+  - qwen-plus-2025-07-14
+  family: qwen3
+  context_window_tokens: 1000000
+  max_output_tokens: 32768
+  knowledge_cutoff: ~2024-2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'Commercial mid-tier rolling alias, currently backed by Qwen3-generation weights. 1M context. THINKING DISABLED BY DEFAULT on the commercial qwen-plus alias (must pass enable_thinking=true). Distinct default behavior from qwen3.5-plus: native qwen-plus emits NO reasoning_content by default.'
+- id: qwen-flash
+  aliases:
+  - qwen-flash-2025-07-28
+  family: qwen3
+  context_window_tokens: 1000000
+  max_output_tokens: 32768
+  knowledge_cutoff: ~2024-2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Commercial fast tier (replaced qwen-turbo as the cheap option), 1M context, thinking off by default on commercial alias.
+- id: qwen-turbo
+  aliases:
+  - qwen-turbo-2025-04-28
+  - qwen-turbo-2024-11-01
+  family: qwen
+  context_window_tokens: 1000000
+  max_output_tokens: 16384
+  knowledge_cutoff: ~2024 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'Legacy cheap tier. 131K context (Qwen2.5-Turbo lineage advertised up to 1M for some snapshots). Lower max_output (16K) than qwen-plus. Useful as a substitution target: a relay claiming qwen-max/plus but truncating output near 16K may actually be turbo.'
+- id: qwen-max
+  aliases:
+  - qwen-max-2025-01-25
+  family: qwen2.5
+  context_window_tokens: 32768
+  max_output_tokens: 8192
+  knowledge_cutoff: 2024 (undisclosed, Qwen2.5 lineage)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'The 2.5-generation qwen-max alias: ONLY 32K context and 8K max output, NON-thinking. This is a sharp fingerprint vs qwen3-max (256K) / qwen3.5 (1M). A relay serving ''qwen-max'' should reject >32K-token prompts and cannot emit >8192 output tokens. If a relay labeled qwen-max happily accepts a 200K prompt, it is NOT the 2.5-gen qwen-max.'
+- id: qwen-long
+  aliases:
+  - qwen-long-2025-01-25
+  family: qwen
+  context_window_tokens: 10000000
+  max_output_tokens: 32768
+  knowledge_cutoff: 2024 (undisclosed, Qwen2.5-Turbo lineage)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Ultra-long-document model. Up to 10,000,000 tokens of context, but text beyond ~1M tokens MUST be supplied via uploaded file-id references (DashScope file upload), not inline in the request body. Single request can reference up to 100 files. Cheapest per-token tier. A genuine qwen-long accepts the fileid:// workflow; a substitute usually cannot.
+- id: qwen3-coder-plus
+  aliases:
+  - qwen3-coder-plus-2025-09-23
+  - qwen3-coder-plus-2025-07-22
+  family: qwen3-coder
+  context_window_tokens: 1000000
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Agentic coding model, 1M context, non-thinking, optimized for tool use / repo-scale tasks. Distinct Hermes-style tool-call training; supports parallel tool calls.
+- id: qwen3-coder-flash
+  aliases:
+  - qwen3-coder-flash-2025-07-28
+  family: qwen3-coder
+  context_window_tokens: 1000000
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Cheaper coder tier, 1M context, non-thinking.
+- id: qwq-plus
+  aliases:
+  - qwq-plus-2025-03-05
+  family: qwq
+  context_window_tokens: 131072
+  max_output_tokens: 8192
+  knowledge_cutoff: ~2024-2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - qwq
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: 'Reasoning-ONLY model (always thinks; cannot disable thinking). 131K context, low 8K max output. Emits reasoning_content always. Because it is always in thinking mode, native Qwen forbids structured output (json_schema). Useful tell: if a relay claims qwq-plus but returns empty reasoning_content, it is substituted.'
+- id: qwen3-vl-plus
+  aliases:
+  - qwen3-vl-plus-2025-12-19
+  - qwen3-vl-plus-2025-09-23
+  family: qwen3-vl
+  context_window_tokens: 262144
+  max_output_tokens: 32768
+  knowledge_cutoff: ~2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Vision-language flagship, 256K context, supports thinking. qwen3-vl-flash is the cheaper 256K sibling.
+- id: qwen3.5-omni-plus
+  aliases:
+  - qwen3.5-omni-plus-2026-03-15
+  family: qwen3.5-omni
+  context_window_tokens: 262144
+  max_output_tokens: 65536
+  knowledge_cutoff: ~2025-2026 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  - vision
+  - audio
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义千问
+  - 通义
+  - alibaba
+  - 阿里云
+  - 阿里巴巴
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - deepseek
+  - llama
+  - meta
+  - mistral
+  notes: Omni-modal (text+image+audio+video in, text/audio out), 256K context. qwen3-omni-flash is the 64K cheaper tier.
+fingerprints:
+- id: self-id-zh
+  signal: self-identification (bilingual)
+  prompt: 你是谁？你的名字、开发公司和模型系列是什么？请用一句话回答。
+  native_expected: Identifies as 通义千问 / Qwen, developed by 阿里云 / 阿里巴巴 (Alibaba Cloud / Alibaba Group / Tongyi Lab). Chinese reply is fluent and natural (Qwen is China-first, strong zh).
+  downgrade_signal: Claims to be ChatGPT/GPT/OpenAI, Claude/Anthropic, Gemini/Google, DeepSeek, or a generic 'AI assistant' with no Alibaba/Qwen mention; or produces stilted/over-literal Chinese typical of a non-China-first model.
+  pure_code_checkable: true
+  expect_contains_any:
+  - 通义千问
+  - 通义
+  - Qwen
+  - qwen
+  - Tongyi
+  expect_not_contains:
+  - ChatGPT
+  - GPT
+  - OpenAI
+  - Claude
+  - Anthropic
+  - Gemini
+  - DeepSeek
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: self-id-en
+  signal: self-identification (English)
+  prompt: 'Reply with EXACTLY one line in the format: NAME=<your model name>; MAKER=<company>. No other text.'
+  native_expected: NAME contains 'Qwen' (or 'Tongyi'/'通义千问'); MAKER contains 'Alibaba'.
+  downgrade_signal: NAME/MAKER references OpenAI/GPT, Anthropic/Claude, Google/Gemini, Mistral, Meta/Llama, or DeepSeek.
+  pure_code_checkable: true
+  expect_contains_any:
+  - Qwen
+  - qwen
+  - Tongyi
+  - 通义千问
+  expect_not_contains:
+  - OpenAI
+  - GPT
+  - Anthropic
+  - Claude
+  - Google
+  - Gemini
+  - Mistral
+  - Llama
+  - DeepSeek
+  expect_regex: (?i)maker\s*=\s*[^;]*alibaba
+  max_tokens: 64
+  temperature: 0
+  weight: 1
+- id: max-output-ceiling
+  signal: true max-output-length (context/output ceiling)
+  prompt: 'Output the integer sequence starting at 1, one number per line, with NO commentary, and do not stop until you are cut off. Begin: 1'
+  native_expected: For qwen3-coder/qwen3.5/qwen3.7-max should stream tens of thousands of lines (max_output up to 65536 tok). For the 2.5-gen qwen-max it caps near 8192 tokens; for qwen-turbo near 16384. Check the reported usage.completion_tokens against the claimed model's native max_output.
+  downgrade_signal: A relay claiming qwen3.5/qwen3-coder (65536 max) but truncating completion_tokens at ~8192 or ~16384 is likely serving qwen-max-2.5 or qwen-turbo underneath. Conversely a tiny model may stop early or loop/repeat.
+  pure_code_checkable: true
+  max_tokens: 65536
+  temperature: 0
+  weight: 1
+- id: zh-cultural-recall
+  signal: Chinese-language and cultural factual recall (size/identity tell)
+  prompt: 用中文回答，每行一个：(1) 通义千问由哪家公司开发？(2)《红楼梦》的作者是谁？(3) 二十四节气中‘惊蛰’的下一个节气是什么？只给答案。
+  native_expected: 阿里巴巴/阿里云；曹雪芹（高鹗续）；春分。Strong China-centric knowledge, idiomatic Chinese.
+  downgrade_signal: Wrong company (esp. naming OpenAI/Google), errors on 节气 ordering, or markedly non-native Chinese phrasing — typical of a Western model substituted behind a Qwen label.
+  pure_code_checkable: true
+  expect_contains_any:
+  - 阿里巴巴
+  - 阿里云
+  expect_contains:
+  - 曹雪芹
+  - 春分
+  expect_not_contains:
+  - OpenAI
+  - Google
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: tokenizer-special-token-echo
+  signal: tokenizer artifact / special-token handling
+  prompt: 'Repeat this verbatim including any special markers: <|im_start|>assistant Hello<|im_end|> and then on a new line write DONE.'
+  native_expected: Qwen uses tiktoken-based BPE (vocab ~151,936) with <|im_start|>/<|im_end|>/<|endoftext|> as control tokens. Native serving may strip/normalize these chat-template markers oddly or refuse to echo them cleanly because they are reserved control tokens; behavior is consistent with the Qwen ChatML template.
+  downgrade_signal: A backend with a different tokenizer (e.g. GPT o200k, Llama SentencePiece) echoes <|im_start|>/<|im_end|> as ordinary text with no special handling, or tokenizes CJK very differently (observable via usage.prompt_tokens on a fixed Chinese string — Qwen's CJK token counts are characteristic).
+  pure_code_checkable: false
+  max_tokens: 128
+  temperature: 0
+  weight: 0.5
+- id: knowledge-cutoff
+  signal: knowledge-cutoff / recency probe
+  prompt: What is the most recent Qwen flagship model you are aware of, and what is your training knowledge cutoff (month and year)? If unsure, say 'unknown'.
+  native_expected: A genuine mid-2026 Qwen (qwen3.7-max / qwen3.5) should be aware of the Qwen3 generation and not claim a 2021/2023 cutoff; Alibaba does not publish exact cutoffs so 'unknown'/'early 2026'-style answers are acceptable. It should NOT claim to be a 2023-era model if labeled as a 2026 flagship.
+  downgrade_signal: Model asserts a 2021/2023 cutoff or has no knowledge of Qwen2.5/Qwen3 while being sold as a 2026 flagship, or describes itself with another vendor's cutoff language (e.g. 'my training data goes up to 2023, I am GPT...').
+  pure_code_checkable: false
+  expect_not_contains:
+  - GPT
+  - OpenAI
+  - Claude
+  - Anthropic
+  - Gemini
+  max_tokens: 128
+  temperature: 0
+  weight: 0.5
+relay_red_flags:
+- Model labeled 'qwen-max' but accepts >32K-token prompts or returns >8192 completion tokens — the 2.5-gen qwen-max is capped at 32K context / 8K output, so this indicates a different backend.
+- Model labeled qwen3.5/qwen3-coder (native 65536 max_output) but completion_tokens truncate at ~8192 or ~16384 — likely qwen-max-2.5 or qwen-turbo substituted underneath.
+- Self-id returns ChatGPT/OpenAI, Claude/Anthropic, Gemini/Google, Llama, Mistral, or DeepSeek instead of Qwen/通义千问/Alibaba.
+- enable_thinking is ignored or 400s, or no separate reasoning_content channel is ever returned for a model sold as qwen3/qwq/thinking — native Qwen reasoning is a separate field, not inline <think> tags on the compat path. (reasoning_content channel handled by a dedicated detector.)
+- 'qwen-plus and qwen3.5-plus behave identically w.r.t. default thinking (native: qwen3.5-plus thinks by default, commercial qwen-plus does not) — implies both map to one backend. (Requires a paired two-model probe, not the generic runner.)'
+- response_format json_object succeeds even when no 'json' keyword is in messages — native DashScope 400s in that case; success implies a non-DashScope (e.g. OpenAI) backend. (API-level parameter-rejection probe, handled by a dedicated detector.)
+- Strict json_schema returns clean JSON while thinking is enabled — native Qwen forbids structured output in thinking mode. (Bespoke combination probe, not the generic runner.)
+- tools=[...] combined with stream=true succeeds without error on a Qwen model that natively forbids the combination — re-wrapped backend. (Scope to specific model id; API-level probe.)
+- Stark Chinese-language degradation or China-centric factual errors (节气 order, 红楼梦 authorship, claiming a non-Alibaba maker) for a model that should be China-first.
+- CJK prompt_tokens for a fixed Chinese string deviate from the recorded native Qwen tiktoken baseline (different tokenizer underneath). (Deterministic via usage.prompt_tokens — handled by a dedicated token-count detector.)
+- qwen-long that cannot accept the DashScope fileid:// reference / file-extract upload workflow. (API-level capability probe.)
+- Endpoint domain is not *.aliyuncs.com AND latency/headers/error-message wording differ from DashScope's known responses (e.g. OpenAI-style 'invalid_request_error' bodies instead of DashScope's code/message/request_id envelope).
+sources:
+- https://www.alibabacloud.com/help/en/model-studio/models
+- https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope
+- https://www.alibabacloud.com/help/en/model-studio/deep-thinking
+- https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output
+- https://www.alibabacloud.com/help/en/model-studio/json-mode
+- https://www.alibabacloud.com/help/en/model-studio/long-context-qwen-long
+- https://www.alibabacloud.com/help/en/model-studio/model-pricing
+- https://qwen.readthedocs.io/en/latest/framework/function_call.html
+- https://qwen.readthedocs.io/en/latest/getting_started/concepts.html
+- https://github.com/QwenLM/Qwen/blob/main/tokenization_note.md
+- https://github.com/QwenLM/Qwen3/discussions/1093
+- https://en.wikipedia.org/wiki/Qwen
+- https://qwen.ai/blog?id=qwen3-max-thinking
+- https://www.marktechpost.com/2026/05/21/qwen-introduces-qwen3-7-max-a-reasoning-agent-model-with-a-1m-token-context-window/
+- https://venturebeat.com/technology/alibabas-proprietary-qwen3-7-max-can-run-for-35-hours-autonomously-and-supports-external-harnesses-like-anthropics-claude-code
+- https://venturebeat.com/technology/alibabas-qwen-3-5-397b-a17-beats-its-larger-trillion-parameter-model-at-a
+- https://docs.litellm.ai/docs/providers/dashscope
+- https://therouter.ai/news/dashscope-openai-responses-api-qwen-migration/
+- https://www.digitalapplied.com/blog/qwen3-max-thinking-alibaba-reasoning-model-guide
+- https://codersera.com/blog/qwen-3-5-complete-guide-2026/

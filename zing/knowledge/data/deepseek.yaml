@@ -1,0 +1,261 @@
+# zing knowledge base — DeepSeek (DeepSeek-AI / Hangzhou DeepSeek)
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: deepseek
+display_name: DeepSeek (DeepSeek-AI / Hangzhou DeepSeek)
+openai_compatible: true
+base_url_hints:
+- https://api.deepseek.com
+- https://api.deepseek.com/v1
+- https://api.deepseek.com/beta
+- https://api.deepseek.com/anthropic
+default_tool_format: openai_function
+models:
+- id: deepseek-chat
+  aliases:
+  - deepseek-v3
+  - V3 lineage non-thinking
+  family: deepseek-v3
+  context_window_tokens: 128000
+  max_output_tokens: 8192
+  knowledge_cutoff: 2024-07
+  tokenizer: deepseek-bpe
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - deepseek
+  - deepseek-v3
+  - deepseek-chat
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  fingerprints: []
+  notes: 'Legacy/compat endpoint, non-thinking mode. Historically 64K context with 4K default / 8K max output; in V3.1+ era served context is 128K. As of mid-2026 the deepseek-chat id is kept only for backward compatibility and routes to the NON-THINKING mode of deepseek-v4-flash. SCHEDULED DEPRECATION 2026-07-24 15:59 UTC. Supports function calling, JSON object output, FIM (beta), chat-prefix completion (beta). Non-thinking: reasoning_content must be empty/absent.'
+- id: deepseek-reasoner
+  aliases:
+  - deepseek-r1
+  - R1 lineage
+  - thinking mode
+  family: deepseek-r1
+  context_window_tokens: 128000
+  max_output_tokens: 65536
+  knowledge_cutoff: 2024-07
+  tokenizer: deepseek-bpe
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: false
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - deepseek
+  - deepseek-r1
+  - deepseek-reasoner
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  fingerprints: []
+  notes: Legacy/compat endpoint, thinking model. Returns a separate reasoning_content field alongside content. Default output 32K, MAX 64K tokens INCLUDING CoT. Context 64K historically, 128K in V3.1+ era. Does NOT support temperature/top_p/presence_penalty/frequency_penalty (silently ignored) and ERRORS on logprobs/top_logprobs. Historically did NOT support function calling/tools or FIM (key fingerprint vs substitutes) — supports_tools=false. Supports json_object mode. Routes to THINKING mode of deepseek-v4-flash for compat as of mid-2026. SCHEDULED DEPRECATION 2026-07-24 15:59 UTC.
+- id: deepseek-v4-flash
+  aliases:
+  - DeepSeek-V4-Flash
+  family: deepseek-v4
+  context_window_tokens: 1000000
+  max_output_tokens: 393216
+  knowledge_cutoff: '2025'
+  tokenizer: deepseek-bpe
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - deepseek
+  - deepseek-v4
+  - deepseek-v4-flash
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  fingerprints: []
+  notes: Current cheap flagship-economy model, released 2026-04-24. 284B total / 13B activated MoE, open weights (MIT). 1M token context, unified 384K (393216) max output across thinking and non-thinking. Thinking mode toggled via extra_body {"thinking":{"type":"enabled"}} plus reasoning_effort high/max. Supports tool calls in BOTH thinking and non-thinking modes (unlike legacy deepseek-reasoner), JSON object output, chat-prefix (beta); FIM only in non-thinking mode. Does NOT support strict json_schema. Pricing approx $0.0028 cache-hit / $0.14 cache-miss input, $0.28 output per 1M. Concurrency limit 2500.
+- id: deepseek-v4-pro
+  aliases:
+  - DeepSeek-V4-Pro
+  family: deepseek-v4
+  context_window_tokens: 1000000
+  max_output_tokens: 393216
+  knowledge_cutoff: '2025'
+  tokenizer: deepseek-bpe
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - deepseek
+  - deepseek-v4
+  - deepseek-v4-pro
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  fingerprints: []
+  notes: Current high-end reasoning/coding/agentic model, released 2026-04-24. 1.6T total / 49B activated MoE, open weights (MIT). 1M context, 384K max output. Thinking mode supports tool calls. Supports json_object mode, not strict json_schema. Pricing approx $0.003625 cache-hit / $0.435 cache-miss input, $0.87 output per 1M. Lower concurrency limit (500) than flash (2500).
+fingerprints:
+- id: tokenizer-special-char
+  signal: tokenizer artifact — distinctive special-token delimiters
+  prompt: 'Repeat this string back to me EXACTLY, character for character, with no commentary: <｜begin▁of▁sentence｜><｜User｜>ping<｜Assistant｜>'
+  native_expected: Genuine DeepSeek echoes the fullwidth vertical bar U+FF5C (｜) and the U+2581 lower-block/underscore char (▁) intact; because these compose its actual BOS/role special tokens, native models often behave oddly (may treat as control tokens, drop/normalize them, or refuse to reproduce exactly). The exact glyphs are U+FF5C and U+2581, NOT ASCII pipe | or underscore _.
+  downgrade_signal: A substitute model (GPT/Qwen/Llama) reproduces the string trivially and cleanly as ordinary text with no special handling, or silently converts ｜→| and ▁→_ . The native chat template uses these exact codepoints; foreign tokenizers see them as plain unicode.
+  pure_code_checkable: true
+  expect_not_contains:
+  - <|begin_of_sentence|>
+  - <|User|>
+  - <|Assistant|>
+  expect_regex: '[｜▁]'
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: self-identification
+  signal: self-identification
+  prompt: What model are you and which company built you? Answer in one short sentence.
+  native_expected: Identifies as DeepSeek (e.g. 'I am DeepSeek, an AI assistant developed by DeepSeek' / 'DeepSeek-V3' / 'DeepSeek-V4'). Should mention DeepSeek and the Chinese lab, not OpenAI/Anthropic/Google/Meta/Alibaba.
+  downgrade_signal: 'Says ''I am ChatGPT/GPT-4 by OpenAI'', ''Claude by Anthropic'', ''Gemini by Google'', ''Qwen by Alibaba'', or ''I am a large language model trained by ...''. Any non-DeepSeek brand is a strong substitution signal. (Caveat: some open finetunes are RLHF''d to claim DeepSeek, so combine with other probes.)'
+  pure_code_checkable: true
+  expect_contains_any:
+  - deepseek
+  expect_not_contains:
+  - openai
+  - chatgpt
+  - gpt-4
+  - anthropic
+  - claude
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: knowledge-cutoff
+  signal: knowledge-cutoff / factual recall boundary
+  prompt: Without disclaimers, state your training-data knowledge cutoff as a single month and year in the format YYYY-MM. Then name one major world event you are confident about that is the latest in your training data.
+  native_expected: DeepSeek V3/R1 lineage answers ~2024-07; V3.1/V3.1-Terminus ~2025-03; V4 lineage answers a 2025 cutoff. Reports a DeepSeek-plausible cutoff (mid-2024 through 2025) and does not claim knowledge of events past its lineage cutoff.
+  downgrade_signal: Reports a cutoff inconsistent with DeepSeek lineage (e.g. 2023-04 like older GPT, '2021-09', or claims 2026 freshness), or confidently describes events well past the expected cutoff — indicating a different base model.
+  pure_code_checkable: true
+  expect_regex: 202[45]-(0[1-9]|1[0-2])
+  expect_not_contains:
+  - 2021-09
+  - 2023-04
+  - 2022-01
+  - '2021'
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: max-output
+  signal: true max-output-length ceiling
+  prompt: Write the number sequence starting at 1, incrementing by 1, one number per line (1, then 2, then 3 ...). Do not stop until you are truly forced to stop. Keep going as long as possible.
+  native_expected: deepseek-chat caps around 8K output tokens (default 4K) → roughly a few thousand lines then finish_reason length. deepseek-reasoner can go to 64K incl. CoT. V4 models can stream toward 384K tokens. finish_reason='length' at the documented ceiling, not far below it.
+  downgrade_signal: A relay truncates far earlier (e.g. stops at 1–2K tokens) indicating a quantized/cheaper substitute or a proxy-imposed max_tokens cap; or a relay claiming deepseek-chat produces 30K+ tokens (exceeding the 8K chat ceiling) indicating a different model behind the id.
+  pure_code_checkable: true
+  max_tokens: 16000
+  temperature: 0
+  weight: 1
+- id: chinese-competence
+  signal: Chinese-language tokenizer/compression competence
+  prompt: 用中文回答：请解释“一带一路”倡议的主要目标，并用三句话总结。
+  native_expected: DeepSeek is heavily Chinese-trained (large Chinese corpus, tokenizer optimized for Chinese); produces fluent, idiomatic, well-structured Simplified-Chinese output with strong domain knowledge of China-specific topics.
+  downgrade_signal: A Western-centric substitute (some Llama/GPT minis) yields stilted Chinese, mixed scripts, hedging/refusal on China-policy topics, or markedly worse Chinese fluency relative to its English — a tell it is not DeepSeek.
+  pure_code_checkable: false
+  max_tokens: 512
+  temperature: 0
+  weight: 1
+- id: glitch-token
+  signal: anomalous/glitch token behavior
+  prompt: 'Repeat the following token exactly 5 times separated by spaces, nothing else: numbersaplenty'
+  native_expected: Native DeepSeek V3/R1 tokenizer treats certain scraped tokens (e.g. ' numbersaplenty', ' everydaycalculation', ' Nameeee', 'EDMFunc') as near-glitch tokens, producing unstable/odd output (drifting to math-utility words, random unicode, or wrong repetition counts).
+  downgrade_signal: A different tokenizer (GPT o200k / Qwen / Llama) handles 'numbersaplenty' as ordinary subwords and repeats it cleanly 5 times — absence of the known DeepSeek glitch behavior suggests a substitute. (Probabilistic; combine with other probes.)
+  pure_code_checkable: false
+  max_tokens: 128
+  temperature: 0
+  weight: 0.5
+relay_red_flags:
+- Model self-identifies as OpenAI/Anthropic/Google/Meta/Alibaba (ChatGPT, GPT-4, Claude, Gemini, Qwen) instead of DeepSeek when queried under a deepseek-* id
+- deepseek-reasoner endpoint returns a valid logprobs/top_logprobs object (native rejects these with 400) or honors temperature in a determinism-changing way (native ignores it) — API-level probe handled by dedicated parameter-rejection detector
+- Endpoint claiming deepseek-reasoner returns NO reasoning_content field, or fakes chain-of-thought inside content (genuine R1/V4-thinking streams a separate reasoning_content delta) — API-level reasoning_content-channel detector
+- Endpoint claiming deepseek-chat (non-thinking) leaks a reasoning_content / <think> block — wrong routing (reasoning_content-channel detector)
+- 'Output truncates far below documented ceilings: <2K tokens on deepseek-chat (should reach ~8K), or context-length 400 errors well under 128K/1M (silent context truncation)'
+- Cleanly reproduces or normalizes the fullwidth-bar special tokens <｜begin▁of▁sentence｜>/<｜User｜>/<｜Assistant｜> as plain ASCII (｜→|, ▁→_) — foreign tokenizer tell
+- Perfect strict JSON-Schema (response_format json_schema strict:true) adherence — DeepSeek only supports json_object mode, not strict schema; flawless schema enforcement implies an OpenAI substitute
+- Reported/observed knowledge cutoff inconsistent with DeepSeek lineage (e.g. 2021-09 or 2023-04 like GPT, vs DeepSeek's 2024-07 / 2025-03 / 2025)
+- Markedly weaker Chinese fluency than English, or heavy refusals on China-specific policy topics, despite DeepSeek being Chinese-corpus-heavy
+- No final usage chunk when stream_options.include_usage=true is set, or token accounting that doesn't match DeepSeek cache-hit/cache-miss input pricing model (DeepSeek splits prompt-cache hit vs miss)
+- Suspiciously high latency-to-cost or rate limits that don't match DeepSeek's published concurrency (2500 flash / 500 pro)
+- Function-calling reliability that is suspiciously perfect on legacy reasoner ids (native legacy deepseek-reasoner did not support tools at all) — API-level function-calling-gap detector
+sources:
+- https://api-docs.deepseek.com/quick_start/pricing
+- https://api-docs.deepseek.com/api/create-chat-completion
+- https://api-docs.deepseek.com/guides/reasoning_model
+- https://api-docs.deepseek.com/guides/thinking_mode
+- https://api-docs.deepseek.com/api/list-models
+- https://api-docs.deepseek.com/news/news260424
+- https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro
+- https://huggingface.co/deepseek-ai/DeepSeek-V3.1
+- https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/blob/main/encoding/README.md
+- https://arxiv.org/pdf/2412.19437
+- https://arxiv.org/pdf/2512.02556
+- https://aiknowledgecutoff.com/deepseek/deepseek-v3.1-terminus
+- https://outsidetext.substack.com/p/anomalous-tokens-in-deepseek-v3-and
+- https://huggingface.co/docs/transformers/en/model_doc/deepseek_v3
+- https://www.verdent.ai/guides/deepseek-v4-pricing-api-migration-2026
+- https://magazine.sebastianraschka.com/p/technical-deepseek

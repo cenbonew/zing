@@ -1,0 +1,702 @@
+# zing knowledge base — OpenAI
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: openai
+display_name: OpenAI
+openai_compatible: true
+base_url_hints:
+- https://api.openai.com/v1
+- api.openai.com
+- /v1/chat/completions
+- /v1/responses
+default_tool_format: openai_function
+models:
+- id: gpt-5.5
+  aliases:
+  - gpt-5.5-2026-04-23
+  family: gpt-5
+  context_window_tokens: 1050000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-12-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: 'Flagship as of mid-2026. $5/$30 per MTok, $0.50 cached input. Reasoning effort levels: none, low, medium, high, xhigh. Verbosity param low/medium/high. Supports Chat Completions and Responses API, function calling, structured outputs, web/file search, code interpreter, computer use, MCP. 1.05M context advertised; some downstream tools observe a ~272K input cap with 128K reserved for output.'
+- id: gpt-5.5-pro
+  aliases: []
+  family: gpt-5
+  context_window_tokens: 1050000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-12-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Highest-precision variant, ~ $30/$180 per MTok. Heavy reasoning, slow, expensive. Responses API recommended.
+- id: gpt-5.4
+  aliases: []
+  family: gpt-5
+  context_window_tokens: 1050000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-08-31'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Strong general-purpose frontier, $2.50/$15 per MTok. Reasoning effort none/low/medium/high/xhigh.
+- id: gpt-5.4-pro
+  aliases: []
+  family: gpt-5
+  context_window_tokens: 1050000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-08-31'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: High-precision Responses-API reasoning variant of the 5.4 tier, ~$30/$180 per MTok. 1.05M context, 128K max output. Served on the Responses API. Source developers.openai.com/api/docs/models/gpt-5.4-pro.
+- id: gpt-5.4-mini
+  aliases: []
+  family: gpt-5
+  context_window_tokens: 400000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-08-31'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: $0.75/$4.50 per MTok. Note smaller 400K context vs full GPT-5.4's 1M — a common downgrade target.
+- id: gpt-5.4-nano
+  aliases: []
+  family: gpt-5
+  context_window_tokens: 400000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-08-31'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: ~ $0.20/$1.25 per MTok. Cheapest GPT-5.4 tier.
+- id: gpt-5.3-codex
+  aliases: []
+  family: gpt-5
+  context_window_tokens: 400000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-08-31'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  - codex
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Agentic coding model for Codex. Reasoning effort low/medium/high/xhigh. Function calling + structured outputs. Optimized for tool-heavy coding loops.
+- id: gpt-5.2
+  aliases:
+  - gpt-5.2-chat-latest
+  - gpt-5.2-pro
+  family: gpt-5
+  context_window_tokens: 400000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2025-08-31'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Prior frontier gen. Chat variant (gpt-5.2-chat-latest) is 128K context / 16384 max output, non-reasoning-optimized. Pro variant is high-effort reasoning.
+- id: gpt-5.1
+  aliases:
+  - gpt-5.1-chat-latest
+  - gpt-5.1-codex
+  family: gpt-5
+  context_window_tokens: 400000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2024-09-30'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Earlier GPT-5 gen. Chat-latest variant 128K/16384.
+- id: gpt-5
+  aliases:
+  - gpt-5-chat-latest
+  family: gpt-5
+  context_window_tokens: 400000
+  max_output_tokens: 128000
+  knowledge_cutoff: '2024-09-30'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-5
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Original GPT-5 (Aug 2025). 400K context advertised, ~272K real input cap. Introduced reasoning_effort=minimal and verbosity params and custom (plaintext/CFG-grammar) tools. gpt-5-chat-latest is 128K/16384 non-reasoning. Retired from ChatGPT UI Feb 2026 but API snapshots remained.
+- id: gpt-4.1
+  aliases:
+  - gpt-4.1-2025-04-14
+  family: gpt-4.1
+  context_window_tokens: 1047576
+  max_output_tokens: 32768
+  knowledge_cutoff: '2024-06-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-4.1
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: 1,047,576 (2^20-ish) context, 32768 max output. Non-reasoning. Deprecated from ChatGPT UI Feb 13 2026; API access reportedly continued. Distinctive exact context number is a strong fingerprint.
+- id: gpt-4.1-mini
+  aliases: []
+  family: gpt-4.1
+  context_window_tokens: 1047576
+  max_output_tokens: 32768
+  knowledge_cutoff: '2024-06-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-4.1
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Same 1,047,576 context / 32768 output as gpt-4.1. Non-reasoning.
+- id: gpt-4.1-nano
+  aliases: []
+  family: gpt-4.1
+  context_window_tokens: 1047576
+  max_output_tokens: 32768
+  knowledge_cutoff: '2024-06-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-4.1
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Cheapest 4.1 tier ($0.10/$0.40). Same 1,047,576/32768. Common downgrade substitute for pricier models.
+- id: gpt-4o
+  aliases:
+  - gpt-4o-2024-11-20
+  - gpt-4o-2024-08-06
+  family: gpt-4o
+  context_window_tokens: 128000
+  max_output_tokens: 16384
+  knowledge_cutoff: '2023-10-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-4o
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: 128K context, 16384 max output (latest 2024-11-20 snapshot; original May-2024 snapshot was 4096 output). Non-reasoning. Knowledge cutoff Oct 2023. Deprecated from ChatGPT UI Feb 13 2026. o200k_base tokenizer (introduced with GPT-4o). Structured Outputs json_schema supported on gpt-4o-2024-08-06+.
+- id: gpt-4o-mini
+  aliases:
+  - gpt-4o-mini-2024-07-18
+  family: gpt-4o
+  context_window_tokens: 128000
+  max_output_tokens: 16384
+  knowledge_cutoff: '2023-10-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - gpt
+  - chatgpt
+  - gpt-4o
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: 128K context, 16384 max output. Cheapest legacy non-reasoning model and the single most common relay substitution target. Only the gpt-4o-mini-2024-07-18 snapshot exists; json_schema structured outputs supported on this snapshot.
+- id: o3
+  aliases:
+  - o3-2025-04-16
+  - o3-pro
+  family: o-series
+  context_window_tokens: 200000
+  max_output_tokens: 100000
+  knowledge_cutoff: '2024-06-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - chatgpt
+  - o3
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Reasoning model (Apr 2025). 200K context / 100K max output. Emits reasoning tokens; on Chat Completions requires max_completion_tokens, rejects temperature!=1, reasoning_effort low/medium/high. o3-pro is higher-compute variant via Responses API. json_schema structured outputs supported.
+- id: o4-mini
+  aliases:
+  - o4-mini-2025-04-16
+  family: o-series
+  context_window_tokens: 200000
+  max_output_tokens: 100000
+  knowledge_cutoff: '2024-06-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - chatgpt
+  - o4-mini
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Small fast reasoning model. 200K/100K. Reasoning tokens. Deprecated from ChatGPT UI Feb 13 2026; API continued. Same param constraints as o3 (max_completion_tokens, rejects temperature!=1). json_schema structured outputs supported.
+- id: o1
+  aliases:
+  - o1-2024-12-17
+  family: o-series
+  context_window_tokens: 200000
+  max_output_tokens: 100000
+  knowledge_cutoff: '2023-10-01'
+  tokenizer: o200k_base
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - openai
+  - chatgpt
+  - o1
+  identity_forbidden:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: First-gen reasoning model, largely superseded by o3. 200K/100K. Originally no system message / no streaming on early snapshots; uses developer role. Expensive ($15/MTok input historically). Predates the gpt-4o-2024-08-06+ / o3 / o4-mini json_schema structured-output rollout.
+fingerprints:
+- id: self-id
+  signal: self-identification style
+  prompt: What model are you, and which company built you? Answer in one short sentence.
+  native_expected: Genuine OpenAI models identify as an OpenAI model (a GPT/ChatGPT/GPT-5-family model trained by OpenAI). They do NOT claim to be Claude, Gemini, Llama, Qwen, or DeepSeek.
+  downgrade_signal: A substituted backend self-identifies as Claude/Anthropic, Gemini/Google, Llama/Meta, Qwen/Alibaba, or DeepSeek — an immediate tell. Note exact OpenAI version self-ID is unreliable (models are not reliably aware of their own minor version), so judge only the vendor/family claim. Keyword check for foreign-vendor names.
+  pure_code_checkable: true
+  expect_contains_any:
+  - openai
+  - gpt
+  - chatgpt
+  expect_not_contains:
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  - cohere
+  max_tokens: 64
+  temperature: 0
+  weight: 1
+- id: knowledge-cutoff
+  signal: knowledge-cutoff capability (factual, not self-report)
+  prompt: 'Without any web access, state plainly: who won the 2024 US presidential election, and who was inaugurated US president in January 2025? Answer in one sentence.'
+  native_expected: Models with cutoffs at/after late 2024 (GPT-5.x cutoffs Sep-2024 through Dec-2025; GPT-4.1/o3/o4-mini cutoff Jun-2024) — the Jun-2024-cutoff ones may hedge, but Sep-2024+ models (GPT-5/5.1) and later know the Nov-2024 result. GPT-5.5 (Dec-2025 cutoff) confidently states the Jan-2025 inauguration.
+  downgrade_signal: 'A substitute with an older cutoff (e.g. a 2023 model standing in for GPT-5.5) cannot name the Jan-2025 inauguration or gets the 2024 election wrong. NOTE: self-reported cutoff is unreliable — OpenAI models frequently MISstate their own cutoff (GPT-5.5 has been observed claiming ''June 2024''), so probe with a dated FACT, not ''what is your cutoff''. Needs LLM/keyword judge.'
+  pure_code_checkable: false
+  expect_contains_any:
+  - trump
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: max-output-truncation
+  signal: max-output / context truncation
+  prompt: Output the integer sequence starting at 1, one number per line, incrementing by 1, with no other text. Keep going until you are cut off. Start now.
+  native_expected: Genuine GPT-5.x/4.1 honors a very large max_completion_tokens; with max set to e.g. 40000 it streams tens of thousands of tokens before stopping. Reaching well past 16384 output tokens proves it is not a 4o-class (16384 cap) or a quietly capped relay.
+  downgrade_signal: A relay fronting gpt-4o/4o-mini hard-stops at 16384 output tokens; a context-truncating relay stops far earlier. Set max_completion_tokens=40000 and check the emitted line count / completion_tokens.
+  pure_code_checkable: true
+  expect_regex: (?s)1\b.*\b2\b.*\b3\b
+  max_tokens: 40000
+  temperature: 0
+  weight: 1
+relay_red_flags:
+- Claims gpt-5.x/4.1/o-series but the response top-level 'model' field is a bare alias with no YYYY-MM-DD snapshot suffix, or a wrong/foreign id (Llama/Qwen/DeepSeek string)
+- Accepts temperature!=1 and max_tokens on a claimed o3/o4-mini/GPT-5-reasoning model (genuine reasoning models reject both) — dedicated parameter-rejection detector
+- reasoning_tokens always 0 / completion_tokens_details absent on a claimed reasoning model — dedicated reasoning-token-accounting detector
+- Rejects or ignores reasoning_effort='minimal'/'xhigh' or verbosity on a claimed GPT-5.x model (these are GPT-5-generation-specific)
+- Output silently hard-caps near 16384 tokens while claiming a GPT-5.x/4.1 model (128K output) — actually a gpt-4o-class backend
+- Context request near 200K-1M tokens returns context_length_exceeded while claiming GPT-4.1 (1,047,576) or GPT-5.x (400K-1M) — secret truncation; dedicated needle-in-haystack detector
+- function_call/tool_calls returns arguments as a raw object instead of a JSON string, or tool-call id lacks the 'call_' prefix
+- 'Ignores response_format json_schema strict mode: returns prose/markdown-fenced JSON or schema-violating keys'
+- 'stream_options.include_usage produces no trailing usage chunk, or stream never terminates with ''data: [DONE]'''
+- usage.prompt_tokens for a fixed reference string diverges from locally computed o200k_base token count (wrong tokenizer => substituted model)
+- Self-identifies as Claude/Gemini/Llama/Qwen/DeepSeek/Anthropic/Google/Meta
+- Cannot recall post-cutoff dated facts the genuine model's cutoff covers (e.g. a claimed GPT-5.5 (Dec-2025 cutoff) that doesn't know the Jan-2025 US inauguration)
+- 'Latency/cost profile inconsistent: a claimed heavy reasoning model (o3-pro/gpt-5.5-pro) that answers instantly with no reasoning tokens, or a claimed nano/mini that is suspiciously slow'
+sources:
+- https://developers.openai.com/api/docs/models
+- https://developers.openai.com/api/docs/models/gpt-5.5
+- https://developers.openai.com/api/docs/models/gpt-5.3-codex
+- https://developers.openai.com/api/docs/models/gpt-5
+- https://platform.openai.com/docs/models/gpt-5.2-chat-latest
+- https://platform.openai.com/docs/models/gpt-4.1
+- https://developers.openai.com/api/docs/models/gpt-4.1-mini
+- https://developers.openai.com/api/docs/models/gpt-4.1-nano
+- https://developers.openai.com/api/docs/models/gpt-4o
+- https://developers.openai.com/api/docs/models/o4-mini
+- https://openai.com/index/introducing-o3-and-o4-mini/
+- https://openai.com/index/gpt-4-1/
+- https://openai.com/index/introducing-gpt-5-for-developers/
+- https://developers.openai.com/api/docs/deprecations
+- https://platform.openai.com/docs/guides/latest-model
+- https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide
+- https://developers.openai.com/cookbook/examples/gpt-5/gpt-5_new_params_and_tools
+- https://github.com/openai/tiktoken
+- https://github.com/openai/tiktoken/blob/main/tiktoken/model.py
+- https://developers.openai.com/cookbook/examples/how_to_count_tokens_with_tiktoken
+- https://community.openai.com/t/stealth-model-swap-gpt-5-5-high-claims-knowledge-cutoff-is-june-2024/1381918
+- https://openai.com/api/pricing/

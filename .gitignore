@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+*.whl
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# zing output
+reports/
+*.zing.json
+
+# Reference material (ChatGPT v0 seed, not part of the project)
+tmp/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

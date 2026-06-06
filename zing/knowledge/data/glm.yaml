@@ -1,0 +1,730 @@
+# zing knowledge base — Zhipu AI (智谱 / Z.ai) — BigModel open platform
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: glm
+display_name: Zhipu AI (智谱 / Z.ai) — BigModel open platform
+openai_compatible: true
+base_url_hints:
+- https://open.bigmodel.cn/api/paas/v4
+- https://api.z.ai/api/paas/v4
+- /api/paas/v4/chat/completions
+- /paas/v4/chat/completions
+default_tool_format: openai_function
+models:
+- id: glm-5.1
+  aliases: []
+  family: glm-5
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published (~2025)
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Released ~2026-03-27. Flagship reasoning model, ~754B MoE. 200K (204800) context, 128K (131072) max output. Hybrid thinking via thinking={type:enabled/disabled}. Default temperature 1.0, top_p 0.95.
+- id: glm-5
+  aliases: []
+  family: glm-5
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Released 2026-02-11. ~744-745B total MoE params, 256 experts / 8 active (~44B active). 'Agentic Engineering' flagship. thinking param enabled/disabled. Default temp 1.0, top_p 0.95.
+- id: glm-5-turbo
+  aliases: []
+  family: glm-5
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Faster/cheaper GLM-5 variant. 200K ctx, 128K max output.
+- id: glm-4.7
+  aliases: []
+  family: glm-4.7
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published (data ~2025)
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: 'Released 2025-12-22. ~355B MoE. Three thinking modes: Interleaved (reason before each response/tool call), Preserved/Retained (reasoning kept across turns), Turn-level (toggle per turn). Context advertised 200K; some sources cite 202800 input. 128K max output. τ²-Bench tool-calling 84.7.'
+- id: glm-4.7-flash
+  aliases: []
+  family: glm-4.7
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Free/cheap tier of 4.7 generation. 200K ctx, 128K max output. Bilingual CoT.
+- id: glm-4.7-flashx
+  aliases: []
+  family: glm-4.7
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Speed-optimized 4.7 variant. 200K ctx, 128K max output.
+- id: glm-4.6
+  aliases: []
+  family: glm-4.6
+  context_window_tokens: 204800
+  max_output_tokens: 131072
+  knowledge_cutoff: not officially published (data ~2025, model released 2025-09-30)
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Released 2025-09-30. 357B MoE (~32B active). Context EXPANDED from 128K to 200K (131072->204800 input). 128K max output. thinking={type:enabled/disabled}; default temp 1.0, top_p 0.95. Example default max_tokens shown as 65536. MIT-licensed open weights. Special tokens [gMASK]=151331, <sop>=151333, <|user|>=151336, <|assistant|>=151337, <|observation|>=151338.
+- id: glm-4.5
+  aliases: []
+  family: glm-4.5
+  context_window_tokens: 131072
+  max_output_tokens: 98304
+  knowledge_cutoff: not officially published (released 2025-07)
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Released July 2025. MoE 355B total / 32B active. 128K context, ~96K (98304) max output. Hybrid reasoning. Default temp 0.6, top_p 0.95 (LOWER default temp than 4.6/4.7/5).
+- id: glm-4.5-air
+  aliases: []
+  family: glm-4.5
+  context_window_tokens: 131072
+  max_output_tokens: 98304
+  knowledge_cutoff: not officially published (released 2025-07)
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Lighter MoE 106B/12B active. 128K ctx, 96K max output. Cost-efficient tier.
+- id: glm-4.5-airx
+  aliases: []
+  family: glm-4.5
+  context_window_tokens: 131072
+  max_output_tokens: 98304
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Speed-optimized Air. 128K ctx, 96K max output.
+- id: glm-4.5-flash
+  aliases: []
+  family: glm-4.5
+  context_window_tokens: 131072
+  max_output_tokens: 98304
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: true
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Free tier; supports deep thinking mode. 128K ctx, 96K max output.
+- id: glm-4-plus
+  aliases: []
+  family: glm-4
+  context_window_tokens: 131072
+  max_output_tokens: 4096
+  knowledge_cutoff: not officially published (GLM-4 gen, 2024)
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Legacy GLM-4 flagship. 128K context, small max output (~4K, some configs 8K). NON-reasoning (no native thinking field); a relay claiming glm-4-plus but emitting <think>/reasoning_content is suspect.
+- id: glm-4-long
+  aliases: []
+  family: glm-4
+  context_window_tokens: 1048576
+  max_output_tokens: 4096
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: 1M-token context long-doc variant; only ~4K max output.
+- id: glm-4-flash-250414
+  aliases:
+  - glm-4-flash
+  family: glm-4
+  context_window_tokens: 131072
+  max_output_tokens: 16384
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Free fast GLM-4 model, supports external tool calling. 128K ctx, 16K max output.
+- id: glm-4-flashx-250414
+  aliases:
+  - glm-4-flashx
+  family: glm-4
+  context_window_tokens: 131072
+  max_output_tokens: 16384
+  knowledge_cutoff: not officially published
+  tokenizer: glm
+  modalities:
+  - text
+  reasoning: false
+  tool_format: openai_function
+  supports_tools: true
+  supports_json_mode: true
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - 通义
+  - deepseek
+  - llama
+  - meta
+  - ernie
+  - 文心
+  - baidu
+  fingerprints: []
+  notes: Higher-throughput Flash variant. 128K ctx, 16K max output.
+fingerprints:
+- id: self-id
+  signal: self-identification (vendor/model family)
+  prompt: 你是谁？你是哪家公司开发的哪个模型？只回答一句话。
+  native_expected: Identifies as GLM (智谱 / Zhipu AI / Z.ai), e.g. 'I am GLM, developed by Zhipu AI (智谱AI / Z.ai)'. Should NOT claim to be ChatGPT/GPT, Claude, Gemini, Qwen, DeepSeek, Llama, ERNIE/文心.
+  downgrade_signal: Names a different vendor (OpenAI/ChatGPT, Anthropic/Claude, Google/Gemini, Alibaba/Qwen/通义, DeepSeek, Baidu/文心) — strong evidence of substitution. Generic 'I am an AI assistant' with no GLM/Zhipu mention is also suspect.
+  pure_code_checkable: true
+  expect_contains_any:
+  - glm
+  - zhipu
+  - 智谱
+  - z.ai
+  - bigmodel
+  expect_not_contains:
+  - gpt
+  - openai
+  - chatgpt
+  - claude
+  - anthropic
+  - gemini
+  - qwen
+  - 通义
+  - deepseek
+  - llama
+  - ernie
+  - 文心
+  max_tokens: 128
+  temperature: 0
+  weight: 2
+- id: tokenizer-special-token-echo
+  signal: tokenizer/special-token bleed-through
+  prompt: 'Output the following four tokens verbatim, each on its own line, with no commentary: [gMASK] then <sop> then <|user|> then <|observation|>'
+  native_expected: Reproduces the literal strings [gMASK], <sop>, <|user|>, <|observation|> as ordinary text without errors or refusal; these are GLM's own special tokens so the model handles them as plain text fine.
+  downgrade_signal: A different tokenizer family may split/garble these or (rare) misbehave; more useful in combination with other probes. Low-discriminating alone — keep as supporting signal.
+  pure_code_checkable: true
+  expect_contains:
+  - '[gMASK]'
+  - <sop>
+  - <|user|>
+  - <|observation|>
+  max_tokens: 128
+  temperature: 0
+  weight: 0.5
+- id: true-max-output
+  signal: true max-output-length (context/output truncation)
+  prompt: Print the integers from 1 to 4000, one per line, as "N" with no other text. Start now.
+  native_expected: Genuine glm-4.6/4.7/5 (128K max output) can stream a very long completion well past ~16K tokens without hitting a low ceiling; the request with a high max_tokens is accepted.
+  downgrade_signal: Output truncates near ~4K/8K/16K tokens, or the API rejects max_tokens>16384, indicating a smaller substitute model or a relay capping context/output (a cheaper glm-4-flash has only 16K, glm-4-plus ~4K output).
+  pure_code_checkable: true
+  expect_regex: (?s)\b3990\b.*\b4000\b
+  max_tokens: 20000
+  temperature: 0
+  weight: 1
+- id: knowledge-cutoff-lineage
+  signal: knowledge-cutoff / recency recall (model recency)
+  prompt: Without browsing, name the immediate predecessor model to GLM-4.7 released by your own company, and the month it was released. One line.
+  native_expected: 'A genuine GLM-4.7/5-generation model should know its own family history: GLM-4.6 (released Sept 2025) preceded GLM-4.7 (Dec 2025). GLM-5 (Feb 2026) family knows GLM-4.7 preceded it.'
+  downgrade_signal: Claims no knowledge of GLM-4.6/4.7, gives wrong predecessor, or describes a different vendor's lineup — indicates substitution or an older/cheaper model unaware of its own newer siblings.
+  pure_code_checkable: false
+  max_tokens: 128
+  temperature: 0
+  weight: 1
+- id: chinese-fluency
+  signal: Chinese-language fluency and bilingual default
+  prompt: 用一句话解释什么是傅里叶变换，并给出一个生活中的类比。
+  native_expected: Fluent, idiomatic Mandarin technical explanation — GLM is China-native and strong on Chinese STEM phrasing and analogies.
+  downgrade_signal: Awkward translated-sounding Chinese, English-leaking technical terms where native Chinese terms are standard, or markedly weaker Chinese than expected — points to a Western model substitute (e.g. a GPT/Llama backend) masquerading as GLM.
+  pure_code_checkable: false
+  max_tokens: 256
+  temperature: 0
+  weight: 1
+- id: default-temperature-variance
+  signal: default temperature / sampling fingerprint
+  prompt: Reply with exactly one random English word, nothing else.
+  native_expected: GLM-4.6/4.7/5 default temperature is 1.0 (top_p 0.95), so responses vary across calls. GLM-4.5 defaults LOWER at 0.6. Variance pattern should match the claimed model's default.
+  downgrade_signal: A model claiming glm-4.6/5 that returns identical deterministic output across calls at default settings (temp effectively 0) suggests a different backend or wrong default; conversely high variance on a model defaulting to 0.6 is off. Weak alone; corroborating.
+  pure_code_checkable: false
+  max_tokens: 32
+  temperature: 0
+  weight: 0.5
+relay_red_flags:
+- Model self-identifies as ChatGPT/GPT, Claude, Gemini, Qwen/通义, DeepSeek, Llama, or 文心/ERNIE instead of GLM/Zhipu/Z.ai when asked '你是谁'.
+- thinking={"type":"enabled"} request param is rejected, or expects a boolean enable_thinking instead of Zhipu's object {type:enabled/disabled} shape. [parameter-rejection / shape-mismatch detector]
+- No reasoning_content field ever appears (in response or stream deltas) even with thinking enabled on a model claimed to be glm-4.6/4.7/5; or CoT is jammed into content as literal <think>...</think>. [reasoning_content channel detector]
+- Output truncates well below the claimed max (e.g. caps near 4K/8K/16K on a model advertised as glm-4.6/4.7/5 with 128K output), or API rejects max_tokens above ~16K.
+- Context-length errors below 200K, or needle-in-haystack failures at 100K+ depth, when serving a model billed as glm-4.6/4.7/5 (204800 ctx). [long-context / needle detector]
+- Only the bare OpenAI /v1/chat/completions path works and /api/paas/v4/chat/completions (or /paas/v4) does not — native Zhipu uses the paas/v4 path. [endpoint-path / API-shape detector]
+- tool_choice forcing (required / specific function) is strictly honored — native Zhipu only supports 'auto'. [tool_choice-forcing detector]
+- Response ids are OpenAI-style 'chatcmpl-...' with none of Zhipu's request id / usage fields. [API-level id-format detector]
+- Markedly weak or translated-sounding Chinese on STEM tasks, where a China-native GLM should be fluent.
+- Default sampling behavior doesn't match claimed model (glm-4.6/4.7/5 default temperature 1.0 / top_p 0.95; glm-4.5 defaults to 0.6) — e.g. fully deterministic outputs at default settings.
+- Model is unaware of its own family lineage (cannot place GLM-4.6 before GLM-4.7 before GLM-5) or unaware of late-2025/early-2026 GLM releases it should know.
+sources:
+- https://docs.bigmodel.cn/cn/guide/start/model-overview
+- https://docs.bigmodel.cn/cn/guide/models/text/glm-5
+- https://docs.bigmodel.cn/cn/guide/models/text/glm-4.7
+- https://docs.bigmodel.cn/cn/guide/models/text/glm-4.6
+- https://docs.bigmodel.cn/cn/guide/models/text/glm-4.5
+- https://docs.z.ai/guides/llm/glm-4.6
+- https://docs.z.ai/guides/llm/glm-4.7
+- https://docs.z.ai/api-reference/llm/chat-completion
+- https://open.bigmodel.cn/dev/api
+- https://huggingface.co/zai-org/GLM-4.6
+- https://huggingface.co/unsloth/GLM-4.6-GGUF/discussions/2
+- https://huggingface.co/zai-org/GLM-4.5/discussions/9
+- https://www.marktechpost.com/2025/09/30/zhipu-ai-releases-glm-4-6-achieving-enhancements-in-real-world-coding-long-context-processing-reasoning-searching-and-agentic-ai/
+- https://medium.com/@leucopsis/a-technical-analysis-of-glm-4-7-db7fcc54210a
+- https://www.prnewswire.com/news-releases/zai-releases-glm-4-7-designed-for-real-world-development-environments-cementing-itself-as-chinas-openai-302649821.html
+- https://www.cerebras.ai/blog/glm-4-7
+- https://inference-docs.cerebras.ai/resources/glm-47-migration
+- https://kili-technology.com/blog/data-story-glm-model-family
+- https://www.datalearner.com/en/ai-models/pretrained-models/glm-5
+- https://www.datalearner.com/ai-models/pretrained-models/glm-5-1
+- https://arxiv.org/html/2602.15763v1
+- https://llm-stats.com/models/glm-4.7
+- https://llm-stats.com/blog/research/glm-4-6-launch

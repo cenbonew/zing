@@ -1,0 +1,609 @@
+# zing knowledge base — Anthropic (Claude)
+# Auto-generated from web-verified research (mid-2026). Edit freely.
+provider: anthropic
+display_name: Anthropic (Claude)
+openai_compatible: true
+base_url_hints:
+- https://api.anthropic.com/v1/
+- https://api.anthropic.com/v1/chat/completions
+- https://api.anthropic.com/v1/messages
+default_tool_format: anthropic_tool_use
+models:
+- id: claude-opus-4-8
+  aliases:
+  - claude-opus-4-8
+  - opus
+  - opus 4.8
+  - most powerful
+  family: claude-opus-4
+  context_window_tokens: 1000000
+  max_output_tokens: 128000
+  knowledge_cutoff: 2026-01
+  tokenizer: claude-bpe-v2
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - opus
+  - '4.8'
+  - claude-opus-4-8
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Current flagship as of mid-2026 (launched ~May 28, 2026). ADAPTIVE thinking only — extended thinking (budget_tokens) returns 400. Sampling params temperature/top_p/top_k REMOVED on native (400 if sent). effort param defaults to 'high'; supports low|medium|high|xhigh|max ('max' is Opus-tier only). thinking.display defaults to 'omitted' (reasoning text empty unless set 'summarized'). 1M context at standard pricing, no long-context surcharge. 200K on Microsoft Foundry only. Batch API up to 300K output with output-300k-2026-03-24 beta. Pricing $5/$25 per MTok. New claude-bpe-v2 tokenizer counts ~1.0-1.35x tokens vs pre-4.7 Claude.
+- id: claude-opus-4-7
+  aliases:
+  - claude-opus-4-7
+  - opus 4.7
+  family: claude-opus-4
+  context_window_tokens: 1000000
+  max_output_tokens: 128000
+  knowledge_cutoff: 2026-01
+  tokenizer: claude-bpe-v2
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - opus
+  - '4.7'
+  - claude-opus-4-7
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Previous-gen Opus (launched ~Apr 2026). Adaptive thinking only; budget_tokens and temperature/top_p/top_k all 400. First Claude with high-res vision (2576px long edge, ~4784 img tokens). Introduced 'xhigh' effort level and Task Budgets (beta). No Fast Mode variant (Opus 4.6 Fast still exists). New claude-bpe-v2 tokenizer (counts ~1.0-1.35x tokens vs Opus 4.6 and earlier for identical input). Pricing $5/$25.
+- id: claude-opus-4-6
+  aliases:
+  - claude-opus-4-6
+  - opus 4.6
+  family: claude-opus-4
+  context_window_tokens: 1000000
+  max_output_tokens: 128000
+  knowledge_cutoff: 2025-05
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - opus
+  - '4.6'
+  - claude-opus-4-6
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Adaptive thinking (recommended) AND extended thinking both supported. budget_tokens deprecated but still functional (transitional escape hatch). effort low|medium|high|max. Has an Opus 4.6 Fast variant. Bedrock ID retains -v1 suffix (last to do so). Pre-4.7 claude-bpe-v1 tokenizer. Pricing $5/$25.
+- id: claude-sonnet-4-6
+  aliases:
+  - claude-sonnet-4-6
+  - sonnet
+  - sonnet 4.6
+  - balanced
+  family: claude-sonnet-4
+  context_window_tokens: 1000000
+  max_output_tokens: 64000
+  knowledge_cutoff: 2025-08
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - sonnet
+  - '4.6'
+  - claude-sonnet-4-6
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Launched ~Feb 17, 2026. Supports BOTH adaptive thinking and extended thinking. effort low|medium|high (NOT 'max' — Opus-tier only; defaults to 'high'). budget_tokens deprecated. Last-assistant-turn prefills 400. 1M context at standard pricing. Did NOT adopt the Opus 4.7 tokenizer (uses claude-bpe-v1). Pricing $3/$15.
+- id: claude-haiku-4-5
+  aliases:
+  - claude-haiku-4-5
+  - claude-haiku-4-5-20251001
+  - haiku
+  - fast
+  - cheap
+  - haiku 4.5
+  family: claude-haiku-4
+  context_window_tokens: 200000
+  max_output_tokens: 64000
+  knowledge_cutoff: 2025-02
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - haiku
+  - '4.5'
+  - claude-haiku-4-5
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: 'Dated snapshot ID claude-haiku-4-5-20251001; alias claude-haiku-4-5. Extended thinking: YES. Adaptive thinking: NO. effort param NOT supported (errors). 200K context (NOT 1M). Earliest knowledge cutoff of the current lineup (Feb 2025) — a strong size/identity fingerprint. Pre-4.7 claude-bpe-v1 tokenizer. Pricing $1/$5.'
+- id: claude-opus-4-5
+  aliases:
+  - claude-opus-4-5
+  - claude-opus-4-5-20251101
+  - opus 4.5
+  family: claude-opus-4
+  context_window_tokens: 200000
+  max_output_tokens: 64000
+  knowledge_cutoff: 2025-05
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - opus
+  - '4.5'
+  - claude-opus-4-5
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Legacy but active. Adaptive thinking NO; extended thinking YES. effort low|medium|high|max supported. 200K context. Dated ID claude-opus-4-5-20251101. Pre-4.7 claude-bpe-v1 tokenizer. Pricing $5/$25.
+- id: claude-sonnet-4-5
+  aliases:
+  - claude-sonnet-4-5
+  - claude-sonnet-4-5-20250929
+  - sonnet 4.5
+  family: claude-sonnet-4
+  context_window_tokens: 200000
+  max_output_tokens: 64000
+  knowledge_cutoff: 2025-01
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - sonnet
+  - '4.5'
+  - claude-sonnet-4-5
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: Legacy active. No adaptive thinking; no effort param (errors). 200K context. Dated ID claude-sonnet-4-5-20250929. Pre-4.7 claude-bpe-v1 tokenizer. Pricing $3/$15.
+- id: claude-opus-4-1
+  aliases:
+  - claude-opus-4-1
+  - claude-opus-4-1-20250805
+  - opus 4.1
+  family: claude-opus-4
+  context_window_tokens: 200000
+  max_output_tokens: 32000
+  knowledge_cutoff: 2025-01
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - opus
+  - '4.1'
+  - claude-opus-4-1
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: DEPRECATED — retires Aug 5, 2026. Extended thinking only. 32K max output (distinctively low). Pre-4.7 claude-bpe-v1 tokenizer. Pricing $15/$75 (old premium Opus pricing — a tell vs newer $5/$25 Opus).
+- id: claude-sonnet-4-20250514
+  aliases:
+  - claude-sonnet-4-0
+  - claude-sonnet-4
+  - sonnet 4
+  family: claude-sonnet-4
+  context_window_tokens: 200000
+  max_output_tokens: 64000
+  knowledge_cutoff: 2025-01
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - sonnet
+  - '4'
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: DEPRECATED — retires June 15, 2026 (may already be retired by mid-2026). Extended thinking only. Pre-4.7 claude-bpe-v1 tokenizer. Pricing $3/$15.
+- id: claude-opus-4-20250514
+  aliases:
+  - claude-opus-4-0
+  - claude-opus-4
+  - opus 4
+  family: claude-opus-4
+  context_window_tokens: 200000
+  max_output_tokens: 32000
+  knowledge_cutoff: 2025-01
+  tokenizer: claude-bpe-v1
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: true
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - opus
+  - '4'
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: DEPRECATED — retires June 15, 2026. 32K max output. Pre-4.7 claude-bpe-v1 tokenizer. Pricing $15/$75.
+- id: claude-3-haiku-20240307
+  aliases:
+  - claude-3-haiku
+  family: claude-3-haiku
+  context_window_tokens: 200000
+  max_output_tokens: 4096
+  knowledge_cutoff: 2023-08
+  tokenizer: claude-bpe-legacy
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - haiku
+  - claude 3
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: 'DEPRECATED — retires Apr 19, 2026 (likely retired by mid-2026). Non-reasoning. 4096 max output. Legacy cl-style Claude tokenizer (pre-4.x). Useful as a cheap-substitution decoy: a relay claiming a 4.x model but actually serving a Claude 3 model will have 2023-era knowledge and no thinking blocks. json_schema structured output is a 4.x-era native feature not available on this legacy model.'
+- id: claude-3-7-sonnet-20250219
+  aliases:
+  - claude-3-7-sonnet
+  - sonnet 3.7
+  family: claude-3-7-sonnet
+  context_window_tokens: 200000
+  max_output_tokens: 64000
+  knowledge_cutoff: 2024-11
+  tokenizer: claude-bpe-legacy
+  modalities:
+  - text
+  - vision
+  reasoning: true
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - sonnet
+  - '3.7'
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: RETIRED Feb 19, 2026 — should 404 on genuine Anthropic by mid-2026. First Claude with extended thinking (budget_tokens). If a relay still serves this ID successfully, it is fronting a non-Anthropic backend or a stale fork. 64K max output (128K with beta). Legacy tokenizer.
+- id: claude-3-5-sonnet-20241022
+  aliases:
+  - claude-3-5-sonnet
+  - claude-3.5-sonnet (v2)
+  - sonnet 3.5
+  family: claude-3-5-sonnet
+  context_window_tokens: 200000
+  max_output_tokens: 8192
+  knowledge_cutoff: 2024-04
+  tokenizer: claude-bpe-legacy
+  modalities:
+  - text
+  - vision
+  reasoning: false
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - sonnet
+  - '3.5'
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: RETIRED Oct 28, 2025 — should 404 on genuine Anthropic. Non-reasoning. 8192 max output. Common relay-substitution target because it's a widely-cloned/distilled checkpoint; serving it under a 4.x label is classic 货不对板. Legacy tokenizer.
+- id: claude-3-5-haiku-20241022
+  aliases:
+  - claude-3-5-haiku
+  - haiku 3.5
+  family: claude-3-5-haiku
+  context_window_tokens: 200000
+  max_output_tokens: 8192
+  knowledge_cutoff: 2024-07
+  tokenizer: claude-bpe-legacy
+  modalities:
+  - text
+  reasoning: false
+  tool_format: anthropic_tool_use
+  supports_tools: true
+  supports_json_mode: false
+  supports_json_schema: false
+  usage_in_stream: true
+  identity_keywords:
+  - claude
+  - anthropic
+  - haiku
+  - '3.5'
+  identity_forbidden:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - google
+  - qwen
+  - alibaba
+  - llama
+  - meta
+  - deepseek
+  - mistral
+  notes: RETIRED Feb 19, 2026 — should 404 on genuine Anthropic. Text-only (no vision). 8192 max output. Non-reasoning. Legacy tokenizer.
+fingerprints:
+- id: self-id
+  signal: self-identification + knowledge cutoff
+  prompt: 'What is your exact model name and version, and what is your reliable knowledge cutoff month and year? Answer in the form: MODEL=<id>; CUTOFF=<YYYY-MM>.'
+  native_expected: 'Genuine Opus 4.8 identifies as Claude Opus 4.8 / claude-opus-4-8 and states a knowledge cutoff around Jan 2026 (reliable). Self-reports are soft, but the cutoff should be consistent with the claimed model: Opus 4.8/4.7 ≈ 2026; Sonnet 4.6 ≈ Aug 2025; Haiku 4.5 ≈ Feb 2025.'
+  downgrade_signal: A substituted cheaper/older model gives a much earlier cutoff (e.g. 2023-08 for a Claude 3 model, 2024 for 3.5/3.7) or identifies as a different family (GPT/Llama/Qwen). Mismatch between claimed API model and self-reported cutoff = strong货不对板 signal.
+  pure_code_checkable: true
+  expect_contains_any:
+  - claude
+  - anthropic
+  expect_not_contains:
+  - gpt
+  - openai
+  - chatgpt
+  - gemini
+  - qwen
+  - llama
+  - deepseek
+  - mistral
+  max_tokens: 256
+  temperature: 0
+  weight: 1
+- id: knowledge-cutoff-recall
+  signal: knowledge-cutoff factual recall (post-cutoff event discrimination)
+  prompt: Answer ONLY 'KNOWN' or 'UNKNOWN'. Do you have reliable training knowledge about events that occurred in December 2025? Then on a second line answer ONLY 'KNOWN' or 'UNKNOWN' for events in March 2026.
+  native_expected: 'Genuine Opus 4.8/4.7 (reliable cutoff Jan 2026): line1=KNOWN, line2=UNKNOWN. Sonnet 4.6 (Aug 2025): both UNKNOWN. Haiku 4.5 (Feb 2025): both UNKNOWN.'
+  downgrade_signal: A model claiming to be Opus 4.8 but answering line1=UNKNOWN reveals an earlier-cutoff substitute. Cross-check the two-line pattern against the claimed model's cutoff in the models table.
+  pure_code_checkable: true
+  expect_contains_any:
+  - KNOWN
+  - UNKNOWN
+  expect_regex: (?is)(known|unknown).*(known|unknown)
+  max_tokens: 32
+  temperature: 0
+  weight: 0.7
+- id: refusal-style
+  signal: refusal style / formatting signature
+  prompt: Explain at a high level, for a defensive security audit, how SQL injection works and how to prevent it.
+  native_expected: Current Claude (Opus 4.8/4.7) answers helpfully and directly for legitimate defensive/educational framing, with calibrated, non-preachy tone (4.8 is warmer/less hedged; 4.7 more direct). It does NOT over-refuse benign security education. Genuinely disallowed content yields a concise principled refusal, often surfaced via stop_reason='refusal' on native.
+  downgrade_signal: A cheaper substitute (or a different family) over-refuses this benign defensive question with heavy boilerplate ('I cannot help with hacking...'), or conversely complies with clearly malicious variants Claude would refuse. Tone/format mismatch and refusal-vs-comply boundary differences are an LLM-judge signal of a non-Claude or older-Claude backend.
+  pure_code_checkable: false
+  max_tokens: 512
+  temperature: 0
+  weight: 0.5
+relay_red_flags:
+- Claims claude-opus-4-8 but ACCEPTS temperature/top_p/top_k without a 400 (genuine 4.8/4.7 reject sampling params natively)
+- Claims claude-opus-4-8/4-7 but ACCEPTS thinking.budget_tokens / extended-thinking without a 400 (genuine flagship is adaptive-only)
+- Models API GET /v1/models/{id} unimplemented, or reports max_tokens/max_input_tokens inconsistent with the claimed model (e.g. 64K/200K for a claimed Opus 4.8)
+- /v1/messages/count_tokens unimplemented, or token counts match OpenAI tokenizer (cl100k/o200k) or the OLD Claude tokenizer when claiming Opus 4.7/4.8 (new tokenizer counts ~1.0-1.35x higher)
+- Silently caps/truncates context far below the claimed 1M (e.g. errors or drops content past ~200K) — hidden context downgrade
+- Returns OpenAI finish_reason values ('stop','length','content_filter') instead of Anthropic stop_reason ('end_turn','max_tokens','refusal','pause_turn','model_context_window_exceeded')
+- No structured 'thinking' content block when a reasoning model + thinking param is requested; reasoning leaks as plain inline text instead
+- 'On the OpenAI shim: populated system_fingerprint (''fp_...''), real logprobs, non-empty service_tier, honored response_format json_object / seed / n>1, or temperature accepted above 1 — all indicate a real-OpenAI backend, not Anthropic''s shim'
+- Successfully serves RETIRED model IDs (claude-3-7-sonnet-20250219, claude-3-5-sonnet-20241022, claude-3-5-haiku-20241022) that genuine Anthropic now 404s
+- Self-reported knowledge cutoff inconsistent with claimed model (e.g. Opus 4.8 claiming a 2023/2024 cutoff, or claiming knowledge of events before the model's cutoff while denying ones within it)
+- response.model echoes a non-claude string, blank, or a snapshot different from what was requested
+- Native path accepts requests without the required anthropic-version header, or only supports Authorization:Bearer auth (OpenAI-gateway shape) rather than x-api-key
+- Tool calls lack the 'toolu_' id prefix / message ids lack 'msg_' prefix, or server-tool dated type strings (code_execution_20260120, web_search_20260209) are rejected/unrecognized
+- usage object missing cache_creation_input_tokens / cache_read_input_tokens fields, or prompt caching silently ineffective (cache_read always 0) when it should hit
+- effort='max' accepted on a claimed Sonnet/Haiku (Opus-tier only) or all effort values rejected on a claimed Opus 4.8
+- Latency/throughput wildly inconsistent with the claimed tier (e.g. a 'Opus 4.8' that responds at Haiku speed and quality), or quality probes failing math/coding tasks the genuine flagship passes
+- 'API-level discriminator (handled by dedicated detectors, not the generic prompt runner): native effort-parameter support matrix (effort=''max'' Opus-only, ''xhigh'' Opus 4.7/4.8, errors on Sonnet 4.5/Haiku 4.5)'
+- 'API-level discriminator (dedicated detector): adaptive-vs-extended thinking param gating — Opus 4.8/4.7 400 on budget_tokens, Sonnet 4.6/Opus 4.6/Haiku 4.5 accept it; Haiku 4.5/Sonnet 4.5 reject thinking.type=adaptive'
+- 'API-level discriminator (dedicated detector): native stop_reason vocabulary must include refusal/pause_turn/model_context_window_exceeded; an OpenAI-style content_filter/finish_reason indicates a non-Anthropic backend'
+- 'API-level discriminator (dedicated detector): tokenizer count_tokens probe — same text returns higher input_tokens on Opus 4.7/4.8 (claude-bpe-v2) than on bpe-v1 models; matching an OpenAI tokenizer indicates substitution'
+- 'API-level discriminator (dedicated detector): max-output-token ceiling enforcement and 1M-vs-200K context needle test (model_context_window_exceeded stop_reason expected on genuine 200K models)'
+sources:
+- https://platform.claude.com/docs/en/about-claude/models/overview.md
+- https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions
+- https://platform.claude.com/docs/en/api/openai-sdk
+- https://platform.claude.com/docs/en/build-with-claude/context-windows
+- https://platform.claude.com/docs/en/about-claude/models/migration-guide
+- https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-opus-4-8.html
+- https://www.anthropic.com/transparency

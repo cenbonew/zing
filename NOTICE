@@ -1,0 +1,10 @@
+zing — LLM relay reality check
+Copyright 2026 zing contributors
+
+This product is licensed under the Apache License, Version 2.0 (see the LICENSE
+file). You may not use this product except in compliance with that License.
+
+zing is a black-box auditing aid. It gathers reproducible evidence of behavioral
+divergence and risk — not cryptographic proof of model identity or fraud. See
+README.md ("Responsible use") and docs/METHODOLOGY.md before publishing any
+report that names a vendor.
