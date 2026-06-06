@@ -18,6 +18,7 @@ from zing.models import TargetConfig
 SUITES = ("smoke", "standard", "deep", "full")
 FORMATS = ("json", "md", "html", "all")
 RISK_LEVELS = ("low", "medium", "high")
+APIS = ("auto", "openai", "anthropic")
 
 
 class ConfigError(Exception):
@@ -114,6 +115,7 @@ def build_target(
     declared_provider: str | None = None,
     timeout_sec: float | None = None,
     headers: dict[str, str] | None = None,
+    api: str | None = None,
 ) -> TargetConfig:
     if not base_url:
         raise ConfigError(f"{kind}: base_url is required")
@@ -133,6 +135,7 @@ def build_target(
         declared_provider=declared_provider,
         timeout_sec=timeout_sec if timeout_sec is not None else 60.0,
         headers=headers or {},
+        api=validate_api(api),
     )
 
 
@@ -145,6 +148,15 @@ def validate_suite(value: str) -> str:
 def validate_format(value: str) -> str:
     if value not in FORMATS:
         raise ConfigError(f"Unknown format {value!r}. Choose from: {', '.join(FORMATS)}")
+    return value
+
+
+def validate_api(value: str | None) -> str:
+    """Validate the wire-protocol selector; default to 'auto'."""
+    if value is None:
+        return "auto"
+    if value not in APIS:
+        raise ConfigError(f"Unknown api {value!r}. Choose from: {', '.join(APIS)}")
     return value
 
 
@@ -173,6 +185,7 @@ target:
   base_url: https://relay.example.com/v1
   api_key: env:ZING_API_KEY        # env:VAR | file:/path | raw value
   model: gpt-4o
+  api: auto                        # auto | openai | anthropic (wire protocol)
   declared_provider: openai        # optional; inferred from model id if omitted
   timeout_sec: 60
   headers: {}

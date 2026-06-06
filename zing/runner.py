@@ -14,7 +14,7 @@ from pathlib import Path
 
 import zing.detectors  # noqa: F401  -- populates the detector REGISTRY
 from zing import __version__
-from zing.clients import OpenAICompatibleClient
+from zing.clients import make_client
 from zing.config import AuditOptions
 from zing.context import AuditContext
 from zing.detectors.base import run_detector, select_detectors
@@ -69,21 +69,17 @@ async def run_audit(
     profile = kb.resolve(target.model, target.declared_provider)
 
     async with AsyncExitStack() as stack:
-        client = await stack.enter_async_context(OpenAICompatibleClient(target))
+        client = await stack.enter_async_context(make_client(target))
 
         baseline_client = None
         if baseline is not None:
-            baseline_client = await stack.enter_async_context(
-                OpenAICompatibleClient(baseline)
-            )
+            baseline_client = await stack.enter_async_context(make_client(baseline))
 
         judge = None
         if options.judge:
             jt = judge_target or baseline
             if jt is not None:
-                judge_client = await stack.enter_async_context(
-                    OpenAICompatibleClient(jt)
-                )
+                judge_client = await stack.enter_async_context(make_client(jt))
                 judge = Judge(judge_client, jt.model)
 
         ctx = AuditContext(
