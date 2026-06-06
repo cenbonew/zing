@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from zing.clients import OpenAICompatibleClient
+from zing.clients import Client
 from zing.config import AuditOptions
 from zing.judge import Judge
 from zing.knowledge import KnowledgeBase, ResolvedProfile
@@ -20,12 +20,12 @@ from zing.models import TargetConfig
 @dataclass
 class AuditContext:
     target: TargetConfig
-    client: OpenAICompatibleClient
+    client: Client
     options: AuditOptions
     kb: KnowledgeBase
     profile: ResolvedProfile | None = None
     baseline: TargetConfig | None = None
-    baseline_client: OpenAICompatibleClient | None = None
+    baseline_client: Client | None = None
     judge: Judge | None = None
 
     @property

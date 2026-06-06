@@ -74,6 +74,9 @@ class TargetConfig(BaseModel):
     base_url: str
     api_key: str = ""
     model: str
+    # Wire protocol: "auto" infers from the base_url/model, or force "openai"
+    # (Chat Completions) / "anthropic" (Messages API).
+    api: str = "auto"
     # Optional declared metadata used to pick the right knowledge-base profile and
     # to compare claims vs reality. If absent, zing infers from the model id.
     declared_provider: str | None = None

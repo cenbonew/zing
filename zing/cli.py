@@ -21,7 +21,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from zing import __version__
-from zing.clients import OpenAICompatibleClient
+from zing.clients import make_client
 from zing.config import (
     TEMPLATE,
     AuditOptions,
@@ -184,6 +184,7 @@ def _target_from(
     declared_provider: str | None,
     timeout: float | None,
     headers: list[str] | None,
+    api: str | None = None,
 ) -> TargetConfig:
     fs = section(cfg, sect)
     merged_headers = merge_headers(fs.get("headers"), headers)
@@ -196,6 +197,7 @@ def _target_from(
         declared_provider=declared_provider or fs.get("declared_provider"),
         timeout_sec=timeout if timeout is not None else fs.get("timeout_sec"),
         headers=merged_headers,
+        api=api or fs.get("api"),
     )
 
 
@@ -296,6 +298,7 @@ def check_command(
     api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
     model: Annotated[str | None, typer.Option("--model", help="Model id the relay claims to serve.")] = None,
     name: Annotated[str | None, typer.Option("--name", help="Display name for the target.")] = None,
+    api: Annotated[str | None, typer.Option("--api", help="Wire protocol: auto | openai | anthropic.")] = None,
     declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup (openai, anthropic, deepseek, ...).")] = None,
     header: Annotated[list[str] | None, typer.Option("--header", "-H", help="Extra header 'Name: value' (repeatable).")] = None,
     suite: Annotated[str | None, typer.Option("--suite", help="smoke | standard | deep | full.")] = None,
@@ -322,6 +325,7 @@ def check_command(
         target = _target_from(
             cfg, "target", kind="target", name=name, base_url=base_url, api_key=api_key,
             model=model, declared_provider=declared_provider, timeout=timeout, headers=header,
+            api=api,
         )
         options = _build_options(
             cfg, suite=suite, judge=judge, only=only, skip=skip,
@@ -350,11 +354,13 @@ def compare_command(
     target_api_key: Annotated[str | None, typer.Option("--target-api-key", help="Target API key (env:VAR ok).")] = None,
     target_model: Annotated[str | None, typer.Option("--target-model", help="Target model id.")] = None,
     target_name: Annotated[str | None, typer.Option("--target-name", help="Target display name.")] = None,
+    target_api: Annotated[str | None, typer.Option("--target-api", help="Target wire protocol: auto | openai | anthropic.")] = None,
     declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup.")] = None,
     baseline_base_url: Annotated[str | None, typer.Option("--baseline-base-url", help="Trusted baseline base URL.")] = None,
     baseline_api_key: Annotated[str | None, typer.Option("--baseline-api-key", help="Baseline API key (env:VAR ok).")] = None,
     baseline_model: Annotated[str | None, typer.Option("--baseline-model", help="Baseline model id.")] = None,
     baseline_name: Annotated[str | None, typer.Option("--baseline-name", help="Baseline display name.")] = None,
+    baseline_api: Annotated[str | None, typer.Option("--baseline-api", help="Baseline wire protocol: auto | openai | anthropic.")] = None,
     suite: Annotated[str | None, typer.Option("--suite", help="smoke | standard | deep | full.")] = None,
     judge: Annotated[bool | None, typer.Option("--judge/--no-judge", help="Enable code+LLM hybrid judging.")] = None,
     judge_model: Annotated[str | None, typer.Option("--judge-model", help="Judge model id (defaults to baseline).")] = None,
@@ -373,12 +379,12 @@ def compare_command(
         target = _target_from(
             cfg, "target", kind="target", name=target_name, base_url=target_base_url,
             api_key=target_api_key, model=target_model, declared_provider=declared_provider,
-            timeout=timeout, headers=None,
+            timeout=timeout, headers=None, api=target_api,
         )
         baseline = _target_from(
             cfg, "baseline", kind="baseline", name=baseline_name, base_url=baseline_base_url,
             api_key=baseline_api_key, model=baseline_model, declared_provider=None,
-            timeout=timeout, headers=None,
+            timeout=timeout, headers=None, api=baseline_api,
         )
         options = _build_options(cfg, suite=suite or "deep", judge=judge, max_context_tokens=max_context_tokens)
         fail_on_risk = validate_risk(fail_on_risk)
@@ -400,18 +406,19 @@ def models_command(
     base_url: Annotated[str, typer.Option("--base-url", help="Endpoint base URL.")],
     api_key: Annotated[str | None, typer.Option("--api-key", help="API key (env:VAR ok).")] = None,
     model: Annotated[str, typer.Option("--model", help="A model id (for the client; not required to list).")] = "x",
+    api: Annotated[str | None, typer.Option("--api", help="Wire protocol: auto | openai | anthropic.")] = None,
 ) -> None:
     """List the models an endpoint advertises via GET /v1/models."""
     try:
         target = build_target(
-            kind="endpoint", name=None, base_url=base_url, api_key=api_key, model=model
+            kind="endpoint", name=None, base_url=base_url, api_key=api_key, model=model, api=api
         )
     except ConfigError as exc:
         err_console.print(f"[red]Config error:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
     async def _go() -> None:
-        async with OpenAICompatibleClient(target) as client:
+        async with make_client(target) as client:
             outcome, ids = await client.list_models()
         if not outcome.ok:
             err_console.print(f"[red]Failed:[/red] {outcome.error_message or outcome.status_code}")

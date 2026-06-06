@@ -6,6 +6,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Anthropic Messages API support.** zing now audits Anthropic-native relays
+  (`/v1/messages`) as well as OpenAI Chat Completions, behind one detector
+  interface. The protocol is auto-detected from the base_url/model or forced with
+  `--api openai|anthropic` (and `--target-api` / `--baseline-api` for `compare`).
+- Automated PyPI publishing via GitHub Actions + Trusted Publishing
+  (`.github/workflows/release.yml`); see `docs/PUBLISHING.md`.
+
 ## [0.1.0] — first public alpha
 
 First public release. A local-first CLI that audits whether an OpenAI-compatible

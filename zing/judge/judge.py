@@ -6,7 +6,7 @@ import json
 import re
 from typing import Any
 
-from zing.clients import OpenAICompatibleClient
+from zing.clients import Client
 from zing.models import RequestSpec
 
 _JSON_FENCE = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.DOTALL)
@@ -24,7 +24,7 @@ class Judge:
     from the relay under audit, so the verdict is not graded by the suspect.
     """
 
-    def __init__(self, client: OpenAICompatibleClient, model: str) -> None:
+    def __init__(self, client: Client, model: str) -> None:
         self.client = client
         self.model = model
 

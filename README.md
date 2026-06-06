@@ -6,10 +6,11 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
-**zing** is a local-first CLI that audits whether an OpenAI-compatible API relay
-(中转站 / reseller / proxy) actually serves the model it claims to — or quietly
-substitutes a cheaper one, truncates your context window, fakes streaming, or
-inflates token billing (**货不对板检测**).
+**zing** is a local-first CLI that audits whether an API relay (中转站 / reseller /
+proxy) actually serves the model it claims to — or quietly substitutes a cheaper
+one, truncates your context window, fakes streaming, or inflates token billing
+(**货不对板检测**). It speaks both **OpenAI Chat Completions** and the
+**Anthropic Messages API** (auto-detected, or forced with `--api`).
 
 You point it at a relay endpoint and the model it advertises; zing runs a battery
 of black-box probes, compares the observed behavior against a bundled knowledge
@@ -75,11 +76,16 @@ zing compare \
   --baseline-base-url https://api.openai.com/v1 --baseline-api-key env:OPENAI_API_KEY --baseline-model gpt-4o \
   --suite deep
 
-# 3) inspect the bundled knowledge base
+# 3) audit an Anthropic-native (Messages API) relay — protocol is auto-detected
+#    from the base_url/model, or force it with --api anthropic
+zing check --base-url https://relay.example.com/v1 --model claude-opus-4-8 \
+  --api-key env:ZING_API_KEY --api anthropic
+
+# 4) inspect the bundled knowledge base
 zing kb            # all 85 models
 zing kb deepseek   # one provider
 
-# 4) generate a config you can commit
+# 5) generate a config you can commit
 zing init          # writes zing.yaml
 zing check -c zing.yaml
 ```
