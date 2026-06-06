@@ -6,6 +6,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1]
+
+### Fixed
+
+- `zing --version` now reports the actual installed version. It was hardcoded in
+  `zing/__init__.py` and reported `0.1.0` for the 0.2.0 release; the version is now
+  single-sourced from package metadata (`importlib.metadata`) so it can never drift
+  from `pyproject.toml`.
+
 ## [0.2.0] — Anthropic support & roadmap security detectors
 
 ### Added
@@ -59,6 +68,7 @@ streaming, or inflates token billing (货不对板检测).
   text is redacted before it reaches any report (JSON/Markdown/HTML).
 - `--fail-under` / `--fail-on-risk` exit-code gates for CI use.
 
-[Unreleased]: https://github.com/cenbonew/zing/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/cenbonew/zing/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/cenbonew/zing/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cenbonew/zing/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cenbonew/zing/releases/tag/v0.1.0
