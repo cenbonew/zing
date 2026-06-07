@@ -116,6 +116,7 @@ def build_target(
     timeout_sec: float | None = None,
     headers: dict[str, str] | None = None,
     api: str | None = None,
+    claimed_model: str | None = None,
 ) -> TargetConfig:
     if not base_url:
         raise ConfigError(f"{kind}: base_url is required")
@@ -132,6 +133,7 @@ def build_target(
         base_url=base_url,
         api_key=resolve_secret(api_key),
         model=model,
+        claimed_model=claimed_model,
         declared_provider=declared_provider,
         timeout_sec=timeout_sec if timeout_sec is not None else 60.0,
         headers=headers or {},

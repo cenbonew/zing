@@ -6,6 +6,32 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] — accuracy pass on real relays (DeepSeek / Doubao)
+
+Validated against live endpoints (DeepSeek official + Aliyun, Volcengine, …): honest
+DeepSeek relays now read CLEAN, and Doubao models passed off as DeepSeek are caught HIGH.
+
+### Added
+
+- **`--claimed-model`** — audit an endpoint's *real* model id against a *different*
+  claimed model's profile (e.g. request `doubao-seed-...` but verify it against the
+  `deepseek-v4-flash` profile). Lets you confirm a suspected substitution end-to-end.
+
+### Fixed
+
+- **Billing false positives on reasoning models / non-OpenAI tokenizers.** A reasoning
+  model's `completion_tokens` legitimately includes hidden reasoning tokens the
+  visible-text estimate can't see, and heuristic (non-tiktoken) estimates are
+  imprecise — these no longer produce a "token inflation" HIGH. Prompt-token thresholds
+  widen for heuristic tokenizers, and prompt-padding is still checked when a reasoning
+  model returns empty visible content. (DeepSeek official went MEDIUM → CLEAN.)
+- **Substitution false negatives.** Model-identity now flags ANY known vendor brand
+  that isn't the model's own — including Doubao/ByteDance, Kimi, GLM, Hunyuan, Ernie,
+  MiniMax (with Chinese names) — so a substitute the per-model KB list never enumerated
+  is still caught. (A "I'm Doubao, by ByteDance" relay sold as DeepSeek now reads HIGH.)
+- KB: added DeepSeek's native brand name (深度求索) to the deepseek profiles so a
+  genuine model using it isn't mis-flagged.
+
 ## [0.2.1]
 
 ### Fixed
@@ -68,7 +94,8 @@ streaming, or inflates token billing (货不对板检测).
   text is redacted before it reaches any report (JSON/Markdown/HTML).
 - `--fail-under` / `--fail-on-risk` exit-code gates for CI use.
 
-[Unreleased]: https://github.com/cenbonew/zing/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/cenbonew/zing/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/cenbonew/zing/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/cenbonew/zing/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cenbonew/zing/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cenbonew/zing/releases/tag/v0.1.0

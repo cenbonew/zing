@@ -14,7 +14,7 @@ from zing.context import AuditContext
 from zing.detectors.base import Detector, register
 from zing.detectors.helpers import usage_field
 from zing.models import DetectorResult, Dimension, Finding, RequestSpec, Severity, Status
-from zing.utils.tokenize import estimate_messages_tokens, estimate_tokens
+from zing.utils.tokenize import estimate_messages_tokens, estimate_tokens, is_exact_tokenizer
 
 # A fixed paragraph (~110 words) so the prompt size is stable across runs.
 _KNOWN_PARAGRAPH = (
@@ -57,8 +57,10 @@ class BillingDetector(Detector):
         )
         outcome = await ctx.client.complete(spec)
 
-        # Transport-level failure: nothing to bill-check, degrade to INCONCLUSIVE.
-        if not (outcome.ok and outcome.has_content()):
+        # Bail only when there's truly nothing to assess. A reasoning model can return
+        # valid usage with EMPTY visible content (budget spent thinking) — keep going so
+        # the prompt-token padding check still runs even then.
+        if not outcome.ok or (not outcome.has_content() and outcome.usage is None):
             result.findings.append(
                 Finding(
                     id="billing.request-failed",
@@ -117,9 +119,18 @@ class BillingDetector(Detector):
 
         score = 100.0
         worst = Status.PASS
+        exact = is_exact_tokenizer(tok)
+        reasoning = bool(ctx.profile and ctx.profile.model.reasoning)
 
-        # Prompt-token inflation (the buyer-harmful direction).
-        if prompt is not None and prompt > 1.8 * est_prompt and prompt > est_prompt + 50:
+        # Prompt-token inflation (the buyer-harmful direction). The prompt has no
+        # hidden tokens, but when the estimate is heuristic (non-OpenAI tokenizer)
+        # we widen the margin so CJK / aggressive-split tokenizers aren't flagged.
+        prompt_ratio_threshold = 1.8 if exact else 2.5
+        if (
+            prompt is not None
+            and prompt > prompt_ratio_threshold * est_prompt
+            and prompt > est_prompt + 50
+        ):
             result.findings.append(
                 Finding(
                     id="billing.usage-inflation",
@@ -130,35 +141,75 @@ class BillingDetector(Detector):
                         f"Reported prompt tokens ({prompt}) far exceed independent "
                         f"estimate (~{est_prompt})."
                     ),
-                    evidence={"reported_prompt": prompt, "estimated_prompt": est_prompt, "ratio": ratio_prompt},
+                    evidence={"reported_prompt": prompt, "estimated_prompt": est_prompt, "ratio": ratio_prompt, "exact_tokenizer": exact},
                     recommendation="Cross-check billing against a known-size prompt; possible per-token overbilling.",
                 )
             )
             score = min(score, 55.0)
             worst = Status.FAIL
 
-        # Completion-token inflation, judged the same way.
-        if completion is not None and completion > 1.8 * est_completion and completion > est_completion + 50:
-            result.findings.append(
-                Finding(
-                    id="billing.usage-inflation-completion",
-                    title="Reported completion tokens far exceed estimate",
-                    status=Status.FAIL,
-                    severity=Severity.HIGH,
-                    summary=(
-                        f"Reported completion tokens ({completion}) far exceed "
-                        f"independent estimate (~{est_completion})."
-                    ),
-                    evidence={
-                        "reported_completion": completion,
-                        "estimated_completion": est_completion,
-                        "ratio": ratio_completion,
-                    },
-                    recommendation="Cross-check billing against output length; possible per-token overbilling.",
+        # Completion-token inflation — the trickiest. For a REASONING model the
+        # reported completion legitimately includes hidden reasoning/thinking tokens
+        # that our visible-text estimate cannot see, so a higher count is EXPECTED,
+        # not inflation. For a non-exact tokenizer the completion estimate is
+        # unreliable, so only a gross divergence is flagged, and only as a soft WARN.
+        if completion is not None and est_completion > 0:
+            comp_ratio = completion / est_completion
+            if reasoning:
+                if comp_ratio > 1.5:
+                    result.findings.append(
+                        Finding(
+                            id="billing.reasoning-tokens",
+                            title="Completion tokens exceed visible text (reasoning model)",
+                            status=Status.INFO,
+                            severity=Severity.INFO,
+                            summary=(
+                                f"Reported completion tokens ({completion}) exceed the visible-text "
+                                f"estimate (~{est_completion}); expected for a reasoning model whose "
+                                "completion count includes hidden reasoning tokens. Not treated as inflation."
+                            ),
+                            evidence={"reported_completion": completion, "visible_estimate": est_completion, "ratio": round(comp_ratio, 2)},
+                        )
+                    )
+            elif exact:
+                if completion > 1.8 * est_completion and completion > est_completion + 50:
+                    result.findings.append(
+                        Finding(
+                            id="billing.usage-inflation-completion",
+                            title="Reported completion tokens far exceed estimate",
+                            status=Status.FAIL,
+                            severity=Severity.HIGH,
+                            summary=(
+                                f"Reported completion tokens ({completion}) far exceed "
+                                f"independent estimate (~{est_completion})."
+                            ),
+                            evidence={"reported_completion": completion, "estimated_completion": est_completion, "ratio": ratio_completion},
+                            recommendation="Cross-check billing against output length; possible per-token overbilling.",
+                        )
+                    )
+                    score = min(score, 55.0)
+                    worst = Status.FAIL
+            elif comp_ratio > 3.0 and completion > est_completion + 80:
+                # Non-exact tokenizer, non-reasoning: estimate is approximate, so a
+                # gross divergence is only a soft signal worth a second look.
+                result.findings.append(
+                    Finding(
+                        id="billing.usage-inflation-completion",
+                        title="Reported completion tokens well above heuristic estimate",
+                        status=Status.WARN,
+                        severity=Severity.MEDIUM,
+                        summary=(
+                            f"Reported completion tokens ({completion}) are far above the "
+                            f"heuristic estimate (~{est_completion}); the estimate is approximate "
+                            "for this tokenizer, so corroborate before concluding overbilling."
+                        ),
+                        evidence={"reported_completion": completion, "estimated_completion": est_completion, "ratio": round(comp_ratio, 2), "exact_tokenizer": False},
+                        recommendation="Compare token accounting against a trusted baseline of the same model.",
+                    )
                 )
-            )
-            score = min(score, 55.0)
-            worst = Status.FAIL
+                score = min(score, 70.0)
+                if worst == Status.PASS:
+                    worst = Status.WARN
 
         # Severe under-count: cheaper for the buyer, so only an informational note.
         for label, reported, estimated in (

@@ -19,6 +19,13 @@ env/
 .coverage
 htmlcov/
 
+# Secrets — NEVER commit API keys
+.env
+.env.*
+!.env.example
+*.key
+secrets.*
+
 # zing output
 reports/
 *.zing.json
