@@ -47,6 +47,7 @@ class InjectedPromptDetector(Detector):
     name = "Injected system-prompt detection"
     dimension = Dimension.SECURITY
     min_suite = "deep"
+    cost_hint = 3
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

@@ -6,6 +6,27 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] — agent/LLM ergonomics
+
+Make zing pleasant to drive from another program or model.
+
+### Added
+
+- **`--compact`** (`check`/`compare`) — a lean, agent-facing JSON verdict on stdout:
+  verdict + per-dimension status + a flat findings list, *without* the bulky
+  per-finding evidence. ~66% smaller than `--json` (a standard report drops from
+  ~5.2k to ~1.8k tokens).
+- **`--dry-run`** (`check`/`compare`) — print the detectors that would run and an
+  estimated API-call count (honoring `--reliability-requests`) **without making any
+  requests**, so an agent can budget cost first. Each detector now carries a
+  `cost_hint`.
+- **`kb --json`** and **`models --json`** — machine-readable discovery of the bundled
+  knowledge base and of an endpoint's advertised model list.
+- **Structured errors in machine mode.** In `--json`/`--compact` mode a config/usage
+  error now prints `{"error": {...}}` to stdout (exit 2) instead of a human message,
+  so a pipeline can parse failures uniformly.
+- Top-level `--help` now documents the agent flags.
+
 ## [0.3.0] — accuracy pass on real relays (DeepSeek / Doubao)
 
 Validated against live endpoints (DeepSeek official + Aliyun, Volcengine, …): honest
@@ -94,7 +115,8 @@ streaming, or inflates token billing (货不对板检测).
   text is redacted before it reaches any report (JSON/Markdown/HTML).
 - `--fail-under` / `--fail-on-risk` exit-code gates for CI use.
 
-[Unreleased]: https://github.com/cenbonew/zing/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/cenbonew/zing/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/cenbonew/zing/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cenbonew/zing/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/cenbonew/zing/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cenbonew/zing/compare/v0.1.0...v0.2.0

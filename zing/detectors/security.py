@@ -49,6 +49,7 @@ class SecurityDetector(Detector):
     name = "Transport & secret-handling signals"
     dimension = Dimension.SECURITY
     min_suite = "smoke"
+    cost_hint = 1
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

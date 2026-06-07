@@ -33,6 +33,7 @@ class ReliabilityDetector(Detector):
     name = "Concurrent reliability & latency"
     dimension = Dimension.RELIABILITY
     min_suite = "standard"
+    cost_hint = 8
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

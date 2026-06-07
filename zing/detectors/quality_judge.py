@@ -60,6 +60,7 @@ class QualityJudgeDetector(Detector):
     dimension = Dimension.MODEL_IDENTITY
     min_suite = "deep"
     requires_judge = True
+    cost_hint = 5
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

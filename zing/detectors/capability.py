@@ -54,6 +54,7 @@ class CapabilityDetector(Detector):
     name = "Capability-claim verification"
     dimension = Dimension.CAPABILITY
     min_suite = "standard"
+    cost_hint = 4
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

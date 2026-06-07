@@ -58,6 +58,7 @@ class ContextWindowDetector(Detector):
     name = "Real context window & truncation"
     dimension = Dimension.CONTEXT_WINDOW
     min_suite = "deep"
+    cost_hint = 14
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

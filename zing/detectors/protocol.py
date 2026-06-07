@@ -20,6 +20,7 @@ class ProtocolDetector(Detector):
     name = "OpenAI-compatibility conformance"
     dimension = Dimension.PROTOCOL
     min_suite = "standard"
+    cost_hint = 4
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

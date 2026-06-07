@@ -37,6 +37,7 @@ class BillingDetector(Detector):
     name = "Token/usage billing audit"
     dimension = Dimension.BILLING
     min_suite = "standard"
+    cost_hint = 1
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

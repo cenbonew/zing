@@ -70,6 +70,7 @@ class IntegrityDetector(Detector):
     name = "Response integrity / tampering"
     dimension = Dimension.SECURITY
     min_suite = "deep"
+    cost_hint = 3
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()
