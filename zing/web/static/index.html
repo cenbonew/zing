@@ -142,6 +142,7 @@
 <div class="wrap">
   <header>
     <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
+    <a class="pill" href="/history" style="margin-left:auto;text-decoration:none">📊 检测历史</a>
     <span class="pill">🔒 本地运行 · 密钥<b>不经手</b></span>
   </header>
 
@@ -218,6 +219,7 @@
   </section>
 </div>
 
+<script src="/i18n.js"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const RISK={clean:{c:"good",bg:"goodbg",t:"大概率是真货"},low:{c:"sky",bg:"skybg",t:"基本可信，小瑕疵"},
@@ -299,12 +301,13 @@ function handle(ev,seen){
   }
 }
 function zhDet(ev){const m=DIMNAME[ev.dimension];return (m?m[0]:ev.dimension)+" · "+(ev.name||ev.id);}
+function loc(f){return (window.ZING_I18N&&ZING_I18N.localizeFinding)?ZING_I18N.localizeFinding(f.id,f.summary,f.evidence):{title:f.title,summary:f.summary||""};}
 function addFeed(ev,f){
-  const c=VAR(SEVC[f.severity]||STATC[f.status]||"grey"), hi=evHi(f);
+  const c=VAR(SEVC[f.severity]||STATC[f.status]||"grey"), hi=evHi(f), L=loc(f);
   const el=document.createElement("div");el.className="fi";el.style.borderLeftColor=c;
   el.innerHTML=`<div class="fdot" style="background:${c}">${ICON[f.status]||"!"}</div>
     <div style="flex:1;min-width:0"><div class="fmeta">${esc(zhDet(ev))}</div>
-    <div class="ft">${esc(f.title)}</div>${f.summary?`<div class="fe">${esc(f.summary)}</div>`:""}
+    <div class="ft">${esc(L.title)}</div>${L.summary?`<div class="fe">${esc(L.summary)}</div>`:""}
     ${hi?`<div class="fe"><b>证据</b> ${esc(hi)}</div>`:""}</div>`;
   $("#feed").appendChild(el);
 }
@@ -365,10 +368,10 @@ function dimRow(d){const [nm,desc]=DIMNAME[d.dimension]||[d.dimension,""];const 
   return `<div class="dl"><div class="nm">${nm}<small>${desc}</small></div>
     <div class="ba"><i data-w="${d.score==null?15:d.score}" data-c="${d.score==null?'var(--faint)':c}"></i></div>
     <div class="bdg" style="background:var(--${STATC[d.status]}bg,#eee);color:${VAR(STATC[d.status])}">${sc}</div></div>`;}
-function findRow(f){const c=VAR(SEVC[f.severity]||"grey");const ev=evText(f.evidence);
+function findRow(f){const c=VAR(SEVC[f.severity]||"grey");const ev=evText(f.evidence);const L=loc(f);
   return `<div class="f"><div class="dot" style="background:${c}">${ICON[f.status]||"!"}</div>
-    <div style="flex:1;min-width:0"><div class="ft">${esc(f.title)}</div>
-    <div class="fs">${esc(f.summary||"")}${f.recommendation?` <span style="color:var(--faint)">· 建议：${esc(f.recommendation)}</span>`:""}</div>
+    <div style="flex:1;min-width:0"><div class="ft">${esc(L.title)}</div>
+    <div class="fs">${esc(L.summary)}${f.recommendation?` <span style="color:var(--faint)">· 建议：${esc(f.recommendation)}</span>`:""}</div>
     ${ev?`<div class="ev">${esc(ev)}</div><span class="more">查看证据</span>`:""}</div></div>`;}
 function evText(e){if(!e||typeof e!=="object")return "";const keys=Object.keys(e).slice(0,6);
   return keys.map(k=>`${k}: ${fmt(e[k])}`).join("\n");}

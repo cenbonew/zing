@@ -6,6 +6,22 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Findings localized to Chinese (web UI).** A new `zing/web/static/i18n.js` catalog
+  maps every finding `id` (~65) to a zh title + a zh summary template filled from the
+  finding's evidence (falling back to the English summary when a key is absent). The
+  report and the live feed now show findings in Chinese.
+- **Audit history & trends.** `zing serve` persists every audit to a local SQLite DB
+  (`$ZING_DATA_DIR` or `~/.zing/history.db`, stdlib only — no new dep). New endpoints
+  (`/api/history`, `/api/history/{id}`, `/api/history/trend`, DELETE) and a `/history`
+  page that lists past audits grouped by target+model with a score sparkline; click a
+  row to view that saved report. History never leaves your machine.
+- **Advanced console view (`/console`).** A dark, power-user UI (ported from the
+  console prototype) wired to the same live SSE: terminal-style detector log with
+  click-to-expand evidence, dimension bars, and a verdict ring. Linked from the
+  default report view; the report view links to history.
+
 ## [0.6.0] — web compare + live evidence
 
 ### Added

@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing — 检测历史</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#eef2ec;--card:#fffefb;--ink:#0c211e;--ink2:#566460;--faint:#93a09b;--line:#e7ece5;
+    --teal:#0f6f5f;--teal-d:#0a4a40;--lime:#c7f25a;
+    --good:#0f6f5f;--goodbg:#e9f4ee;--warn:#b9831f;--warnbg:#f7eed7;--bad:#cb3b2e;--badbg:#fbe7e2;
+    --sky:#2a7bb8;--skybg:#e4f0f8;--grey:#7c8a85;--greybg:#eef1ec;
+    --disp:"Bricolage Grotesque",system-ui,sans-serif;--sans:"Hanken Grotesk",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
+    background:radial-gradient(700px 460px at 50% -8%,#f4fbef 0,transparent 60%),radial-gradient(760px 760px at 110% 114%,#dcEee2 0,transparent 55%),var(--bg);
+    min-height:100vh}
+  .wrap{max-width:820px;margin:0 auto;padding:0 18px}
+  a{color:var(--teal);text-decoration:none}
+
+  header{display:flex;align-items:center;gap:10px;padding:20px 0 4px}
+  .logo{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.4px;color:var(--ink)}
+  .logo .b{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--ink);color:var(--lime);font-size:16px;box-shadow:0 8px 22px -10px var(--teal)}
+  .logo b{color:var(--teal)}
+  header .pill{margin-left:auto;font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+  header .pill b{color:var(--teal)}
+
+  .hero{padding:24px 0 6px}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(26px,4.5vw,36px);line-height:1.06;letter-spacing:-1px;margin:0}
+  .hero h1 .u{background:linear-gradient(transparent 62%,var(--lime) 0);padding:0 4px}
+  .hero p{color:var(--ink2);font-size:15px;line-height:1.6;margin:11px 0 0;max-width:58ch}
+  .topbar{display:flex;align-items:center;gap:12px;margin:14px 0 18px;flex-wrap:wrap}
+  .back{font-family:var(--sans);font-weight:700;font-size:13.5px;color:var(--teal);background:#fff;border:1.5px solid var(--line);border-radius:11px;padding:9px 14px;cursor:pointer}
+  .back:hover{border-color:#cfe0d6}
+  .clr{margin-left:auto;font-family:var(--sans);font-weight:700;font-size:13px;color:var(--bad);background:var(--badbg);border:1.5px solid #f2c9c0;border-radius:11px;padding:9px 14px;cursor:pointer}
+  .clr:hover{background:#f9ddd6}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 26px 60px -42px rgba(15,60,50,.45),0 2px 0 #fff inset;overflow:hidden}
+
+  /* group blocks */
+  .group{padding:6px 0}
+  .group+.group{border-top:1px solid var(--line)}
+  .ghead{display:flex;align-items:center;gap:12px;padding:16px 22px 8px}
+  .gtitle{min-width:0;flex:1}
+  .gtitle .gm{font-family:var(--disp);font-weight:600;font-size:15.5px;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gtitle .gu{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .spark{flex:0 0 auto;display:flex;align-items:center;gap:9px}
+  .spark .cur{font-family:var(--disp);font-weight:700;font-size:18px}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--faint);text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}
+  thead th.r{text-align:right}
+  tbody tr{cursor:pointer;transition:.12s}
+  tbody tr:hover{background:#f5f8f4}
+  tbody td{padding:11px 10px;border-bottom:1px dotted var(--line);font-size:13px;color:var(--ink2);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  td.ts{font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+  td.sc b{font-family:var(--disp);font-size:15px}
+  td.r{text-align:right}
+  .ms{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .ms b{color:var(--ink2);font-weight:600}
+
+  .bdg{font-family:var(--sans);font-weight:800;font-size:10.5px;padding:3px 9px;border-radius:999px;white-space:nowrap;display:inline-block}
+
+  .empty{padding:46px 26px;text-align:center;color:var(--ink2)}
+  .empty .big{font-size:34px;margin-bottom:8px}
+  .empty a{font-weight:700}
+
+  /* ---- inline saved-report drawer ---- */
+  .drawer{background:#fafdf8;border-top:1px solid var(--line)}
+  .doc{padding:2px 0 8px}
+  .vhero{display:flex;gap:18px;align-items:center;padding:20px 22px 12px}
+  @media(max-width:520px){.vhero{flex-direction:column;align-items:flex-start;gap:12px}}
+  .grade{font-family:var(--disp);font-weight:700;font-size:60px;line-height:.8;letter-spacing:-2px}
+  .vmeta{flex:1;min-width:0}
+  .vpill{display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:600;font-size:13px;padding:5px 12px;border-radius:999px}
+  .vmeta h2{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:-.3px;margin:9px 0 0;line-height:1.18}
+  .vmeta p{color:var(--ink2);font-size:13.5px;line-height:1.55;margin:7px 0 0}
+  .vscores{display:flex;gap:18px;margin-top:11px;font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
+  .vscores b{font-family:var(--disp);font-size:15px;color:var(--ink)}
+  .sect{padding:14px 22px}
+  .sect h3{font-family:var(--disp);font-weight:600;font-size:14px;margin:0 0 10px;display:flex;align-items:baseline;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+  .sect h3 span{font-size:10.5px;color:var(--faint);font-weight:600;letter-spacing:1.4px;text-transform:uppercase;font-family:var(--sans)}
+  .dl{display:grid;grid-template-columns:160px 1fr auto;gap:11px;align-items:center;padding:8px 0;border-bottom:1px dotted var(--line);font-size:13px}
+  @media(max-width:520px){.dl{grid-template-columns:1fr auto}.dl .ba{grid-column:1/-1;order:3}}
+  .dl .nm{font-weight:600}.dl .nm small{display:block;font-weight:400;color:var(--faint);font-size:10.5px}
+  .ba{height:7px;background:#ecf1ea;border-radius:5px;overflow:hidden}.ba i{display:block;height:100%;width:0;border-radius:5px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .bdg2{font-family:var(--sans);font-weight:800;font-size:11px;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .f{display:flex;gap:10px;padding:11px 0;border-bottom:1px dotted var(--line)}
+  .f .dot{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px}
+  .f .ft{font-weight:600;font-size:13.5px}
+  .f .fs{color:var(--ink2);font-size:13px;line-height:1.5;margin-top:2px}
+  .f .ev{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink2);background:#f1f5f0;border:1px solid var(--line);border-radius:8px;padding:7px 9px;white-space:pre-wrap;word-break:break-word;display:none}
+  .f .ev.show{display:block}
+  .f .more{font-size:11.5px;color:var(--teal);cursor:pointer;font-weight:700;margin-top:4px;display:inline-block}
+  .drawer-foot{padding:10px 22px 18px;display:flex;gap:10px;flex-wrap:wrap}
+  .drawer-foot button{font-family:var(--sans);font-weight:700;font-size:12.5px;border-radius:10px;padding:8px 13px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink2)}
+  .drawer-foot .del{color:var(--bad);border-color:#f2c9c0;background:var(--badbg)}
+  .loading{padding:18px 22px;color:var(--faint);font-size:13px;font-family:var(--mono)}
+
+  .foot{text-align:center;color:var(--faint);font-size:12px;padding:18px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
+    <span class="pill">🔒 本地历史 · 存于 <b>~/.zing</b></span>
+  </header>
+
+  <div class="hero">
+    <h1>检测<span class="u">历史</span>与趋势</h1>
+    <p>这里是你在本机跑过的每一次验真。按「中转站 + 声称模型」分组，附一条健康分趋势曲线；点任意一行可展开当时那份报告。</p>
+  </div>
+
+  <div class="topbar">
+    <a class="back" href="/">← 返回检测</a>
+    <button class="clr" id="clr">清空历史</button>
+  </div>
+
+  <div class="card" id="card">
+    <div class="loading">加载历史…</div>
+  </div>
+
+  <div class="foot">历史只存在你本地的 SQLite 文件里，不会上传任何第三方。</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const RISK={clean:{c:"good",bg:"goodbg",t:"大概率是真货"},low:{c:"sky",bg:"skybg",t:"基本可信，小瑕疵"},
+  medium:{c:"warn",bg:"warnbg",t:"有偏离，建议核实"},high:{c:"bad",bg:"badbg",t:"货不对板"},inconclusive:{c:"grey",bg:"greybg",t:"信号不足"}};
+const VAR=k=>`var(--${k})`;
+const scoreC=v=>v==null?"grey":v>=85?"good":v>=70?"warn":"bad";
+const STATC={pass:"good",warn:"warn",fail:"bad",info:"sky",inconclusive:"grey",not_run:"grey",error:"bad"};
+const SEVC={info:"sky",low:"warn",medium:"warn",high:"bad",critical:"bad"};
+const DIMNAME={model_identity:["模型身份","它是不是它自称的那个？"],context_window:["上下文窗口","长文是否真能记住？"],
+  capability:["能力声明","工具/JSON 是否真支持？"],billing:["计费用量","token 有没有虚报？"],
+  protocol:["协议兼容","接口是否规范？"],connectivity:["连通性","稳定可达？"],reliability:["并发可靠","压力下稳不稳？"],
+  streaming:["流式真实","真流式还是假装？"],security:["传输安全","密钥是否安全？"]};
+const ICON={pass:"✓",warn:"!",fail:"✕",info:"ℹ",inconclusive:"?",not_run:"–",error:"✕"};
+
+let openRow=null;  // currently expanded <tr> trigger, so we can toggle/close
+
+load();
+
+async function load(){
+  try{
+    const rows=await fetch("/api/history").then(r=>r.json());
+    render(Array.isArray(rows)?rows:[]);
+  }catch(e){
+    $("#card").innerHTML=`<div class="empty"><div class="big">⚠️</div>无法读取历史：${esc(String(e.message||e))}<br><br>请确认本地 zing 服务在运行。</div>`;
+  }
+}
+
+function render(rows){
+  if(!rows.length){
+    $("#card").innerHTML=`<div class="empty"><div class="big">🗂️</div>还没有检测记录。<br><br><a href="/">去跑第一次检测 →</a></div>`;
+    return;
+  }
+  // group by base_url + claimed_model, preserving newest-first encounter order
+  const groups=[];const idx={};
+  rows.forEach(r=>{
+    const key=(r.base_url||"")+"\n"+(r.claimed_model||"");
+    if(idx[key]==null){idx[key]=groups.length;groups.push({key,base_url:r.base_url,claimed_model:r.claimed_model,rows:[]});}
+    groups[idx[key]].rows.push(r);
+  });
+  $("#card").innerHTML=groups.map(groupHTML).join("");
+  // wire row clicks
+  $$("#card tbody tr").forEach(tr=>tr.onclick=()=>toggleRow(tr));
+  // fetch + draw sparklines per group
+  groups.forEach(g=>{
+    const host=$(`#spark-${cssId(g.key)}`); if(!host) return;
+    const u="/api/history/trend?base_url="+encodeURIComponent(g.base_url||"")+"&claimed_model="+encodeURIComponent(g.claimed_model||"");
+    fetch(u).then(r=>r.json()).then(t=>drawSpark(host,Array.isArray(t)?t:[])).catch(()=>{});
+  });
+}
+
+function groupHTML(g){
+  const sid=cssId(g.key);
+  const body=g.rows.map(rowHTML).join("");
+  return `<div class="group">
+    <div class="ghead">
+      <div class="gtitle">
+        <div class="gm">${esc(g.claimed_model||"(未声明模型)")}</div>
+        <div class="gu">${esc(g.base_url||"")}</div>
+      </div>
+      <div class="spark" id="spark-${sid}"></div>
+    </div>
+    <table><thead><tr>
+      <th>时间</th><th>风险</th><th class="r">健康分</th><th class="r">评级</th><th class="r">模式 / 套件</th>
+    </tr></thead><tbody>${body}</tbody></table>
+  </div>`;
+}
+
+function rowHTML(r){
+  const risk=RISK[r.risk_level]||RISK.inconclusive;
+  const sc=r.score==null?"—":Math.round(r.score);
+  return `<tr data-id="${r.id}">
+    <td class="ts">${esc(fmtTime(r.ts))}</td>
+    <td><span class="bdg" style="background:var(--${risk.bg});color:${VAR(risk.c)}">${riskGlyph(r.risk_level)} ${(r.risk_level||"?").toUpperCase()}</span></td>
+    <td class="sc r"><b style="color:${VAR(scoreC(r.score))}">${sc}</b></td>
+    <td class="r" style="font-family:var(--disp);font-weight:700;color:${VAR(risk.c)}">${esc(r.rating||"–")}</td>
+    <td class="r ms"><b>${esc(r.mode||"check")}</b> · ${esc(r.suite||"")}</td>
+  </tr>`;
+}
+
+function toggleRow(tr){
+  const next=tr.nextElementSibling;
+  if(next&&next.classList.contains("drawerRow")){next.remove();openRow=null;return;}
+  // close any other open drawer
+  $$("#card tr.drawerRow").forEach(d=>d.remove());
+  const dr=document.createElement("tr");dr.className="drawerRow";
+  dr.innerHTML=`<td colspan="5" style="padding:0"><div class="drawer"><div class="loading">加载报告…</div></div></td>`;
+  tr.after(dr);openRow=tr;
+  const id=tr.dataset.id;
+  fetch("/api/history/"+id).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+    .then(rep=>{dr.querySelector(".drawer").innerHTML=reportHTML(rep,id);wireDrawer(dr,id);})
+    .catch(e=>{dr.querySelector(".drawer").innerHTML=`<div class="loading">无法加载这份报告：${esc(String(e.message||e))}</div>`;});
+}
+
+function wireDrawer(dr,id){
+  dr.querySelectorAll(".more").forEach(m=>m.onclick=ev=>{ev.stopPropagation();const e=m.previousElementSibling;
+    e.classList.toggle("show");m.textContent=e.classList.contains("show")?"收起证据":"查看证据";});
+  requestAnimationFrame(()=>dr.querySelectorAll(".ba i").forEach(i=>{i.style.width=i.dataset.w+"%";i.style.background=i.dataset.c;}));
+  const del=dr.querySelector(".del");
+  if(del)del.onclick=ev=>{ev.stopPropagation();
+    if(!confirm("删除这条历史记录？"))return;
+    fetch("/api/history/"+id,{method:"DELETE"}).then(()=>load());};
+  const dl=dr.querySelector(".dl-json");
+  if(dl)dl.onclick=ev=>{ev.stopPropagation();
+    fetch("/api/history/"+id).then(r=>r.json()).then(rep=>{
+      const blob=new Blob([JSON.stringify(rep,null,2)],{type:"application/json"});
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="zing-report-"+id+".json";a.click();});};
+}
+
+function reportHTML(r,id){
+  const v=r.verdict||{}, risk=RISK[v.risk_level]||RISK.inconclusive;
+  const gradeC=VAR(risk.c), sc=v.overall_score;
+  const t=r.target||{};
+  const dims=(r.dimensions||[]).filter(d=>d.status!=="not_run");
+  const findings=[];
+  (r.detectors||[]).forEach(det=>{(det.findings||[]).forEach(f=>{
+    if(["fail","warn","error"].includes(f.status)) findings.push({...f,dim:det.dimension});
+  });});
+  findings.sort((a,b)=>sevRank(b.severity)-sevRank(a.severity));
+
+  return `<div class="doc">
+    <div class="vhero">
+      <div class="grade" style="color:${gradeC}">${esc(v.rating||"–")}</div>
+      <div class="vmeta">
+        <span class="vpill" style="background:var(--${risk.bg});color:${gradeC}">${riskGlyph(v.risk_level)} ${esc(risk.t)}</span>
+        <h2>${esc(zhHead(v))}</h2>
+        <p>${esc(v.summary||"")}</p>
+        <div class="vscores">
+          <div>综合健康分 <b style="color:${VAR(scoreC(sc))}">${sc==null?"—":Math.round(sc)}</b>/100</div>
+          <div>置信度 <b>${esc(zhConf(v.confidence))}</b></div>
+          <div>风险 <b style="color:${gradeC}">${esc((v.risk_level||"").toUpperCase())}</b></div>
+          <div>时间 <b style="font-family:var(--mono);font-size:12px">${esc(fmtTime(r.generated_at))}</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="sect"><h3>逐项体检 <span>${dims.length} dimensions</span></h3>${dims.map(dimRow).join("")||'<p style="color:var(--ink2);font-size:13px;margin:0">无维度数据。</p>'}</div>
+    ${findings.length
+      ?`<div class="sect"><h3>关注点 <span>${findings.length} findings</span></h3>${findings.map(findRow).join("")}</div>`
+      :`<div class="sect"><h3>关注点 <span>findings</span></h3><p style="color:var(--ink2);font-size:13px;margin:0">未发现警告或失败项。</p></div>`}
+    <div class="drawer-foot">
+      <button class="dl-json">下载 JSON</button>
+      <button class="del">删除此记录</button>
+    </div>
+  </div>`;
+}
+
+function dimRow(d){const [nm,desc]=DIMNAME[d.dimension]||[d.dimension,""];const c=VAR(scoreC(d.score));const sc=d.score==null?"—":Math.round(d.score);
+  return `<div class="dl"><div class="nm">${esc(nm)}<small>${esc(desc)}</small></div>
+    <div class="ba"><i data-w="${d.score==null?15:d.score}" data-c="${d.score==null?'var(--faint)':c}"></i></div>
+    <div class="bdg2" style="background:var(--${STATC[d.status]}bg,#eee);color:${VAR(STATC[d.status]||'grey')}">${sc}</div></div>`;}
+function findRow(f){const c=VAR(SEVC[f.severity]||"grey");const ev=evText(f.evidence);
+  return `<div class="f"><div class="dot" style="background:${c}">${ICON[f.status]||"!"}</div>
+    <div style="flex:1;min-width:0"><div class="ft">${esc(f.title)}</div>
+    <div class="fs">${esc(f.summary||"")}${f.recommendation?` <span style="color:var(--faint)">· 建议：${esc(f.recommendation)}</span>`:""}</div>
+    ${ev?`<div class="ev">${esc(ev)}</div><span class="more">查看证据</span>`:""}</div></div>`;}
+function evText(e){if(!e||typeof e!=="object")return "";const keys=Object.keys(e).slice(0,6);
+  return keys.map(k=>`${k}: ${fmt(e[k])}`).join("\n");}
+function fmt(x){if(x==null)return "null";if(typeof x==="object")return JSON.stringify(x).slice(0,200);return String(x).slice(0,240);}
+function sevRank(s){return {critical:5,high:4,medium:3,low:2,info:1}[s]||0;}
+function riskGlyph(r){return r==="high"?"✕":r==="clean"?"✓":r==="inconclusive"?"?":"▲";}
+function zhHead(v){const m={clean:"行为与所声称的模型一致",low:"基本一致，存在少量小问题",medium:"部分行为与所声称的模型不符 —— 建议核实",high:"它给的并不是你所声称的模型",inconclusive:"信号不足，无法判定（连通或覆盖不够）"};return m[v.risk_level]||v.headline||"";}
+function zhConf(c){return {high:"高",medium:"中",low:"低"}[c]||c||"—";}
+
+/* ---- sparkline ---- */
+function drawSpark(host,trend){
+  const pts=trend.filter(p=>p&&typeof p.score==="number");
+  const last=trend.length?trend[trend.length-1]:null;
+  const curScore=last&&last.score!=null?Math.round(last.score):null;
+  const curC=VAR(scoreC(curScore));
+  if(pts.length<2){
+    // not enough points for a line — just show the latest score chip
+    host.innerHTML=`<span class="cur" style="color:${curC}">${curScore==null?"—":curScore}</span>`;
+    return;
+  }
+  const W=120,H=34,P=3;
+  const xs=pts.map((_,i)=>P+i*(W-2*P)/(pts.length-1));
+  const ys=pts.map(p=>{const s=Math.max(0,Math.min(100,p.score));return H-P-(s/100)*(H-2*P);});
+  const d=xs.map((x,i)=>`${i?"L":"M"}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(" ");
+  const area=`${d} L${xs[xs.length-1].toFixed(1)},${H} L${xs[0].toFixed(1)},${H} Z`;
+  const lastX=xs[xs.length-1],lastY=ys[ys.length-1];
+  const gid="g"+Math.random().toString(36).slice(2,8);
+  host.innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+      <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${curC}" stop-opacity="0.22"/><stop offset="1" stop-color="${curC}" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${area}" fill="url(#${gid})"/>
+      <path d="${d}" fill="none" stroke="${curC}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="2.8" fill="${curC}"/>
+    </svg><span class="cur" style="color:${curC}">${curScore==null?"—":curScore}</span>`;
+}
+
+/* ---- clear all ---- */
+$("#clr").onclick=()=>{
+  if(!confirm("确定清空全部检测历史？此操作不可撤销。"))return;
+  fetch("/api/history",{method:"DELETE"}).then(()=>load());
+};
+
+/* ---- helpers ---- */
+function cssId(k){let h=0;for(let i=0;i<k.length;i++){h=(h*31+k.charCodeAt(i))|0;}return "k"+(h>>>0).toString(36);}
+function fmtTime(ts){if(!ts)return "—";const d=new Date(ts);if(isNaN(d))return String(ts).slice(0,19).replace("T"," ");
+  const p=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+</script>
+</body>
+</html>
