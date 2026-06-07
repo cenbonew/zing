@@ -25,6 +25,7 @@ class DeterminismDetector(Detector):
     name = "Determinism & cache-correctness"
     dimension = Dimension.PROTOCOL
     min_suite = "deep"
+    cost_hint = 6
 
     # Number of high-temperature samples that must ALL be byte-identical before a
     # caching finding fires. More than two so a chance collision on a short output

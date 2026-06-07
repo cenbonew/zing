@@ -38,6 +38,7 @@ class PromptCacheDetector(Detector):
     name = "Prompt prefix-cache (timing)"
     dimension = Dimension.SECURITY
     min_suite = "deep"
+    cost_hint = 3
 
     async def run(self, ctx: AuditContext) -> DetectorResult:
         result = self.new_result()

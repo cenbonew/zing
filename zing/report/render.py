@@ -15,6 +15,7 @@ each human view says so.
 from __future__ import annotations
 
 import html
+import json
 
 from zing.models import AuditReport, RiskLevel, Severity, Status
 
@@ -104,6 +105,94 @@ def _md(value: object) -> str:
 def render_json(report: AuditReport) -> str:
     """Canonical machine output — field names match :mod:`zing.models` exactly."""
     return report.model_dump_json(indent=2)
+
+
+# --------------------------------------------------------------------------- #
+# Compact JSON — a lean, agent/LLM-facing view (no bulky evidence)
+# --------------------------------------------------------------------------- #
+def _compact_finding(dimension: str, finding) -> dict:
+    out = {
+        "dimension": dimension,
+        "id": finding.id,
+        "severity": finding.severity.value,
+        "status": finding.status.value,
+        "title": finding.title,
+    }
+    # Only the actionable findings carry their summary/recommendation; pass/info
+    # findings stay one line so the payload stays small.
+    if finding.status in (Status.WARN, Status.FAIL, Status.ERROR):
+        if finding.summary:
+            out["summary"] = finding.summary
+        if finding.recommendation:
+            out["recommendation"] = finding.recommendation
+    return out
+
+
+def compact_dict(report: AuditReport) -> dict:
+    """A small, stable dict an agent can read without ingesting full evidence.
+
+    ~5-10x smaller than the full report: verdict + per-dimension status + a flat
+    findings list (severity/status/title, plus summary only for warn/fail/error).
+    """
+    v = report.verdict
+    t = report.target
+    target = {"name": t.name, "model": t.model, "base_url": t.base_url}
+    if t.claimed_model:
+        target["claimed_model"] = t.claimed_model
+    if t.declared_provider:
+        target["provider"] = t.declared_provider
+
+    rel = None
+    if report.reliability:
+        r = report.reliability
+        rel = {
+            "requests": r.requests,
+            "successes": r.successes,
+            "success_rate": round(r.success_rate, 4),
+            "rate_limited": r.rate_limited,
+            "latency_p95_ms": r.latency_ms.get("p95"),
+        }
+
+    return {
+        "tool": "zing",
+        "version": report.tool_version,
+        "generated_at": report.generated_at,
+        "mode": report.mode,
+        "suite": report.suite,
+        "target": target,
+        "baseline": (
+            {"model": report.baseline.model, "base_url": report.baseline.base_url}
+            if report.baseline
+            else None
+        ),
+        "verdict": {
+            "risk": v.risk_level.value,
+            "score": v.overall_score,
+            "rating": v.rating,
+            "confidence": v.confidence,
+            "headline": v.headline,
+            "summary": v.summary,
+            "key_findings": v.key_findings,
+        },
+        "dimensions": {
+            d.dimension.value: {"score": d.score, "status": d.status.value}
+            for d in report.dimensions
+            if d.status != Status.NOT_RUN
+        },
+        "findings": [
+            _compact_finding(det.dimension.value, f)
+            for det in report.detectors
+            for f in det.findings
+        ],
+        "reliability": rel,
+        "judge_used": report.judge_used,
+        "warnings": report.warnings or [],
+    }
+
+
+def render_compact(report: AuditReport) -> str:
+    """Lean JSON for agents/LLMs — verdict + findings without bulky evidence."""
+    return json.dumps(compact_dict(report), ensure_ascii=False, indent=2)
 
 
 # --------------------------------------------------------------------------- #

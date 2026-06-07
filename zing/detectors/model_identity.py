@@ -63,6 +63,7 @@ class ModelIdentityDetector(Detector):
     name = "Model identity & downgrade fingerprinting"
     dimension = Dimension.MODEL_IDENTITY
     min_suite = "standard"
+    cost_hint = 9
 
     # Cap on fingerprint probes actually issued (cost control, ~8-call budget).
     MAX_FINGERPRINTS = 6

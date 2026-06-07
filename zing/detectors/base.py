@@ -38,6 +38,9 @@ class Detector(ABC):
     min_suite: ClassVar[str] = "standard"
     requires_judge: ClassVar[bool] = False
     requires_baseline: ClassVar[bool] = False
+    # Approximate number of API calls this detector issues — used by `--dry-run` so
+    # an agent can budget token/cost before committing. A rough upper bound is fine.
+    cost_hint: ClassVar[int] = 2
 
     @abstractmethod
     async def run(self, ctx: AuditContext) -> DetectorResult:

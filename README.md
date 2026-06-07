@@ -97,12 +97,29 @@ zing check -c zing.yaml
 
 ### As a tool for an LLM / agent
 
-`--json` prints the structured report to stdout instead of writing files — feed
-it straight to another program or model:
+zing is built to be driven by another program or model. Everything goes to stdout
+as JSON, errors included, and the exit code is the gate.
 
 ```bash
-zing check --base-url ... --model gpt-4o --json | jq .verdict
+# lean, agent-friendly verdict (~5x smaller than --json: no bulky evidence)
+zing check --base-url ... --model gpt-4o --compact | jq .verdict.risk
+
+# full structured report when you need every finding's evidence
+zing check --base-url ... --model gpt-4o --json
+
+# budget first: which detectors run + estimated API calls, WITHOUT making any
+zing check --base-url ... --model gpt-4o --suite deep --dry-run --json
+
+# gate on the exit code (1 if risk >= medium); config/usage errors exit 2 as JSON
+zing check --base-url ... --model gpt-4o --compact --fail-on-risk medium
+
+# machine-readable discovery
+zing kb --json                 # the whole knowledge base
+zing models --base-url ... --json   # what an endpoint advertises
 ```
+
+In `--json`/`--compact` mode a bad config prints `{"error": {...}}` (exit 2)
+instead of a human message, so a pipeline can parse failures uniformly.
 
 ## What it checks
 

@@ -11,6 +11,7 @@ Commands:
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -39,7 +40,14 @@ from zing.models import AuditReport, RiskLevel, Status, TargetConfig
 
 app = typer.Typer(
     name="zing",
-    help="LLM relay reality check — audit whether a relay serves the model it claims (货不对板检测).",
+    help=(
+        "LLM relay reality check — audit whether a relay serves the model it claims "
+        "(货不对板检测).\n\n"
+        "For agents / scripts: add --compact for a lean JSON verdict (or --json for the "
+        "full report), --dry-run to estimate API calls first, and --fail-on-risk "
+        "low|medium|high to gate on exit code. `kb --json` / `models --json` give "
+        "machine-readable discovery."
+    ),
     no_args_is_help=True,
     add_completion=False,
 )
@@ -236,6 +244,85 @@ def _judge_target(cfg: dict, base_url, api_key, model, baseline: TargetConfig | 
     return baseline
 
 
+def _machine_mode(as_json: bool, as_compact: bool) -> bool:
+    """True when output should be pure JSON to stdout (no files, no rich panel)."""
+    return as_json or as_compact
+
+
+def _emit_machine_error(exc: Exception, *, error_type: str = "config_error") -> None:
+    """Print a parseable error object to stdout and exit 2 (for agents/CI)."""
+    print(json.dumps({"error": {"type": error_type, "message": str(exc)}}, ensure_ascii=False))
+    raise typer.Exit(code=2)
+
+
+def _build_dry_run_plan(target, options, baseline, judge_target, mode: str) -> dict:
+    """What `zing check/compare` WOULD do — selected detectors and an API-call
+    estimate — without issuing a single request, so an agent can budget cost."""
+    import zing.detectors  # noqa: F401  -- populate the registry
+    from zing.detectors.base import select_detectors
+
+    has_judge = bool(options.judge and (judge_target or baseline))
+    has_baseline = baseline is not None
+    detectors = select_detectors(
+        options.suite, has_judge=has_judge, has_baseline=has_baseline, enabled=options.enabled
+    )
+    rows: list[dict] = []
+    total = 0
+    for d in detectors:
+        calls = options.reliability_requests if d.id == "reliability" else d.cost_hint
+        rows.append(
+            {"id": d.id, "dimension": d.dimension.value, "min_suite": d.min_suite, "est_calls": calls}
+        )
+        total += calls
+    if has_baseline:
+        total = int(total * 1.4)  # compare-mode detectors also probe the baseline
+    return {
+        "tool": "zing",
+        "version": __version__,
+        "dry_run": True,
+        "mode": mode,
+        "suite": options.suite,
+        "target": {
+            "model": target.model,
+            "claimed_model": target.claimed_model,
+            "base_url": target.base_url,
+            "provider": target.declared_provider,
+        },
+        "baseline": ({"model": baseline.model, "base_url": baseline.base_url} if baseline else None),
+        "judge": has_judge,
+        "detectors": rows,
+        "estimated_api_calls": total,
+        "note": (
+            "Rough upper bound; reliability uses --reliability-requests. "
+            "No API calls were made."
+        ),
+    }
+
+
+def _emit_dry_run(plan: dict, *, machine: bool) -> None:
+    if machine:
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        raise typer.Exit(code=0)
+    console.print(
+        Panel(
+            f"[bold]Dry run[/] · mode {plan['mode']} · suite {plan['suite']} · "
+            f"model [bold]{plan['target']['model']}[/]\n"
+            f"Would run [bold]{len(plan['detectors'])}[/] detectors, "
+            f"~[bold]{plan['estimated_api_calls']}[/] API calls. No requests were made.",
+            border_style="cyan",
+        )
+    )
+    table = Table(show_lines=False)
+    table.add_column("Detector")
+    table.add_column("Dimension")
+    table.add_column("Min suite")
+    table.add_column("~calls", justify="right")
+    for d in plan["detectors"]:
+        table.add_row(d["id"], d["dimension"], d["min_suite"], str(d["est_calls"]))
+    console.print(table)
+    raise typer.Exit(code=0)
+
+
 def _run_and_report(
     target,
     options,
@@ -248,10 +335,11 @@ def _run_and_report(
     fail_under,
     fail_on_risk,
     as_json,
+    as_compact,
     kb_dirs,
 ) -> None:
     # Imported here so a partially-built report module never breaks `zing kb` etc.
-    from zing.report import write_reports
+    from zing.report import render_compact, write_reports
     from zing.runner import run_audit
 
     command = "zing " + " ".join(sys.argv[1:])
@@ -267,8 +355,11 @@ def _run_and_report(
         )
     )
 
-    if as_json:
-        # Machine-facing output (for piping into another tool or an LLM).
+    if as_compact:
+        # Lean, agent/LLM-facing JSON (verdict + findings, no bulky evidence).
+        print(render_compact(report))
+    elif as_json:
+        # Full machine-facing report.
         print(report.model_dump_json(indent=2))
     else:
         written = write_reports(report, out_dir=out_dir, fmt=validate_format(fmt))
@@ -320,7 +411,9 @@ def check_command(
     kb_dir: Annotated[list[Path] | None, typer.Option("--kb-dir", help="Extra knowledge-base directory (repeatable).")] = None,
     fail_under: Annotated[float | None, typer.Option("--fail-under", help="Exit 1 if overall score < this.")] = None,
     fail_on_risk: Annotated[str | None, typer.Option("--fail-on-risk", help="Exit 1 if risk >= this (low|medium|high).")] = None,
-    as_json: Annotated[bool, typer.Option("--json", help="Print the JSON report to stdout instead of writing files.")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the full JSON report to stdout instead of writing files.")] = False,
+    compact: Annotated[bool, typer.Option("--compact", help="Print a lean agent/LLM-facing JSON verdict to stdout (much smaller than --json).")] = False,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show which detectors would run and the estimated API-call count, without making any requests.")] = False,
 ) -> None:
     """Audit one relay endpoint and write a report."""
     try:
@@ -338,14 +431,21 @@ def check_command(
         fail_on_risk = validate_risk(fail_on_risk)
         baseline = None
         judge_t = _judge_target(cfg, judge_base_url, judge_api_key, judge_model, baseline) if options.judge else None
+        if dry_run:
+            _emit_dry_run(
+                _build_dry_run_plan(target, options, baseline, judge_t, "check"),
+                machine=_machine_mode(as_json, compact),
+            )
         _run_and_report(
             target, options, baseline=baseline, judge_target=judge_t, mode="check",
             out_dir=out_dir or Path(section(cfg, "run").get("output_dir") or "reports"),
             fmt=fmt or section(cfg, "run").get("format") or "all",
-            fail_under=fail_under, fail_on_risk=fail_on_risk, as_json=as_json,
+            fail_under=fail_under, fail_on_risk=fail_on_risk, as_json=as_json, as_compact=compact,
             kb_dirs=list(kb_dir) if kb_dir else None,
         )
     except ConfigError as exc:
+        if _machine_mode(as_json, compact):
+            _emit_machine_error(exc)
         err_console.print(f"[red]Config error:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
@@ -374,7 +474,9 @@ def compare_command(
     kb_dir: Annotated[list[Path] | None, typer.Option("--kb-dir", help="Extra knowledge-base directory (repeatable).")] = None,
     fail_under: Annotated[float | None, typer.Option("--fail-under", help="Exit 1 if overall score < this.")] = None,
     fail_on_risk: Annotated[str | None, typer.Option("--fail-on-risk", help="Exit 1 if risk >= this.")] = None,
-    as_json: Annotated[bool, typer.Option("--json", help="Print JSON report to stdout.")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the full JSON report to stdout.")] = False,
+    compact: Annotated[bool, typer.Option("--compact", help="Print a lean agent/LLM-facing JSON verdict to stdout.")] = False,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show the detectors and estimated API calls without making requests.")] = False,
 ) -> None:
     """Audit a relay against a trusted baseline of the same declared model."""
     try:
@@ -392,14 +494,21 @@ def compare_command(
         options = _build_options(cfg, suite=suite or "deep", judge=judge, max_context_tokens=max_context_tokens)
         fail_on_risk = validate_risk(fail_on_risk)
         judge_t = _judge_target(cfg, None, None, judge_model, baseline) if options.judge else None
+        if dry_run:
+            _emit_dry_run(
+                _build_dry_run_plan(target, options, baseline, judge_t, "compare"),
+                machine=_machine_mode(as_json, compact),
+            )
         _run_and_report(
             target, options, baseline=baseline, judge_target=judge_t, mode="compare",
             out_dir=out_dir or Path(section(cfg, "run").get("output_dir") or "reports"),
             fmt=fmt or section(cfg, "run").get("format") or "all",
-            fail_under=fail_under, fail_on_risk=fail_on_risk, as_json=as_json,
+            fail_under=fail_under, fail_on_risk=fail_on_risk, as_json=as_json, as_compact=compact,
             kb_dirs=list(kb_dir) if kb_dir else None,
         )
     except ConfigError as exc:
+        if _machine_mode(as_json, compact):
+            _emit_machine_error(exc)
         err_console.print(f"[red]Config error:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
@@ -410,6 +519,7 @@ def models_command(
     api_key: Annotated[str | None, typer.Option("--api-key", help="API key (env:VAR ok).")] = None,
     model: Annotated[str, typer.Option("--model", help="A model id (for the client; not required to list).")] = "x",
     api: Annotated[str | None, typer.Option("--api", help="Wire protocol: auto | openai | anthropic.")] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the model list as JSON.")] = False,
 ) -> None:
     """List the models an endpoint advertises via GET /v1/models."""
     try:
@@ -417,6 +527,8 @@ def models_command(
             kind="endpoint", name=None, base_url=base_url, api_key=api_key, model=model, api=api
         )
     except ConfigError as exc:
+        if as_json:
+            _emit_machine_error(exc)
         err_console.print(f"[red]Config error:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
@@ -424,8 +536,18 @@ def models_command(
         async with make_client(target) as client:
             outcome, ids = await client.list_models()
         if not outcome.ok:
+            if as_json:
+                print(json.dumps({
+                    "ok": False, "base_url": base_url, "models": [],
+                    "error": {"status_code": outcome.status_code, "message": outcome.error_message},
+                }, ensure_ascii=False, indent=2))
+                raise typer.Exit(code=1)
             err_console.print(f"[red]Failed:[/red] {outcome.error_message or outcome.status_code}")
             raise typer.Exit(code=1)
+        if as_json:
+            print(json.dumps({"ok": True, "base_url": base_url, "count": len(ids), "models": ids},
+                             ensure_ascii=False, indent=2))
+            return
         console.print(f"[green]{len(ids)} models[/green] at {base_url}")
         for mid in ids:
             console.print(f"  • {mid}")
@@ -437,18 +559,43 @@ def models_command(
 def kb_command(
     provider: Annotated[str | None, typer.Argument(help="Filter by provider key (openai, deepseek, ...).")] = None,
     kb_dir: Annotated[list[Path] | None, typer.Option("--kb-dir", help="Extra knowledge-base directory.")] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the knowledge base as JSON (for programmatic discovery).")] = False,
 ) -> None:
     """Inspect the bundled knowledge base."""
     kb = load_knowledge_base(list(kb_dir) if kb_dir else None)
+    provs = [p for p in sorted(kb.providers.values(), key=lambda p: p.provider)
+             if not provider or p.provider == provider]
+
+    if as_json:
+        models = [
+            {
+                "provider": prov.provider,
+                "id": m.id,
+                "aliases": m.aliases,
+                "context_window_tokens": m.context_window_tokens,
+                "max_output_tokens": m.max_output_tokens,
+                "knowledge_cutoff": m.knowledge_cutoff,
+                "tokenizer": m.tokenizer,
+                "modalities": m.modalities,
+                "reasoning": m.reasoning,
+                "supports_tools": m.supports_tools,
+                "supports_json_mode": m.supports_json_mode,
+                "supports_json_schema": m.supports_json_schema,
+            }
+            for prov in provs
+            for m in prov.models
+        ]
+        print(json.dumps({"count": len(models), "providers": [p.provider for p in provs], "models": models},
+                         ensure_ascii=False, indent=2))
+        return
+
     table = Table(title="zing knowledge base")
     table.add_column("Provider")
     table.add_column("Model")
     table.add_column("Context", justify="right")
     table.add_column("Max out", justify="right")
     table.add_column("Reasoning")
-    for prov in sorted(kb.providers.values(), key=lambda p: p.provider):
-        if provider and prov.provider != provider:
-            continue
+    for prov in provs:
         for m in prov.models:
             table.add_row(
                 prov.provider,
@@ -458,8 +605,8 @@ def kb_command(
                 "yes" if m.reasoning else "",
             )
     console.print(table)
-    total = sum(len(p.models) for p in kb.providers.values())
-    console.print(f"{total} models across {len(kb.providers)} providers.")
+    total = sum(len(p.models) for p in provs)
+    console.print(f"{total} models across {len(provs)} providers.")
 
 
 @app.callback(invoke_without_command=True)
