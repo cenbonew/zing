@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing web — 三套原型选择</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--bg:#0c0f12;--card:#14191f;--ink:#e7eef3;--dim:#8a98a3;--line:#222c34;--grn:#46e2a0}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui;
+    min-height:100vh;padding:46px 20px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-family:"JetBrains Mono",monospace;font-size:30px;letter-spacing:-1px;margin:0}
+  h1 b{color:var(--grn)} p.lead{color:var(--dim);margin:10px 0 30px;max-width:64ch;line-height:1.6}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;transition:.18s}
+  a.card:hover{transform:translateY(-4px);border-color:var(--grn);box-shadow:0 24px 50px -30px var(--grn)}
+  .thumb{height:150px;display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px;letter-spacing:1px}
+  .t-a{background:#0a0e12;color:#46e2a0;background-image:repeating-linear-gradient(transparent 0 5px,#ffffff08 5px 6px)}
+  .t-b{background:#f7f3ea;color:#c0402b}
+  .t-c{background:linear-gradient(135deg,#0f6f5f,#0c211e);color:#c7f25a}
+  .bd{padding:16px 18px}
+  .bd .k{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--grn);letter-spacing:1px}
+  .bd h3{margin:6px 0 6px;font-size:18px}
+  .bd p{margin:0;color:var(--dim);font-size:13.5px;line-height:1.55}
+  .bd .for{margin-top:11px;font-size:12px;color:var(--ink)}
+  .bd .for b{color:var(--grn)}
+  .tip{margin-top:26px;color:var(--dim);font-size:13px;font-family:"JetBrains Mono",monospace}
+</style>
+</head>
+<body><div class="wrap">
+  <h1>zing<b>.</b>web — 三套原型</h1>
+  <p class="lead">同一份真实数据模型（含「豆包冒充 DeepSeek」实测案例），三种不同的产品方向与受众。点开任意一张卡片体验完整交互流程，告诉我你想走哪条路线。</p>
+  <div class="grid">
+    <a class="card" href="A-console.html">
+      <div class="thumb t-a">[ ⚡ zing.console ]</div>
+      <div class="bd"><div class="k">方向 A</div><h3>开发者控制台</h3>
+        <p>深色、技术流、数据密集。实时探测日志 + 雷达评分 + 证据下钻。像安全扫描器。</p>
+        <div class="for">受众：<b>开发者 / 技术团队 / CI</b></div></div>
+    </a>
+    <a class="card" href="B-report.html">
+      <div class="thumb t-b">『 验真报告 』</div>
+      <div class="bd"><div class="k">方向 B</div><h3>验真报告 / 证书</h3>
+        <p>浅色、杂志感、权威。像第三方质检证书：盖章结论 + 评级 + 大白话依据。可下载分享。</p>
+        <div class="for">受众：<b>采购者 / 普通用户 / 决策层</b></div></div>
+    </a>
+    <a class="card" href="C-wizard.html">
+      <div class="thumb t-c">◗ 一键检测 ◖</div>
+      <div class="bd"><div class="k">方向 C</div><h3>一键检测向导</h3>
+        <p>清新、友好、三步走。填两个框 → 雷达扫描动画 → 友好结论，可展开细节。移动端友好。</p>
+        <div class="for">受众：<b>小白用户 / 增长 / 落地页</b></div></div>
+    </a>
+  </div>
+  <div class="tip">// 三套均为纯前端高保真原型，内置模拟扫描与真实结论数据，无需后端即可点完整流程。</div>
+</div></body>
+</html>

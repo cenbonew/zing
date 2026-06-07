@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing — 中转站验真</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#eef2ec;--card:#fffefb;--ink:#0c211e;--ink2:#566460;--faint:#93a09b;--line:#e7ece5;
+    --teal:#0f6f5f;--teal-d:#0a4a40;--lime:#c7f25a;
+    --good:#0f6f5f;--goodbg:#e9f4ee;--warn:#b9831f;--warnbg:#f7eed7;--bad:#cb3b2e;--badbg:#fbe7e2;
+    --sky:#2a7bb8;--skybg:#e4f0f8;--grey:#7c8a85;--greybg:#eef1 ec;
+    --disp:"Bricolage Grotesque",system-ui,sans-serif;--sans:"Hanken Grotesk",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
+    background:radial-gradient(700px 460px at 50% -8%,#f4fbef 0,transparent 60%),radial-gradient(760px 760px at 110% 114%,#dcEee2 0,transparent 55%),var(--bg);
+    min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px}
+  a{color:var(--teal)}
+
+  header{display:flex;align-items:center;gap:10px;padding:20px 0 4px}
+  .logo{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.4px}
+  .logo .b{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--ink);color:var(--lime);font-size:16px;box-shadow:0 8px 22px -10px var(--teal)}
+  .logo b{color:var(--teal)}
+  header .pill{margin-left:auto;font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+  header .pill b{color:var(--teal)}
+
+  .view{display:none}.view.show{display:block;animation:rise .5s cubic-bezier(.2,.85,.25,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}}
+
+  /* ---------- step 1: form ---------- */
+  .hero{padding:26px 0 4px}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(28px,5vw,40px);line-height:1.06;letter-spacing:-1px;margin:0}
+  .hero h1 .u{background:linear-gradient(transparent 62%,var(--lime) 0);padding:0 4px}
+  .hero p{color:var(--ink2);font-size:15.5px;line-height:1.6;margin:12px 0 0;max-width:56ch}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 26px 60px -42px rgba(15,60,50,.45),0 2px 0 #fff inset}
+  form{padding:24px}
+  .lab{font-size:12px;font-weight:700;letter-spacing:.4px;color:var(--faint);text-transform:uppercase;margin:0 0 7px}
+  .in{width:100%;border:1.5px solid var(--line);background:#fbfdfa;border-radius:13px;font-family:var(--sans);font-weight:500;font-size:15.5px;color:var(--ink);padding:13px 14px;outline:none;transition:.16s}
+  .in:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(15,111,95,.12);background:#fff}
+  .grp{margin-bottom:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.two{grid-template-columns:1fr}}
+  .seg{display:flex;gap:7px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:64px;font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink2);background:#fbfdfa;border:1.5px solid var(--line);border-radius:11px;padding:10px 6px;cursor:pointer;transition:.15s}
+  .seg button.on{color:#fff;background:var(--ink);border-color:var(--ink)}
+  .row-help{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+  .row-help button{font-size:12px;color:var(--teal);background:none;border:0;cursor:pointer;font-weight:700;font-family:var(--sans)}
+  .cta{width:100%;margin-top:6px;border:0;border-radius:15px;padding:16px;cursor:pointer;font-family:var(--disp);font-weight:600;font-size:17px;color:#fff;background:var(--ink);transition:.16s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .cta:hover{background:var(--teal)}.cta:disabled{opacity:.5;cursor:wait}
+  .reassure{text-align:center;font-size:12.5px;color:var(--faint);margin-top:13px}
+  .reassure b{color:var(--ink2)}
+
+  /* ---------- step 2: scanning ---------- */
+  .scan{padding:30px 24px 22px;text-align:center}
+  .radar{position:relative;width:150px;height:150px;margin:6px auto}
+  .radar .ripple{position:absolute;inset:0;border-radius:50%;border:2px solid var(--teal);opacity:0;animation:rip 2.4s ease-out infinite}
+  .radar .ripple:nth-child(2){animation-delay:.8s}.radar .ripple:nth-child(3){animation-delay:1.6s}
+  @keyframes rip{0%{transform:scale(.35);opacity:.5}100%{transform:scale(1);opacity:0}}
+  .radar .sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 300deg,rgba(15,111,95,.28) 350deg,transparent 360deg);animation:sp 1.5s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .radar .core{position:absolute;inset:33%;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--teal),var(--teal-d));display:grid;place-items:center;color:var(--lime);font-family:var(--disp);font-weight:700;font-size:22px;box-shadow:0 14px 34px -12px var(--teal)}
+  .scan h2{font-family:var(--disp);font-weight:600;font-size:20px;margin:14px 0 2px}
+  .scan .now{color:var(--teal);font-weight:700;font-size:13.5px;min-height:18px;font-family:var(--mono)}
+  .pbar{height:5px;background:#e3ebe3;border-radius:3px;max-width:360px;margin:14px auto 18px;overflow:hidden}
+  .pbar i{display:block;height:100%;width:0;background:var(--teal);transition:width .4s ease}
+  .dets{display:grid;grid-template-columns:1fr 1fr;gap:7px;text-align:left;max-width:520px;margin:0 auto}
+  @media(max-width:520px){.dets{grid-template-columns:1fr}}
+  .det{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--faint);background:#f5f8f4;border:1px solid var(--line);border-radius:11px;padding:9px 11px;transition:.2s}
+  .det .ic{width:16px;text-align:center;font-weight:700}
+  .det.run{color:var(--ink);border-color:#cfe0d6}
+  .det.run .ic{color:var(--teal);animation:bl 1s steps(2) infinite}
+  @keyframes bl{50%{opacity:.3}}
+  .det.pass{color:var(--ink)}.det.pass .ic{color:var(--good)}
+  .det.warn .ic{color:var(--warn)}.det.fail .ic{color:var(--bad)}.det.info .ic,.det.inconclusive .ic{color:var(--grey)}
+
+  /* ---------- step 3: report ---------- */
+  .report{padding:0 0 40px}
+  .doc{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 26px 60px -42px rgba(15,60,50,.45)}
+  .vhero{position:relative;display:flex;gap:22px;align-items:center;padding:26px 26px 22px}
+  @media(max-width:520px){.vhero{flex-direction:column;align-items:flex-start;gap:14px}}
+  .grade{font-family:var(--disp);font-weight:700;font-size:84px;line-height:.8;letter-spacing:-3px}
+  .vmeta{flex:1;min-width:0}
+  .vpill{display:inline-flex;align-items:center;gap:7px;font-family:var(--disp);font-weight:600;font-size:14px;padding:6px 14px;border-radius:999px}
+  .vmeta h2{font-family:var(--disp);font-weight:600;font-size:21px;letter-spacing:-.4px;margin:11px 0 0;line-height:1.18}
+  .vmeta p{color:var(--ink2);font-size:14.5px;line-height:1.6;margin:9px 0 0}
+  .vscores{display:flex;gap:20px;margin-top:13px;font-size:13px;color:var(--ink2);flex-wrap:wrap}
+  .vscores b{font-family:var(--disp);font-size:16px;color:var(--ink)}
+  .ribbon{height:5px}
+  .meta-strip{display:flex;flex-wrap:wrap;gap:8px 16px;padding:13px 26px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
+  .meta-strip code{font-family:var(--mono);background:#f1f5f0;padding:1px 6px;border-radius:5px;font-size:12px}
+
+  .sect{padding:20px 26px}
+  .sect h3{font-family:var(--disp);font-weight:600;font-size:15px;margin:0 0 12px;display:flex;align-items:baseline;gap:8px;border-top:1px solid var(--line);padding-top:18px}
+  .sect:first-child h3{border-top:0;padding-top:0}
+  .sect h3 span{font-size:11px;color:var(--faint);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--sans)}
+  .dl{display:grid;grid-template-columns:170px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px dotted var(--line);font-size:13.5px}
+  @media(max-width:520px){.dl{grid-template-columns:1fr auto}.dl .ba{grid-column:1/-1;order:3}}
+  .dl .nm{font-weight:600}.dl .nm small{display:block;font-weight:400;color:var(--faint);font-size:11px}
+  .ba{height:7px;background:#ecf1ea;border-radius:5px;overflow:hidden}.ba i{display:block;height:100%;width:0;border-radius:5px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+  .bdg{font-family:var(--sans);font-weight:800;font-size:11px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .f{display:flex;gap:11px;padding:12px 0;border-bottom:1px dotted var(--line)}
+  .f .dot{flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}
+  .f .ft{font-weight:600;font-size:14px}
+  .f .fs{color:var(--ink2);font-size:13.5px;line-height:1.55;margin-top:3px}
+  .f .ev{margin-top:7px;font-family:var(--mono);font-size:11.5px;color:var(--ink2);background:#f5f8f4;border:1px solid var(--line);border-radius:9px;padding:8px 10px;white-space:pre-wrap;word-break:break-word;display:none}
+  .f .ev.show{display:block}
+  .f .more{font-size:12px;color:var(--teal);cursor:pointer;font-weight:700;margin-top:5px;display:inline-block}
+  .disc{font-size:12px;color:var(--faint);line-height:1.6;padding:16px 26px 22px;border-top:1px solid var(--line)}
+  .actions{display:flex;gap:10px;padding:0 26px 24px;flex-wrap:wrap}
+  .actions button{flex:1;min-width:130px;border-radius:13px;padding:13px;font-family:var(--disp);font-weight:600;font-size:14px;cursor:pointer;border:1.5px solid var(--line);background:#fbfdfa;color:var(--ink)}
+  .actions button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .errbox{background:var(--badbg);border:1px solid #f2c9c0;color:var(--bad);border-radius:14px;padding:16px;margin-top:14px;font-size:14px;line-height:1.5}
+  .foot{text-align:center;color:var(--faint);font-size:12px;padding:14px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
+    <span class="pill">🔒 本地运行 · 密钥<b>不经手</b></span>
+  </header>
+
+  <!-- STEP 1 -->
+  <section class="view show" id="v1">
+    <div class="hero">
+      <h1>这家中转站，给的是<span class="u">真货</span>吗？</h1>
+      <p>填入中转站地址和它声称的模型，zing 在你本地跑一整套黑盒检测，出一份能看懂、有依据的验真报告。</p>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <form id="form" onsubmit="return false">
+        <div class="grp"><div class="lab">中转站地址 base_url</div><input class="in" id="i-url" placeholder="https://relay.example.com/v1" value="https://api.deepseek.com/v1"></div>
+        <div class="grp">
+          <div class="row-help"><div class="lab" style="margin:0">API Key</div><span style="font-size:11.5px;color:var(--faint)">支持 env:VAR / file:/path</span></div>
+          <input class="in" id="i-key" placeholder="sk-... 或 env:ZING_API_KEY" value="env:ZING_API_KEY">
+        </div>
+        <div class="two">
+          <div class="grp"><div class="lab">声称的模型</div><input class="in" id="i-model" value="deepseek-v4-flash"></div>
+          <div class="grp">
+            <div class="row-help"><div class="lab" style="margin:0">实际请求 id</div><button type="button" id="adv-t">可选</button></div>
+            <input class="in" id="i-claimed" placeholder="留空=同上（疑似替换时填真实 id）">
+          </div>
+        </div>
+        <div class="two">
+          <div class="grp"><div class="lab">协议</div>
+            <div class="seg" id="api"><button type="button" class="on" data-v="auto">自动</button><button type="button" data-v="openai">OpenAI</button><button type="button" data-v="anthropic">Anthropic</button></div></div>
+          <div class="grp"><div class="lab">检测套件</div>
+            <div class="seg" id="suite"><button type="button" data-v="smoke">smoke</button><button type="button" class="on" data-v="standard">standard</button><button type="button" data-v="deep">deep</button></div></div>
+        </div>
+        <button class="cta" id="go">开始检测 <span>→</span></button>
+        <div class="reassure">检测在 <b>你本地的 zing 服务</b> 发起，密钥只用于连接目标中转站，<b>不上传任何第三方</b>。</div>
+        <div id="formerr"></div>
+      </form>
+    </div>
+    <div class="foot">zing 给出的是风险与偏离的可复现证据，不是法律结论。</div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="view" id="v2">
+    <div class="card" style="margin-top:26px">
+      <div class="scan">
+        <div class="radar"><div class="ripple"></div><div class="ripple"></div><div class="ripple"></div><div class="sweep"></div><div class="core">⚡</div></div>
+        <h2>正在体检…</h2>
+        <div class="now" id="now">连接端点…</div>
+        <div class="pbar"><i id="pbar"></i></div>
+        <div class="dets" id="dets"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="view" id="v3">
+    <div class="report" style="margin-top:22px"><div class="doc" id="doc"></div>
+      <div class="actions">
+        <button id="again">再测一个</button>
+        <button class="pri" id="dl">下载报告 (JSON)</button>
+      </div>
+      <div class="foot">想要最强结论？用 <code>zing compare</code> 对照官方基线复检。</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const RISK={clean:{c:"good",bg:"goodbg",t:"大概率是真货"},low:{c:"sky",bg:"skybg",t:"基本可信，小瑕疵"},
+  medium:{c:"warn",bg:"warnbg",t:"有偏离，建议核实"},high:{c:"bad",bg:"badbg",t:"货不对板"},inconclusive:{c:"grey",bg:"greybg",t:"信号不足"}};
+const VAR=k=>`var(--${k})`;
+const scoreC=v=>v==null?"grey":v>=85?"good":v>=70?"warn":"bad";
+const STATC={pass:"good",warn:"warn",fail:"bad",info:"sky",inconclusive:"grey",not_run:"grey",error:"bad"};
+const SEVC={info:"sky",low:"warn",medium:"warn",high:"bad",critical:"bad"};
+const DIMNAME={model_identity:["模型身份","它是不是它自称的那个？"],context_window:["上下文窗口","长文是否真能记住？"],
+  capability:["能力声明","工具/JSON 是否真支持？"],billing:["计费用量","token 有没有虚报？"],
+  protocol:["协议兼容","接口是否规范？"],connectivity:["连通性","稳定可达？"],reliability:["并发可靠","压力下稳不稳？"],
+  streaming:["流式真实","真流式还是假装？"],security:["传输安全","密钥是否安全？"]};
+const ICON={pass:"✓",warn:"!",fail:"✕",info:"ℹ",inconclusive:"?",not_run:"–",error:"✕"};
+
+let lastReport=null;
+function go(n){$$(".view").forEach(v=>v.classList.remove("show"));$("#v"+n).classList.add("show");window.scrollTo({top:0,behavior:"smooth"});}
+$$("#api button,#suite button").forEach(b=>b.onclick=()=>{[...b.parentElement.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");});
+$("#adv-t").onclick=()=>$("#i-claimed").focus();
+$("#again").onclick=()=>go(1);
+$("#dl").onclick=()=>{if(!lastReport)return;const blob=new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="zing-report.json";a.click();};
+
+$("#go").onclick=startAudit;
+
+async function startAudit(){
+  $("#formerr").innerHTML="";
+  const payload={
+    base_url:$("#i-url").value.trim(), api_key:$("#i-key").value.trim(),
+    model:$("#i-model").value.trim(), claimed_model:$("#i-claimed").value.trim(),
+    api:$("#api .on").dataset.v, suite:$("#suite .on").dataset.v,
+  };
+  if(!payload.base_url||!payload.model){$("#formerr").innerHTML='<div class="errbox">请填写中转站地址和声称的模型。</div>';return;}
+  $("#go").disabled=true;
+  $("#dets").innerHTML=""; $("#pbar").style.width="0"; $("#now").textContent="连接端点…";
+  go(2);
+  const seen={};
+  try{
+    const resp=await fetch("/api/audit/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!resp.ok||!resp.body){throw new Error("HTTP "+resp.status);}
+    const reader=resp.body.getReader(),dec=new TextDecoder();let buf="";
+    while(true){
+      const {value,done}=await reader.read(); if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      let i; while((i=buf.indexOf("\n\n"))>=0){
+        const chunk=buf.slice(0,i); buf=buf.slice(i+2);
+        const dl=chunk.split("\n").find(l=>l.startsWith("data:")); if(!dl)continue;
+        handle(JSON.parse(dl.slice(5).trim()),seen);
+      }
+    }
+  }catch(e){
+    go(1);$("#formerr").innerHTML='<div class="errbox">连接本地服务失败：'+esc(String(e.message||e))+'</div>';
+  }finally{$("#go").disabled=false;}
+}
+
+function handle(ev,seen){
+  if(ev.type==="start"){
+    $("#now").textContent="开始检测 "+(ev.claimed_model||"")+" …";
+  }else if(ev.type==="detector_start"){
+    if(!seen[ev.id]){
+      const d=document.createElement("div");d.className="det run";d.id="det-"+ev.id;
+      d.innerHTML=`<span class="ic">▸</span><span>${zhDet(ev)}</span>`;$("#dets").appendChild(d);seen[ev.id]=d;
+    }
+    $("#now").textContent=zhDet(ev)+" …";
+  }else if(ev.type==="detector_done"){
+    const d=seen[ev.id]||$("#det-"+ev.id);
+    if(d){d.className="det "+ev.status;d.querySelector(".ic").textContent=ICON[ev.status]||"•";}
+    const pct=Math.round((ev.index+1)/(ev.total||1)*100);$("#pbar").style.width=pct+"%";
+  }else if(ev.type==="report"){
+    lastReport=ev.report; renderReport(ev.report); go(3);
+  }else if(ev.type==="error"){
+    go(1);$("#formerr").innerHTML='<div class="errbox">检测失败：'+esc(ev.message)+'</div>';
+  }
+}
+function zhDet(ev){const m=DIMNAME[ev.dimension];return (m?m[0]:ev.dimension)+" · "+(ev.name||ev.id);}
+
+function renderReport(r){
+  const v=r.verdict, risk=RISK[v.risk_level]||RISK.inconclusive;
+  const gradeC=VAR(risk.c), sc=v.overall_score;
+  const t=r.target;
+  const dims=(r.dimensions||[]).filter(d=>d.status!=="not_run");
+  // collect notable findings (warn/fail/error) across detectors, plus key ones
+  const findings=[];
+  (r.detectors||[]).forEach(det=>{(det.findings||[]).forEach(f=>{
+    if(["fail","warn","error"].includes(f.status)) findings.push({...f,dim:det.dimension});
+  });});
+  findings.sort((a,b)=>sevRank(b.severity)-sevRank(a.severity));
+
+  $("#doc").innerHTML=`
+    <div class="ribbon" style="background:${gradeC}"></div>
+    <div class="vhero">
+      <div class="grade" style="color:${gradeC}">${v.rating||"–"}</div>
+      <div class="vmeta">
+        <span class="vpill" style="background:var(--${risk.bg});color:${gradeC}">${riskGlyph(v.risk_level)} ${risk.t}</span>
+        <h2>${esc(zhHead(v))}</h2>
+        <p>${esc(v.summary||"")}</p>
+        <div class="vscores">
+          <div>综合健康分 <b style="color:${VAR(scoreC(sc))}">${sc==null?"—":sc}</b>/100</div>
+          <div>结论置信度 <b>${zhConf(v.confidence)}</b></div>
+          <div>风险等级 <b style="color:${gradeC}">${(v.risk_level||"").toUpperCase()}</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta-strip">
+      <span>目标 <code>${esc(t.base_url||"")}</code></span>
+      <span>声称 <code>${esc(t.claimed_model||t.model||"")}</code></span>
+      ${t.claimed_model&&t.claimed_model!==t.model?`<span>实测 id <code>${esc(t.model)}</code></span>`:""}
+      <span>套件 <code>${esc(r.suite)}</code></span>
+      <span>zing v${esc(r.tool_version||"")}</span>
+    </div>
+
+    <div class="sect"><h3>逐项体检 <span>${dims.length} dimensions</span></h3>${dims.map(dimRow).join("")}</div>
+
+    ${findings.length?`<div class="sect"><h3>关注点 <span>${findings.length} findings</span></h3>${findings.map(findRow).join("")}</div>`
+      :`<div class="sect"><h3>关注点 <span>findings</span></h3><p style="color:var(--ink2);font-size:14px;margin:0">未发现警告或失败项 —— 各维度表现与所声称模型一致。</p></div>`}
+
+    <div class="disc">zing 出具的是<strong>行为偏离与风险的可复现证据</strong>，不是欺诈的法律/密码学证明。中转站可能按概率路由；请结合样本量、计费设置与当地法律自行判断，切勿仅凭单次结果公开指控厂商。</div>`;
+
+  requestAnimationFrame(()=>{$$("#doc .ba i").forEach(i=>{i.style.width=i.dataset.w+"%";i.style.background=i.dataset.c;});});
+  $$("#doc .more").forEach(m=>m.onclick=()=>{const ev=m.previousElementSibling;ev.classList.toggle("show");m.textContent=ev.classList.contains("show")?"收起证据":"查看证据";});
+}
+function dimRow(d){const [nm,desc]=DIMNAME[d.dimension]||[d.dimension,""];const c=VAR(scoreC(d.score));const sc=d.score==null?"—":d.score;
+  return `<div class="dl"><div class="nm">${nm}<small>${desc}</small></div>
+    <div class="ba"><i data-w="${d.score==null?15:d.score}" data-c="${d.score==null?'var(--faint)':c}"></i></div>
+    <div class="bdg" style="background:var(--${STATC[d.status]}bg,#eee);color:${VAR(STATC[d.status])}">${sc}</div></div>`;}
+function findRow(f){const c=VAR(SEVC[f.severity]||"grey");const ev=evText(f.evidence);
+  return `<div class="f"><div class="dot" style="background:${c}">${ICON[f.status]||"!"}</div>
+    <div style="flex:1;min-width:0"><div class="ft">${esc(f.title)}</div>
+    <div class="fs">${esc(f.summary||"")}${f.recommendation?` <span style="color:var(--faint)">· 建议：${esc(f.recommendation)}</span>`:""}</div>
+    ${ev?`<div class="ev">${esc(ev)}</div><span class="more">查看证据</span>`:""}</div></div>`;}
+function evText(e){if(!e||typeof e!=="object")return "";const keys=Object.keys(e).slice(0,6);
+  return keys.map(k=>`${k}: ${fmt(e[k])}`).join("\n");}
+function fmt(x){if(x==null)return "null";if(typeof x==="object")return JSON.stringify(x).slice(0,200);return String(x).slice(0,240);}
+function sevRank(s){return {critical:5,high:4,medium:3,low:2,info:1}[s]||0;}
+function riskGlyph(r){return r==="high"?"✕":r==="clean"?"✓":r==="inconclusive"?"?":"▲";}
+function zhHead(v){const m={clean:"行为与所声称的模型一致",low:"基本一致，存在少量小问题",medium:"部分行为与所声称的模型不符 —— 建议核实",high:"它给的并不是你所声称的模型",inconclusive:"信号不足，无法判定（连通或覆盖不够）"};return m[v.risk_level]||v.headline||"";}
+function zhConf(c){return {high:"高",medium:"中",low:"低"}[c]||c||"—";}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+</script>
+</body>
+</html>
