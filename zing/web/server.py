@@ -54,7 +54,11 @@ def create_app() -> FastAPI:
         body = await request.json()
 
         def sse(event: dict[str, Any]) -> str:
-            return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+            # default=str so any unexpected evidence value can't break the stream.
+            return f"data: {json.dumps(event, ensure_ascii=False, default=str)}\n\n"
+
+        bl = body.get("baseline") or {}
+        has_baseline = bool(bl.get("base_url") and bl.get("model"))
 
         # Validate up front so bad input fails as a clean error event, not a 500.
         try:
@@ -69,6 +73,16 @@ def create_app() -> FastAPI:
                 declared_provider=body.get("declared_provider") or None,
                 api=validate_api(body.get("api")),
             )
+            baseline = None
+            if has_baseline:
+                baseline = build_target(
+                    kind="baseline",
+                    name=bl.get("name") or "baseline",
+                    base_url=bl.get("base_url"),
+                    api_key=bl.get("api_key"),
+                    model=bl.get("model"),
+                    api=validate_api(bl.get("api")),
+                )
             options = AuditOptions(suite=suite)
         except ConfigError as exc:
             msg = str(exc)  # bind now: `exc` is cleared when the except block exits
@@ -85,7 +99,11 @@ def create_app() -> FastAPI:
             async def run() -> None:
                 try:
                     report = await run_audit(
-                        target, options, mode="check", on_event=queue.put_nowait
+                        target,
+                        options,
+                        baseline=baseline,
+                        mode="compare" if baseline is not None else "check",
+                        on_event=queue.put_nowait,
                     )
                     queue.put_nowait(
                         {"type": "report", "report": json.loads(report.model_dump_json())}

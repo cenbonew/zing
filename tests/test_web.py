@@ -55,3 +55,16 @@ def test_audit_stream_unknown_suite_errors(client):
         json={"base_url": "https://x.example/v1", "model": "gpt-4o", "suite": "bogus"},
     )
     assert '"type": "error"' in r.text
+
+
+def test_audit_stream_invalid_baseline_errors(client):
+    # A compare request with a malformed baseline base_url is a clean error event.
+    r = client.post(
+        "/api/audit/stream",
+        json={
+            "base_url": "https://x.example/v1",
+            "model": "gpt-4o",
+            "baseline": {"base_url": "ftp://nope", "model": "gpt-4o"},
+        },
+    )
+    assert '"type": "error"' in r.text

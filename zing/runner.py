@@ -46,6 +46,30 @@ def _redact(config: TargetConfig) -> RedactedTarget:
     )
 
 
+def _event_findings(result: DetectorResult) -> list[dict[str, Any]]:
+    """Compact, size-bounded findings for a live progress event (evidence trimmed)."""
+    out: list[dict[str, Any]] = []
+    for f in result.findings:
+        ev: dict[str, Any] = {}
+        for k, v in list(f.evidence.items())[:8]:
+            s: Any = v if isinstance(v, (int, float, bool)) or v is None else str(v)
+            if isinstance(s, str) and len(s) > 240:
+                s = s[:237] + "…"
+            ev[k] = s
+        out.append(
+            {
+                "id": f.id,
+                "title": f.title,
+                "status": f.status.value,
+                "severity": f.severity.value,
+                "summary": f.summary,
+                "recommendation": f.recommendation,
+                "evidence": ev,
+            }
+        )
+    return out
+
+
 def _extract_reliability(detectors: list[DetectorResult]) -> ReliabilitySummary | None:
     for det in detectors:
         if det.dimension == Dimension.RELIABILITY:
@@ -112,8 +136,9 @@ async def run_audit(
                     on_event(event)
 
         total = len(detectors)
-        _emit({"type": "start", "total": total, "suite": options.suite,
-               "target": target.name, "claimed_model": target.claimed})
+        _emit({"type": "start", "total": total, "suite": options.suite, "mode": mode,
+               "target": target.name, "claimed_model": target.claimed,
+               "has_baseline": baseline_client is not None})
         results: list[DetectorResult] = []
         for i, detector in enumerate(detectors):
             _emit({"type": "detector_start", "index": i, "total": total,
@@ -122,7 +147,8 @@ async def run_audit(
             results.append(res)
             _emit({"type": "detector_done", "index": i, "total": total,
                    "id": res.id, "name": res.name, "dimension": res.dimension.value,
-                   "status": res.status.value, "score": res.score})
+                   "status": res.status.value, "score": res.score,
+                   "duration_ms": res.duration_ms, "findings": _event_findings(res)})
 
     reliability = _extract_reliability(results)
     dimensions = build_dimensions(results, reliability)
