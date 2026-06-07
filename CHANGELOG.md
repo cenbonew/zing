@@ -6,6 +6,18 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Web UI: `compare` against a trusted baseline.** The form has an optional baseline
+  section (base_url / key / model / protocol); when filled, the audit runs in
+  **compare** mode so the verdict gets baseline corroboration (quality_judge and
+  integrity can escalate). The report shows the baseline and `mode: compare`.
+- **Web UI: live evidence feed.** The scan now streams each detector's findings and
+  evidence as it completes (the `detector_done` SSE event carries a compact, bounded
+  findings list), so notable findings appear in real time — e.g. *"Self-identifies as
+  a rival brand — self-id said: I'm Doubao, by ByteDance"* — instead of just status
+  dots. `run_audit`'s `on_event` callback now includes per-detector findings.
+
 ## [0.5.0] — local web UI (`zing serve`)
 
 ### Added

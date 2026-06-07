@@ -55,6 +55,17 @@
   .reassure{text-align:center;font-size:12.5px;color:var(--faint);margin-top:13px}
   .reassure b{color:var(--ink2)}
 
+  /* compare (baseline) */
+  .cmp{margin:2px 0 8px;border:1.5px dashed var(--line);border-radius:14px;overflow:hidden}
+  .cmp.on{border-style:solid;border-color:#cfe0d6;background:#fafdf8}
+  .cmp-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;cursor:pointer;
+    font-family:var(--sans);font-weight:700;font-size:13.5px;color:var(--ink2);padding:13px 14px}
+  .cmp.on .cmp-toggle{color:var(--teal)}
+  .cmp-toggle .cv{transition:.25s}.cmp.on .cmp-toggle .cv{transform:rotate(180deg)}
+  .cmp-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.2,.8,.2,1)}
+  .cmp-inner{padding:2px 14px 14px}
+  .cmp-hint{font-size:12.5px;color:var(--ink2);line-height:1.5;margin:0 0 12px}
+
   /* ---------- step 2: scanning ---------- */
   .scan{padding:30px 24px 22px;text-align:center}
   .radar{position:relative;width:150px;height:150px;margin:6px auto}
@@ -77,6 +88,15 @@
   @keyframes bl{50%{opacity:.3}}
   .det.pass{color:var(--ink)}.det.pass .ic{color:var(--good)}
   .det.warn .ic{color:var(--warn)}.det.fail .ic{color:var(--bad)}.det.info .ic,.det.inconclusive .ic{color:var(--grey)}
+  /* live evidence feed */
+  .feed{max-width:560px;margin:16px auto 0;text-align:left;display:flex;flex-direction:column;gap:8px}
+  .feed:empty{display:none}
+  .fi{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-left-width:3px;border-radius:11px;padding:9px 12px;animation:rise .35s cubic-bezier(.2,.85,.25,1)}
+  .fi .fdot{flex:0 0 18px;height:18px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:10px;margin-top:1px}
+  .fi .ft{font-weight:700;font-size:13px;line-height:1.35}
+  .fi .fmeta{font-size:11px;color:var(--faint);font-family:var(--mono);margin-bottom:2px}
+  .fi .fe{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-top:4px;white-space:pre-wrap;word-break:break-word}
+  .fi .fe b{color:var(--bad)}
 
   /* ---------- step 3: report ---------- */
   .report{padding:0 0 40px}
@@ -151,6 +171,19 @@
           <div class="grp"><div class="lab">检测套件</div>
             <div class="seg" id="suite"><button type="button" data-v="smoke">smoke</button><button type="button" class="on" data-v="standard">standard</button><button type="button" data-v="deep">deep</button></div></div>
         </div>
+        <div class="cmp" id="cmp">
+          <button type="button" class="cmp-toggle" id="cmp-t"><span>＋ 对照可信基线（compare · 更强结论）</span><span class="cv">⌄</span></button>
+          <div class="cmp-body" id="cmp-body"><div class="cmp-inner">
+            <p class="cmp-hint">填一个你<b>信任的同款模型端点</b>（如官方 API）。zing 会用它佐证目标的表现，让替换/降级判定更可靠——质量评审与篡改检测在有基线时才会升到最高级别。</p>
+            <div class="grp"><div class="lab">基线 base_url</div><input class="in" id="b-url" placeholder="https://api.deepseek.com/v1"></div>
+            <div class="grp"><div class="lab">基线 API Key</div><input class="in" id="b-key" placeholder="sk-... 或 env:OPENAI_API_KEY"></div>
+            <div class="two">
+              <div class="grp"><div class="lab">基线模型</div><input class="in" id="b-model" placeholder="同款官方模型 id"></div>
+              <div class="grp"><div class="lab">基线协议</div>
+                <div class="seg" id="b-api"><button type="button" class="on" data-v="auto">自动</button><button type="button" data-v="openai">OpenAI</button><button type="button" data-v="anthropic">Anthropic</button></div></div>
+            </div>
+          </div></div>
+        </div>
         <button class="cta" id="go">开始检测 <span>→</span></button>
         <div class="reassure">检测在 <b>你本地的 zing 服务</b> 发起，密钥只用于连接目标中转站，<b>不上传任何第三方</b>。</div>
         <div id="formerr"></div>
@@ -168,6 +201,7 @@
         <div class="now" id="now">连接端点…</div>
         <div class="pbar"><i id="pbar"></i></div>
         <div class="dets" id="dets"></div>
+        <div class="feed" id="feed"></div>
       </div>
     </div>
   </section>
@@ -200,8 +234,10 @@ const ICON={pass:"✓",warn:"!",fail:"✕",info:"ℹ",inconclusive:"?",not_run:"
 
 let lastReport=null;
 function go(n){$$(".view").forEach(v=>v.classList.remove("show"));$("#v"+n).classList.add("show");window.scrollTo({top:0,behavior:"smooth"});}
-$$("#api button,#suite button").forEach(b=>b.onclick=()=>{[...b.parentElement.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");});
+$$("#api button,#suite button,#b-api button").forEach(b=>b.onclick=()=>{[...b.parentElement.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");});
 $("#adv-t").onclick=()=>$("#i-claimed").focus();
+$("#cmp-t").onclick=()=>{const c=$("#cmp"),body=$("#cmp-body"),open=c.classList.toggle("on");
+  body.style.maxHeight=open?body.scrollHeight+30+"px":"0";};
 $("#again").onclick=()=>go(1);
 $("#dl").onclick=()=>{if(!lastReport)return;const blob=new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="zing-report.json";a.click();};
@@ -216,8 +252,10 @@ async function startAudit(){
     api:$("#api .on").dataset.v, suite:$("#suite .on").dataset.v,
   };
   if(!payload.base_url||!payload.model){$("#formerr").innerHTML='<div class="errbox">请填写中转站地址和声称的模型。</div>';return;}
+  const bUrl=$("#b-url").value.trim(), bModel=$("#b-model").value.trim();
+  if(bUrl&&bModel){payload.baseline={base_url:bUrl,api_key:$("#b-key").value.trim(),model:bModel,api:$("#b-api .on").dataset.v};}
   $("#go").disabled=true;
-  $("#dets").innerHTML=""; $("#pbar").style.width="0"; $("#now").textContent="连接端点…";
+  $("#dets").innerHTML=""; $("#feed").innerHTML=""; $("#pbar").style.width="0"; $("#now").textContent="连接端点…";
   go(2);
   const seen={};
   try{
@@ -251,6 +289,9 @@ function handle(ev,seen){
     const d=seen[ev.id]||$("#det-"+ev.id);
     if(d){d.className="det "+ev.status;d.querySelector(".ic").textContent=ICON[ev.status]||"•";}
     const pct=Math.round((ev.index+1)/(ev.total||1)*100);$("#pbar").style.width=pct+"%";
+    (ev.findings||[]).forEach(f=>{
+      if(["fail","warn","error"].includes(f.status)||["high","critical"].includes(f.severity)) addFeed(ev,f);
+    });
   }else if(ev.type==="report"){
     lastReport=ev.report; renderReport(ev.report); go(3);
   }else if(ev.type==="error"){
@@ -258,6 +299,20 @@ function handle(ev,seen){
   }
 }
 function zhDet(ev){const m=DIMNAME[ev.dimension];return (m?m[0]:ev.dimension)+" · "+(ev.name||ev.id);}
+function addFeed(ev,f){
+  const c=VAR(SEVC[f.severity]||STATC[f.status]||"grey"), hi=evHi(f);
+  const el=document.createElement("div");el.className="fi";el.style.borderLeftColor=c;
+  el.innerHTML=`<div class="fdot" style="background:${c}">${ICON[f.status]||"!"}</div>
+    <div style="flex:1;min-width:0"><div class="fmeta">${esc(zhDet(ev))}</div>
+    <div class="ft">${esc(f.title)}</div>${f.summary?`<div class="fe">${esc(f.summary)}</div>`:""}
+    ${hi?`<div class="fe"><b>证据</b> ${esc(hi)}</div>`:""}</div>`;
+  $("#feed").appendChild(el);
+}
+function evHi(f){const e=f.evidence||{};
+  const pri=["target_answer","observed","self-id","forbidden_hits","forbidden_hit","effective_window","ratio",
+    "reported_completion","reported_prompt","substitutions","returned","model_returned","declared","scheme","overhead"];
+  for(const k of pri){if(e[k]!=null&&String(e[k]).length)return `${k}: ${String(e[k]).slice(0,220)}`;}
+  const ks=Object.keys(e);return ks.length?`${ks[0]}: ${String(e[ks[0]]).slice(0,220)}`:"";}
 
 function renderReport(r){
   const v=r.verdict, risk=RISK[v.risk_level]||RISK.inconclusive;
@@ -290,6 +345,8 @@ function renderReport(r){
       <span>目标 <code>${esc(t.base_url||"")}</code></span>
       <span>声称 <code>${esc(t.claimed_model||t.model||"")}</code></span>
       ${t.claimed_model&&t.claimed_model!==t.model?`<span>实测 id <code>${esc(t.model)}</code></span>`:""}
+      ${r.baseline?`<span>对照基线 <code>${esc(r.baseline.model||"")}</code> @ <code>${esc(r.baseline.base_url||"")}</code></span>`:""}
+      <span>模式 <code>${esc(r.mode||"check")}</code></span>
       <span>套件 <code>${esc(r.suite)}</code></span>
       <span>zing v${esc(r.tool_version||"")}</span>
     </div>
