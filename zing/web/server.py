@@ -49,6 +49,14 @@ def create_app() -> FastAPI:
     async def index() -> Any:
         return FileResponse(_STATIC / "index.html")
 
+    @app.get("/console")
+    async def console() -> Any:
+        return FileResponse(_STATIC / "console.html")
+
+    @app.get("/i18n.js")
+    async def i18n_js() -> Any:
+        return FileResponse(_STATIC / "i18n.js", media_type="application/javascript")
+
     @app.post("/api/audit/stream")
     async def audit_stream(request: Request) -> Any:
         body = await request.json()
@@ -105,9 +113,14 @@ def create_app() -> FastAPI:
                         mode="compare" if baseline is not None else "check",
                         on_event=queue.put_nowait,
                     )
-                    queue.put_nowait(
-                        {"type": "report", "report": json.loads(report.model_dump_json())}
-                    )
+                    report_dict = json.loads(report.model_dump_json())
+                    try:  # best-effort persist; never let history break the stream
+                        from zing.web import history
+
+                        history.save(report_dict)
+                    except Exception:
+                        pass
+                    queue.put_nowait({"type": "report", "report": report_dict})
                 except Exception as exc:  # surface any audit failure to the client
                     queue.put_nowait({"type": "error", "message": f"{type(exc).__name__}: {exc}"})
                 finally:
@@ -129,6 +142,45 @@ def create_app() -> FastAPI:
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
+
+    @app.get("/history")
+    async def history_page() -> Any:
+        return FileResponse(_STATIC / "history.html")
+
+    @app.get("/api/history")
+    async def history_list(limit: int = 50) -> Any:
+        from zing.web import history
+
+        return JSONResponse(history.recent(limit))
+
+    @app.get("/api/history/trend")
+    async def history_trend(base_url: str, claimed_model: str, limit: int = 30) -> Any:
+        from zing.web import history
+
+        return JSONResponse(history.trend(base_url, claimed_model, limit))
+
+    @app.get("/api/history/{rid}")
+    async def history_get(rid: int) -> Any:
+        from zing.web import history
+
+        report = history.get(rid)
+        if report is None:
+            return JSONResponse({"error": "not found"}, status_code=404)
+        return JSONResponse(report)
+
+    @app.delete("/api/history/{rid}")
+    async def history_delete(rid: int) -> Any:
+        from zing.web import history
+
+        history.delete(rid)
+        return JSONResponse({"ok": True})
+
+    @app.delete("/api/history")
+    async def history_clear() -> Any:
+        from zing.web import history
+
+        history.clear()
+        return JSONResponse({"ok": True})
 
     # Static assets (e.g. future JS/CSS split-outs) under /assets.
     assets = _STATIC / "assets"

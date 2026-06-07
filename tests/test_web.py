@@ -57,6 +57,53 @@ def test_audit_stream_unknown_suite_errors(client):
     assert '"type": "error"' in r.text
 
 
+def test_serves_console_and_history_and_i18n(client):
+    for path in ("/console", "/history"):
+        r = client.get(path)
+        assert r.status_code == 200 and "text/html" in r.headers["content-type"]
+    j = client.get("/i18n.js")
+    assert j.status_code == 200 and "ZING_I18N" in j.text
+
+
+def test_history_module_roundtrip(tmp_path, monkeypatch):
+    monkeypatch.setenv("ZING_DATA_DIR", str(tmp_path))
+    from zing.web import history
+
+    assert history.recent() == []
+    sample = {
+        "generated_at": "2026-06-07T00:00:00Z",
+        "target": {"base_url": "https://relay.test/v1", "claimed_model": "deepseek-v4-pro", "model": "doubao-x"},
+        "mode": "compare",
+        "suite": "standard",
+        "verdict": {"risk_level": "high", "overall_score": 21.0, "rating": "F"},
+    }
+    rid = history.save(sample)
+    assert isinstance(rid, int) and rid > 0
+    rows = history.recent()
+    assert len(rows) == 1 and rows[0]["risk_level"] == "high" and rows[0]["score"] == 21.0
+    full = history.get(rid)
+    assert full["verdict"]["rating"] == "F" and full["target"]["model"] == "doubao-x"
+    trend = history.trend("https://relay.test/v1", "deepseek-v4-pro")
+    assert len(trend) == 1 and trend[0]["score"] == 21.0
+    history.delete(rid)
+    assert history.recent() == []
+
+
+def test_history_endpoints(tmp_path, monkeypatch, client):
+    monkeypatch.setenv("ZING_DATA_DIR", str(tmp_path))
+    assert client.get("/api/history").json() == []
+    from zing.web import history
+
+    rid = history.save({
+        "generated_at": "t", "target": {"base_url": "https://x/v1", "claimed_model": "m", "model": "m"},
+        "mode": "check", "suite": "smoke", "verdict": {"risk_level": "clean", "overall_score": 95.0, "rating": "A"},
+    })
+    listed = client.get("/api/history").json()
+    assert len(listed) == 1 and listed[0]["id"] == rid
+    assert client.get(f"/api/history/{rid}").json()["verdict"]["overall_score"] == 95.0
+    assert client.get("/api/history/999999").status_code == 404
+
+
 def test_audit_stream_invalid_baseline_errors(client):
     # A compare request with a malformed baseline base_url is a clean error event.
     r = client.post(

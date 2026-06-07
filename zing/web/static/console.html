@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing.console — relay reality check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#080a0c; --bg2:#0d1014; --panel:#0f1318; --panel2:#11161c;
+    --line:#1c242c; --line2:#283540;
+    --ink:#d7e2ea; --dim:#7c8b97; --faint:#4a5662;
+    --grn:#46e2a0; --amb:#ffc24b; --red:#ff5d6c; --blu:#5cc8ff; --vio:#b69bff; --grey:#7c8b97;
+    --grid:#10161c;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --sans:"Hanken Grotesk",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(1200px 600px at 78% -10%, #0e1b1a 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 110%, #16121d 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:var(--sans);
+    font-feature-settings:"ss01","cv01"; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* scanline + grain atmosphere */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.014) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay;opacity:.5}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px}
+
+  /* ---- top bar ---- */
+  header{position:sticky;top:0;z-index:40;backdrop-filter:blur(8px);
+    background:linear-gradient(180deg,rgba(8,10,12,.92),rgba(8,10,12,.55));
+    border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:14px;height:60px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:800;letter-spacing:-.5px;font-size:18px}
+  .zap{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line2);border-radius:7px;
+    background:linear-gradient(160deg,#0c2a22,#0a161a);color:var(--grn);box-shadow:0 0 22px -6px var(--grn)}
+  .logo b{color:var(--grn)}
+  .logo .v{color:var(--faint);font-size:11px;font-weight:500;margin-left:2px}
+  .tag{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim);
+    border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+  .tag i{color:var(--grn);font-style:normal}
+  .nav{display:flex;gap:4px}
+  .nav a{font-family:var(--mono);font-size:12px;color:var(--dim);text-decoration:none;padding:6px 10px;border-radius:7px}
+  .nav a:hover{color:var(--ink);background:var(--panel)}
+  .nav a.on{color:var(--grn);background:#0c1814}
+
+  /* ---- hero strip ---- */
+  .lede{padding:26px 0 8px}
+  .lede h1{font-family:var(--mono);font-size:clamp(22px,3vw,34px);font-weight:800;margin:0;letter-spacing:-1px}
+  .lede h1 .hl{color:var(--grn)}
+  .lede p{color:var(--dim);max-width:62ch;margin:8px 0 0;font-size:14px}
+  .kbd{font-family:var(--mono);color:var(--amb);background:#15120a;border:1px solid #2a230f;border-radius:5px;padding:1px 6px;font-size:12px}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;padding:18px 0 60px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:14px}
+  .card .hd{display:flex;align-items:center;gap:8px;padding:13px 15px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+  .card .hd .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .card .hd .dot.live{background:var(--grn);box-shadow:0 0 8px var(--grn);animation:bl 1.1s steps(2) infinite}
+  .card .bd{padding:15px}
+
+  /* ---- form ---- */
+  label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--faint);margin:0 0 6px}
+  .fld{margin-bottom:13px}
+  .fld .hint{font-family:var(--mono);font-size:10px;color:var(--faint);float:right;text-transform:none;letter-spacing:0}
+  input,select{width:100%;background:#0a0e12;border:1px solid var(--line2);border-radius:9px;color:var(--ink);
+    font-family:var(--mono);font-size:13px;padding:10px 11px;outline:none;transition:.15s}
+  input::placeholder{color:var(--faint)}
+  input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(70,226,160,.13)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:54px;font-family:var(--mono);font-size:11px;color:var(--dim);background:#0a0e12;border:1px solid var(--line2);
+    border-radius:8px;padding:8px 4px;cursor:pointer;transition:.15s}
+  .seg button.on{color:#07120d;background:var(--grn);border-color:var(--grn);font-weight:700}
+  .run{width:100%;margin-top:4px;font-family:var(--mono);font-weight:800;font-size:14px;letter-spacing:.5px;
+    color:#06120c;background:linear-gradient(180deg,#5bf0ad,#33c98a);border:0;border-radius:10px;padding:13px;cursor:pointer;
+    box-shadow:0 10px 30px -12px var(--grn);transition:.15s}
+  .run:hover{filter:brightness(1.06)} .run:active{transform:translateY(1px)}
+  .run:disabled{filter:grayscale(.5) brightness(.7);cursor:not-allowed}
+
+  /* baseline collapse */
+  .cmp{margin:2px 0 12px;border:1px dashed var(--line2);border-radius:10px;overflow:hidden}
+  .cmp.on{border-style:solid;border-color:#23414e;background:#091016}
+  .cmp-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;cursor:pointer;
+    font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--dim);padding:11px 12px}
+  .cmp.on .cmp-toggle{color:var(--blu)}
+  .cmp-toggle .cv{transition:.25s} .cmp.on .cmp-toggle .cv{transform:rotate(180deg)}
+  .cmp-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.2,.8,.2,1)}
+  .cmp-inner{padding:2px 12px 12px}
+  .cmp-hint{font-family:var(--mono);font-size:10.5px;color:var(--faint);line-height:1.55;margin:0 0 11px}
+
+  /* ---- right column ---- */
+  .stack{display:flex;flex-direction:column;gap:18px}
+
+  /* verdict banner */
+  .verdict{position:relative;overflow:hidden;min-height:150px;display:flex;align-items:center;gap:22px;padding:20px 22px}
+  .verdict .ring{position:relative;flex:0 0 116px;width:116px;height:116px}
+  .verdict svg{transform:rotate(-90deg)}
+  .verdict .score{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:var(--mono)}
+  .verdict .score b{font-size:34px;font-weight:800;line-height:1}
+  .verdict .score span{font-size:10px;color:var(--dim);letter-spacing:1px}
+  .verdict .meta{flex:1;min-width:0}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-weight:800;font-size:13px;
+    letter-spacing:1px;padding:6px 13px;border-radius:8px;text-transform:uppercase}
+  .verdict h2{font-family:var(--mono);font-size:18px;margin:11px 0 4px;letter-spacing:-.3px;line-height:1.25}
+  .verdict p{color:var(--dim);font-size:13px;margin:0;max-width:64ch;line-height:1.55}
+  .verdict .grade{position:absolute;right:18px;top:14px;font-family:var(--mono);font-weight:800;font-size:64px;opacity:.14;letter-spacing:-3px}
+  .verdict.idle{color:var(--dim);font-family:var(--mono);justify-content:center;text-align:center}
+  .kf{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+  .kf li{font-family:var(--mono);font-size:11.5px;color:var(--dim);display:flex;gap:8px;align-items:baseline}
+  .kf li .b{flex:0 0 10px}
+
+  /* dimensions */
+  .dims{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+  @media(max-width:560px){.dims{grid-template-columns:1fr}}
+  .dim{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;font-size:12.5px}
+  .dim .nm{font-weight:600}
+  .dim .wt{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .dim .sc{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
+  .meter{grid-column:1/-1;height:6px;border-radius:4px;background:#0a0e12;overflow:hidden;border:1px solid var(--line)}
+  .meter i{display:block;height:100%;width:0;border-radius:4px;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+
+  /* live log */
+  .log{font-family:var(--mono);font-size:12.5px;line-height:1.9;max-height:420px;overflow:auto}
+  .log .ln{display:flex;gap:9px;align-items:baseline;opacity:0;transform:translateY(4px);animation:in .3s forwards}
+  @keyframes in{to{opacity:1;transform:none}}
+  .log .t{color:var(--faint);flex:0 0 62px}
+  .log .ic{flex:0 0 16px;text-align:center}
+  .log .dn{color:var(--dim);cursor:default;border-bottom:1px dotted transparent}
+  .log .dn.has{cursor:pointer}
+  .log .dn.has:hover{color:var(--ink);border-color:var(--line2)}
+  .log .res{margin-left:auto;font-size:11px;padding-left:10px;text-align:right}
+  .log .res .ms{color:var(--faint);margin-left:8px}
+  .ev{margin:2px 0 8px 71px;padding:10px 12px;border-left:2px solid var(--line2);background:#0a0e12;border-radius:0 8px 8px 0;
+    color:var(--dim);font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;animation:in .25s}
+  .ev .fhd{color:var(--ink);font-weight:700}
+  .ev .sev{font-weight:800;letter-spacing:.5px}
+  .ev .sum{display:block;margin:3px 0 0;color:var(--dim)}
+  .ev .rec{display:block;margin:5px 0 0;color:var(--blu)}
+  .ev .kv{display:block;margin-top:6px;padding-top:6px;border-top:1px dotted var(--line2)}
+  .ev .kv .k{color:var(--amb)}
+  .ev .q{color:var(--amb)}
+  .cursor::after{content:"▋";color:var(--grn);animation:bl 1s steps(2) infinite}
+  @keyframes bl{50%{opacity:0}}
+
+  .c-grn{color:var(--grn)} .c-amb{color:var(--amb)} .c-red{color:var(--red)} .c-blu{color:var(--blu)} .c-dim{color:var(--dim)} .c-vio{color:var(--vio)} .c-grey{color:var(--grey)}
+  .bg-grn{background:rgba(70,226,160,.12);color:var(--grn);border:1px solid rgba(70,226,160,.3)}
+  .bg-amb{background:rgba(255,194,75,.12);color:var(--amb);border:1px solid rgba(255,194,75,.3)}
+  .bg-red{background:rgba(255,93,108,.13);color:var(--red);border:1px solid rgba(255,93,108,.34)}
+  .bg-blu{background:rgba(92,200,255,.12);color:var(--blu);border:1px solid rgba(92,200,255,.3)}
+  .bg-grey{background:rgba(124,139,151,.1);color:var(--grey);border:1px solid var(--line2)}
+  .bg-dim{background:rgba(124,139,151,.1);color:var(--dim);border:1px solid var(--line2)}
+
+  .empty{padding:30px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:13px;line-height:1.6}
+  .errbox{margin:0 0 13px;background:rgba(255,93,108,.09);border:1px solid rgba(255,93,108,.34);color:var(--red);
+    border-radius:10px;padding:11px 13px;font-family:var(--mono);font-size:12px;line-height:1.5}
+  .foot{color:var(--faint);font-family:var(--mono);font-size:11px;text-align:center;padding:8px 0 40px}
+  .foot a{color:var(--dim)}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="logo"><span class="zap">⚡</span> <span>zing<b>.</b>console</span><span class="v" id="ver">dev</span></div>
+  <nav class="nav">
+    <a class="on" href="#">扫描</a><a href="/">报告视图 /</a><a href="/history">历史 /history</a>
+  </nav>
+  <span class="tag" id="tag"><i>●</i> developer console · live SSE</span>
+</div></header>
+
+<main class="wrap">
+  <section class="lede">
+    <h1>中转站<span class="hl">货不对板</span>检测台</h1>
+    <p>把它指向一个中转站的 <span class="kbd">base_url</span> 与声称的模型，zing 跑一整套黑盒探针，对照内置的原生模型画像，给出有证据支撑的结论——而不是凭感觉。Power-user console with a terminal-style live detector log.</p>
+  </section>
+
+  <div class="grid">
+    <!-- LEFT: form -->
+    <form class="card" id="form" onsubmit="return false">
+      <div class="hd"><span class="dot"></span> 目标端点 / target</div>
+      <div class="bd">
+        <div id="formerr"></div>
+        <div class="fld"><label>base_url</label><input id="i-url" placeholder="https://relay.example.com/v1" value="https://api.deepseek.com/v1"></div>
+        <div class="fld"><label>api_key <span class="hint">env:VAR / file:/path</span></label><input id="i-key" value="env:ZING_API_KEY" type="text"></div>
+        <div class="two">
+          <div class="fld"><label>声称模型 (model)</label><input id="i-model" value="deepseek-v4-flash"></div>
+          <div class="fld"><label>claimed_model <span class="hint">opt</span></label><input id="i-claimed" placeholder="留空=同上"></div>
+        </div>
+        <div class="fld"><label>声明厂商 declared_provider <span class="hint">opt</span></label><input id="i-prov" placeholder="e.g. deepseek / openai"></div>
+        <div class="two">
+          <div class="fld"><label>协议 api</label>
+            <div class="seg" id="api">
+              <button type="button" class="on" data-v="auto">auto</button><button type="button" data-v="openai">openai</button><button type="button" data-v="anthropic">anthropic</button>
+            </div>
+          </div>
+          <div class="fld"><label>套件 suite</label>
+            <div class="seg" id="suite">
+              <button type="button" data-v="smoke">smoke</button><button type="button" class="on" data-v="standard">standard</button><button type="button" data-v="deep">deep</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmp" id="cmp">
+          <button type="button" class="cmp-toggle" id="cmp-t"><span>+ baseline / compare (对照可信基线 · 更强结论)</span><span class="cv">⌄</span></button>
+          <div class="cmp-body" id="cmp-body"><div class="cmp-inner">
+            <p class="cmp-hint">填一个你信任的同款模型端点（如官方 API）。质量评审与篡改检测在有基线时才升到最高级别。</p>
+            <div class="fld"><label>baseline base_url</label><input id="b-url" placeholder="https://api.deepseek.com/v1"></div>
+            <div class="fld"><label>baseline api_key</label><input id="b-key" placeholder="sk-... / env:VAR"></div>
+            <div class="two">
+              <div class="fld"><label>baseline model</label><input id="b-model" placeholder="官方模型 id"></div>
+              <div class="fld"><label>baseline api</label>
+                <div class="seg" id="b-api">
+                  <button type="button" class="on" data-v="auto">auto</button><button type="button" data-v="openai">openai</button><button type="button" data-v="anthropic">anthropic</button>
+                </div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+
+        <button class="run" id="run">▸ 运行审计 / run audit</button>
+      </div>
+    </form>
+
+    <!-- RIGHT -->
+    <div class="stack">
+      <div class="card">
+        <div class="hd"><span class="dot"></span> 结论 / verdict</div>
+        <div class="verdict idle" id="verdict">运行审计后在此显示结论 ▌</div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><span class="dot"></span> 维度评分 / 9 dimensions</div>
+        <div class="bd"><div class="dims" id="dims"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><span class="dot" id="logdot"></span> 实时探测日志 / detectors <span style="margin-left:auto" id="prog" class="c-dim"></span></div>
+        <div class="bd"><div class="log" id="log"><div class="empty">// 等待启动… 填好左侧表单并点击「运行审计」<br>// detector lines stream here — click a line with findings to expand evidence</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">zing 报告的是行为偏离与风险的可复现证据，不是欺诈的密码学证明。· <a href="/">switch to report view /</a> · 有基线对照可得最强结论。</div>
+</main>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* 9 dimensions: id, zh name, weight (canonical weighting from prompt contract) */
+const DIMS = [
+  ["model_identity","模型身份 model_identity",22],["context_window","上下文窗口 context_window",20],
+  ["capability","能力声明 capability",14],["billing","计费 billing",8],
+  ["protocol","协议兼容 protocol",8],["connectivity","连通性 connectivity",8],
+  ["reliability","可靠性 reliability",8],["streaming","流式 streaming",6],["security","安全 security",6],
+];
+const RISK = {
+  clean:{c:"grn",txt:"CLEAN"}, low:{c:"blu",txt:"LOW"}, medium:{c:"amb",txt:"MEDIUM"},
+  high:{c:"red",txt:"HIGH"}, inconclusive:{c:"grey",txt:"INCONCLUSIVE"}
+};
+const STATC={pass:"grn",warn:"amb",fail:"red",info:"blu",inconclusive:"grey",not_run:"grey",error:"red"};
+const SEVC={info:"blu",low:"amb",medium:"amb",high:"red",critical:"red"};
+const ICON={pass:'<span class="c-grn">✓</span>',warn:'<span class="c-amb">▲</span>',
+  fail:'<span class="c-red">✗</span>',info:'<span class="c-blu">ℹ</span>',
+  inconclusive:'<span class="c-grey">?</span>',not_run:'<span class="c-grey">–</span>',
+  error:'<span class="c-red">✗</span>'};
+const SEVRANK={critical:5,high:4,medium:3,low:2,info:1};
+const scoreCol = v => v==null?"grey":v>=85?"grn":v>=70?"amb":"red";
+
+let t0=0, running=false, dimSeen={};
+function stamp(){const ms=Math.round(performance.now()-t0);return String(ms).padStart(5," ")+"ms";}
+
+/* fetch tool version for header (best-effort) */
+fetch("/api/health").then(r=>r.json()).then(d=>{if(d&&d.version)$("#ver").textContent="v"+d.version;}).catch(()=>{});
+
+/* segmented controls */
+$$("#api button,#suite button,#b-api button").forEach(b=>b.onclick=()=>{
+  [...b.parentElement.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");});
+/* baseline collapse */
+$("#cmp-t").onclick=()=>{const c=$("#cmp"),body=$("#cmp-body"),open=c.classList.toggle("on");
+  body.style.maxHeight=open?body.scrollHeight+40+"px":"0";};
+
+function resetView(){
+  $("#verdict").className="verdict idle"; $("#verdict").textContent="审计进行中… ▌";
+  $("#dims").innerHTML=""; $("#log").innerHTML=""; $("#prog").textContent=""; $("#formerr").innerHTML="";
+  $("#logdot").classList.add("live"); dimSeen={};
+  renderDims();
+}
+function renderDims(){
+  $("#dims").innerHTML = DIMS.map(([k,nm,wt])=>`
+    <div class="dim" data-k="${k}">
+      <div class="nm">${nm.split(" ")[0]}</div><div class="sc" id="sc-${k}">—</div>
+      <div class="wt">权重 ${wt} · ${k}</div><div></div>
+      <div class="meter"><i id="m-${k}"></i></div>
+    </div>`).join("");
+}
+function fillDim(k,v,status){
+  const sc=$("#sc-"+k), m=$("#m-"+k); if(!sc)return;
+  if(v==null){
+    sc.textContent = status ? ({pass:"pass",info:"info",inconclusive:"n/a",not_run:"—",warn:"warn",fail:"fail",error:"err"}[status]||"—") : "—";
+    sc.className="sc c-grey"; m.style.background="var(--faint)"; m.style.width="18%"; m.style.opacity=".4"; return;
+  }
+  sc.textContent=v; const col=scoreCol(v); sc.className="sc c-"+col;
+  m.style.opacity="1"; m.style.background=`var(--${col})`; m.style.width=Math.max(2,v)+"%";
+}
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function fmtVal(x){if(x==null)return "null";if(typeof x==="object")return JSON.stringify(x).slice(0,300);return String(x).slice(0,300);}
+
+$("#run").onclick=startAudit;
+
+async function startAudit(){
+  if(running) return;
+  const payload={
+    base_url:$("#i-url").value.trim(), api_key:$("#i-key").value.trim(),
+    model:$("#i-model").value.trim(), claimed_model:$("#i-claimed").value.trim(),
+    declared_provider:$("#i-prov").value.trim(),
+    api:$("#api .on").dataset.v, suite:$("#suite .on").dataset.v,
+  };
+  if(!payload.base_url||!payload.model){
+    $("#formerr").innerHTML='<div class="errbox">! 请填写 base_url 与 model。</div>'; return;
+  }
+  const bUrl=$("#b-url").value.trim(), bModel=$("#b-model").value.trim();
+  if(bUrl&&bModel){
+    payload.baseline={base_url:bUrl,api_key:$("#b-key").value.trim(),model:bModel,api:$("#b-api .on").dataset.v};
+  }
+
+  running=true;
+  $("#run").disabled=true; $("#run").textContent="▸ 审计中…";
+  resetView();
+  t0=performance.now();
+
+  try{
+    const resp=await fetch("/api/audit/stream",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!resp.ok||!resp.body){throw new Error("HTTP "+resp.status);}
+    const reader=resp.body.getReader(), dec=new TextDecoder(); let buf="";
+    while(true){
+      const {value,done}=await reader.read(); if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      let i; while((i=buf.indexOf("\n\n"))>=0){
+        const chunk=buf.slice(0,i); buf=buf.slice(i+2);
+        const dl=chunk.split("\n").find(l=>l.startsWith("data:")); if(!dl)continue;
+        try{ handle(JSON.parse(dl.slice(5).trim())); }catch(e){}
+      }
+    }
+  }catch(e){
+    sysLine('<span class="c-red">connection failed · '+esc(String(e.message||e))+'</span>');
+    $("#formerr").innerHTML='<div class="errbox">! 连接本地服务失败：'+esc(String(e.message||e))+'</div>';
+    if($("#verdict").classList.contains("idle")) $("#verdict").textContent="连接失败 ✗";
+  }finally{
+    running=false;
+    $("#logdot").classList.remove("live");
+    $("#run").disabled=false; $("#run").textContent="▸ 重新运行 / re-run";
+  }
+}
+
+/* per-detector row registry: id -> {row, ev} */
+const rows={};
+
+function handle(ev){
+  if(ev.type==="start"){
+    sysLine(`audit start · suite=${esc(ev.suite||"")} · mode=${esc(ev.mode||"")} · claimed=${esc(ev.claimed_model||"")} · detectors=${ev.total||"?"}` + (ev.has_baseline?" · +baseline":""));
+  }else if(ev.type==="detector_start"){
+    startRow(ev);
+    $("#prog").textContent=`${ev.index}/${ev.total||"?"} · running ${esc(ev.id)}`;
+  }else if(ev.type==="detector_done"){
+    doneRow(ev);
+    $("#prog").textContent=`${ev.index+1}/${ev.total||"?"}`;
+    /* live dimension fill from detector score */
+    if(ev.dimension && !dimSeen[ev.dimension]){
+      fillDim(ev.dimension, ev.score==null?null:ev.score, ev.status);
+      dimSeen[ev.dimension]=true;
+    } else if(ev.dimension && ev.score!=null){
+      fillDim(ev.dimension, ev.score, ev.status);
+    }
+    /* stream notable findings inline as their own log entries */
+    (ev.findings||[]).forEach(f=>{
+      if(["fail","warn","error"].includes(f.status)||["high","critical"].includes(f.severity)){
+        notableLine(ev,f);
+      }
+    });
+  }else if(ev.type==="report"){
+    renderReport(ev.report);
+  }else if(ev.type==="error"){
+    sysLine(`<span class="c-red">error · ${esc(ev.message)}</span>`);
+    $("#formerr").innerHTML='<div class="errbox">! 检测失败：'+esc(ev.message)+'</div>';
+    if($("#verdict").classList.contains("idle")) $("#verdict").textContent="审计中断 ✗";
+  }else if(ev.type==="done"){
+    sysLine('<span class="c-dim">— stream done —</span>');
+    if($("#verdict").classList.contains("idle")) $("#verdict").textContent="未收到报告（已结束）";
+  }
+}
+
+/* generic system line (no detector body) */
+function sysLine(html){
+  const ln=document.createElement("div"); ln.className="ln";
+  ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic c-dim">·</span><span class="dn">${html}</span>`;
+  $("#log").appendChild(ln); $("#log").scrollTop=1e9;
+}
+
+function startRow(ev){
+  const ln=document.createElement("div"); ln.className="ln";
+  ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic c-amb">▸</span>`+
+    `<span class="dn cursor">${esc(ev.id)} · ${esc(ev.name||"")} <span class="c-dim">[${esc(ev.dimension||"")}]</span></span>`;
+  $("#log").appendChild(ln); $("#log").scrollTop=1e9;
+  rows[ev.id]={row:ln, ev};
+}
+
+function doneRow(ev){
+  const rec=rows[ev.id];
+  const ln=rec?rec.row:(()=>{const l=document.createElement("div");l.className="ln";$("#log").appendChild(l);return l;})();
+  const cls="c-"+(STATC[ev.status]||"dim");
+  const scoreTxt = ev.score==null?"":`<span class="${'c-'+scoreCol(ev.score)}">${ev.score}</span>`;
+  const ms = ev.duration_ms!=null?`<span class="ms">${ev.duration_ms}ms</span>`:"";
+  const findings = (ev.findings||[]);
+  const hasBody = findings.length>0;
+  ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic">${ICON[ev.status]||"·"}</span>`+
+    `<span class="dn${hasBody?' has':''}">${esc(ev.id)} · ${esc(ev.name||"")} <span class="c-dim">[${esc(ev.dimension||"")}]</span></span>`+
+    `<span class="res"><span class="${cls}">${esc((ev.status||"").toUpperCase())}</span> ${scoreTxt}${ms}</span>`;
+  if(hasBody){
+    rows[ev.id]={row:ln, ev, findings};
+    ln.querySelector(".dn").onclick=()=>toggleFindings(ln, ev, findings);
+  }
+  $("#log").scrollTop=1e9;
+}
+
+function toggleFindings(row, ev, findings){
+  const nx=row.nextElementSibling;
+  if(nx&&nx.classList.contains("ev")&&nx.dataset.for===ev.id){ nx.remove(); return; }
+  /* remove any other open block for same id (defensive) */
+  const block=document.createElement("div"); block.className="ev"; block.dataset.for=ev.id;
+  block.innerHTML = findings.map(f=>findingHtml(ev,f)).join('<div style="height:8px"></div>');
+  row.after(block);
+}
+
+function findingHtml(ev,f){
+  const sevc="c-"+(SEVC[f.severity]||STATC[f.status]||"dim");
+  let h=`<span class="fhd">${ICON[f.status]||"·"} ${esc(f.title||f.id||"finding")}</span> `+
+        `<span class="sev ${sevc}">[${esc((f.severity||f.status||"").toUpperCase())}]</span>`;
+  if(f.summary) h+=`<span class="sum">${esc(f.summary)}</span>`;
+  if(f.recommendation) h+=`<span class="rec">→ ${esc(f.recommendation)}</span>`;
+  const e=f.evidence;
+  if(e&&typeof e==="object"){
+    const keys=Object.keys(e).slice(0,12);
+    if(keys.length){
+      h+=`<span class="kv">`+keys.map(k=>`<span class="k">${esc(k)}</span>: ${esc(fmtVal(e[k]))}`).join("\n")+`</span>`;
+    }
+  }
+  return h;
+}
+
+/* a notable finding streamed inline as its own highlighted line */
+function notableLine(ev,f){
+  const sevc="c-"+(SEVC[f.severity]||STATC[f.status]||"dim");
+  const ln=document.createElement("div"); ln.className="ln";
+  ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic">${ICON[f.status]||"!"}</span>`+
+    `<span class="dn has">↳ <span class="${sevc}">${esc(f.title||f.id||"finding")}</span> <span class="c-dim">(${esc(ev.id)})</span></span>`+
+    `<span class="res"><span class="${sevc}">${esc((f.severity||f.status||"").toUpperCase())}</span></span>`;
+  ln.querySelector(".dn").onclick=()=>{
+    const nx=ln.nextElementSibling;
+    if(nx&&nx.classList.contains("ev")&&nx.dataset.for==="nl"){nx.remove();return;}
+    const block=document.createElement("div"); block.className="ev"; block.dataset.for="nl";
+    block.innerHTML=findingHtml(ev,f);
+    ln.after(block);
+  };
+  $("#log").appendChild(ln); $("#log").scrollTop=1e9;
+}
+
+/* ---- final report ---- */
+function renderReport(r){
+  if(!r){return;}
+  /* dimensions from authoritative report (overrides live estimates) */
+  (r.dimensions||[]).forEach(d=>{
+    fillDim(d.dimension, d.score==null?null:d.score, d.status);
+  });
+  showVerdict(r);
+  $("#tag").innerHTML=`<i>●</i> ${esc(r.target&&r.target.base_url||"")} · zing v${esc(r.tool_version||"")}`;
+}
+
+function showVerdict(r){
+  const v=r.verdict||{}; const risk=RISK[v.risk_level]||RISK.inconclusive;
+  const col=risk.c, sc=v.overall_score;
+  const ringScore = sc==null?0:sc;
+  const circ=2*Math.PI*52, off=circ*(1-ringScore/100);
+  const t=r.target||{};
+  const kf=(v.key_findings||[]).slice(0,4);
+
+  const ve=$("#verdict"); ve.className="verdict";
+  ve.innerHTML=`
+    <div class="ring">
+      <svg width="116" height="116"><circle cx="58" cy="58" r="52" stroke="var(--line2)" stroke-width="8" fill="none"/>
+      <circle cx="58" cy="58" r="52" stroke="var(--${col})" stroke-width="8" fill="none" stroke-linecap="round"
+        stroke-dasharray="${circ}" stroke-dashoffset="${circ}" style="transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)" id="ringc"/></svg>
+      <div class="score"><b class="c-${sc==null?'grey':scoreCol(sc)}">${sc==null?"—":sc}</b><span>/100 · ${esc(v.rating||"–")}</span></div>
+    </div>
+    <div class="meta">
+      <span class="pill bg-${col}">${risk.txt} RISK</span>
+      <h2>${esc(zhHead(v))}</h2>
+      <p>${esc(v.summary||v.headline||"")} <span class="c-dim">置信度/confidence ${esc(v.confidence||"—")}.</span></p>
+      ${kf.length?`<ul class="kf">${kf.map(k=>{
+        const kfTxt = typeof k==="string"?k:(k.title||k.summary||JSON.stringify(k));
+        const kfc = typeof k==="object"&&k.severity?("c-"+(SEVC[k.severity]||"dim")):"c-amb";
+        return `<li><span class="b ${kfc}">▸</span><span>${esc(kfTxt)}</span></li>`;
+      }).join("")}</ul>`:""}
+    </div>
+    <div class="grade c-${col}">${esc(v.rating||"")}</div>`;
+  requestAnimationFrame(()=>{const c=$("#ringc"); if(c) c.style.strokeDashoffset=off;});
+}
+
+function zhHead(v){
+  const m={clean:"行为与所声称的模型一致",low:"基本一致，存在少量小问题",
+    medium:"部分行为与所声称的模型不符 — 建议核实",high:"它给的并不是你所声称的模型",
+    inconclusive:"信号不足，无法判定（连通或覆盖不够）"};
+  return m[v.risk_level]||v.headline||"";
+}
+</script>
+</body>
+</html>
