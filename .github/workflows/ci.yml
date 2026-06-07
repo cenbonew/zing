@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install
-        run: python -m pip install --upgrade pip && pip install -e '.[dev,tokenizers]'
+        run: python -m pip install --upgrade pip && pip install -e '.[dev,tokenizers,web]'
 
       - name: Lint (ruff)
         run: ruff check zing tests

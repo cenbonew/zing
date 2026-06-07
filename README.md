@@ -121,6 +121,21 @@ zing models --base-url ... --json   # what an endpoint advertises
 In `--json`/`--compact` mode a bad config prints `{"error": {...}}` (exit 2)
 instead of a human message, so a pipeline can parse failures uniformly.
 
+## Web UI (`zing serve`)
+
+Prefer point-and-click? A local web UI wraps the same engine — no CLI needed.
+
+```bash
+pip install 'zing-audit[web]'
+zing serve            # opens http://localhost:8000
+```
+
+Enter a relay and the model it claims; watch the audit stream **live** (per-detector
+progress over SSE), then read a shareable verdict report (grade, per-dimension
+breakdown, plain-language findings, downloadable JSON). It runs entirely on your
+machine — a key typed in the browser reaches only your local server and the target
+relay, never a third party. Bind stays on `127.0.0.1` by default.
+
 ## What it checks
 
 zing scores nine dimensions. The three that most directly reveal 货不对板

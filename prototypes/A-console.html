@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing.console — relay reality check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#080a0c; --bg2:#0d1014; --panel:#0f1318; --panel2:#11161c;
+    --line:#1c242c; --line2:#283540;
+    --ink:#d7e2ea; --dim:#7c8b97; --faint:#4a5662;
+    --grn:#46e2a0; --amb:#ffc24b; --red:#ff5d6c; --blu:#5cc8ff; --vio:#b69bff;
+    --grid:#10161c;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --sans:"Hanken Grotesk",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(1200px 600px at 78% -10%, #0e1b1a 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 110%, #16121d 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:var(--sans);
+    font-feature-settings:"ss01","cv01"; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* scanline + grain atmosphere */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.014) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay;opacity:.5}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px}
+
+  /* ---- top bar ---- */
+  header{position:sticky;top:0;z-index:40;backdrop-filter:blur(8px);
+    background:linear-gradient(180deg,rgba(8,10,12,.92),rgba(8,10,12,.55));
+    border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:14px;height:60px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:800;letter-spacing:-.5px;font-size:18px}
+  .zap{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line2);border-radius:7px;
+    background:linear-gradient(160deg,#0c2a22,#0a161a);color:var(--grn);box-shadow:0 0 22px -6px var(--grn)}
+  .logo b{color:var(--grn)}
+  .logo .v{color:var(--faint);font-size:11px;font-weight:500;margin-left:2px}
+  .tag{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim);
+    border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+  .tag i{color:var(--grn);font-style:normal}
+  .nav{display:flex;gap:4px}
+  .nav a{font-family:var(--mono);font-size:12px;color:var(--dim);text-decoration:none;padding:6px 10px;border-radius:7px}
+  .nav a:hover{color:var(--ink);background:var(--panel)}
+  .nav a.on{color:var(--grn);background:#0c1814}
+
+  /* ---- hero strip ---- */
+  .lede{padding:26px 0 8px}
+  .lede h1{font-family:var(--mono);font-size:clamp(22px,3vw,34px);font-weight:800;margin:0;letter-spacing:-1px}
+  .lede h1 .hl{color:var(--grn)}
+  .lede p{color:var(--dim);max-width:62ch;margin:8px 0 0;font-size:14px}
+  .kbd{font-family:var(--mono);color:var(--amb);background:#15120a;border:1px solid #2a230f;border-radius:5px;padding:1px 6px;font-size:12px}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:18px;padding:18px 0 60px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:14px}
+  .card .hd{display:flex;align-items:center;gap:8px;padding:13px 15px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+  .card .hd .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .card .bd{padding:15px}
+
+  /* ---- form ---- */
+  label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--faint);margin:0 0 6px}
+  .fld{margin-bottom:13px}
+  input,select{width:100%;background:#0a0e12;border:1px solid var(--line2);border-radius:9px;color:var(--ink);
+    font-family:var(--mono);font-size:13px;padding:10px 11px;outline:none;transition:.15s}
+  input:focus,select:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(70,226,160,.13)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{flex:1;font-family:var(--mono);font-size:11px;color:var(--dim);background:#0a0e12;border:1px solid var(--line2);
+    border-radius:8px;padding:8px 4px;cursor:pointer;transition:.15s}
+  .seg button.on{color:#07120d;background:var(--grn);border-color:var(--grn);font-weight:700}
+  .run{width:100%;margin-top:4px;font-family:var(--mono);font-weight:800;font-size:14px;letter-spacing:.5px;
+    color:#06120c;background:linear-gradient(180deg,#5bf0ad,#33c98a);border:0;border-radius:10px;padding:13px;cursor:pointer;
+    box-shadow:0 10px 30px -12px var(--grn);transition:.15s}
+  .run:hover{filter:brightness(1.06)} .run:active{transform:translateY(1px)}
+  .run:disabled{filter:grayscale(.5) brightness(.7);cursor:not-allowed}
+  .scenchip{display:flex;gap:8px;margin-bottom:14px}
+  .scenchip button{flex:1;text-align:left;font-family:var(--mono);font-size:11px;line-height:1.35;cursor:pointer;
+    background:#0a0e12;border:1px dashed var(--line2);border-radius:9px;padding:9px;color:var(--dim);transition:.15s}
+  .scenchip button.on{border-style:solid;border-color:var(--blu);color:var(--ink);background:#091016}
+  .scenchip b{display:block;font-size:12px;color:var(--ink);margin-bottom:2px}
+  .scenchip.fake button.on{border-color:var(--red)}
+
+  /* ---- right column ---- */
+  .stack{display:flex;flex-direction:column;gap:18px}
+
+  /* verdict banner */
+  .verdict{position:relative;overflow:hidden;min-height:150px;display:flex;align-items:center;gap:22px;padding:20px 22px}
+  .verdict .ring{position:relative;flex:0 0 116px;width:116px;height:116px}
+  .verdict svg{transform:rotate(-90deg)}
+  .verdict .score{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:var(--mono)}
+  .verdict .score b{font-size:34px;font-weight:800;line-height:1}
+  .verdict .score span{font-size:10px;color:var(--dim);letter-spacing:1px}
+  .verdict .meta{flex:1;min-width:0}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-weight:800;font-size:13px;
+    letter-spacing:1px;padding:6px 13px;border-radius:8px;text-transform:uppercase}
+  .verdict h2{font-family:var(--mono);font-size:18px;margin:11px 0 4px;letter-spacing:-.3px}
+  .verdict p{color:var(--dim);font-size:13px;margin:0;max-width:60ch}
+  .verdict .grade{position:absolute;right:18px;top:14px;font-family:var(--mono);font-weight:800;font-size:64px;opacity:.14;letter-spacing:-3px}
+  .verdict.idle{color:var(--dim);font-family:var(--mono);justify-content:center;text-align:center}
+
+  /* dimensions */
+  .dims{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+  @media(max-width:560px){.dims{grid-template-columns:1fr}}
+  .dim{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;font-size:12.5px}
+  .dim .nm{font-weight:600}
+  .dim .wt{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .dim .sc{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
+  .meter{grid-column:1/-1;height:6px;border-radius:4px;background:#0a0e12;overflow:hidden;border:1px solid var(--line)}
+  .meter i{display:block;height:100%;width:0;border-radius:4px;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+
+  /* live log */
+  .log{font-family:var(--mono);font-size:12.5px;line-height:1.9;max-height:340px;overflow:auto}
+  .log .ln{display:flex;gap:9px;align-items:baseline;opacity:0;transform:translateY(4px);animation:in .3s forwards}
+  @keyframes in{to{opacity:1;transform:none}}
+  .log .t{color:var(--faint);flex:0 0 58px}
+  .log .ic{flex:0 0 16px;text-align:center}
+  .log .dn{color:var(--dim);cursor:pointer;border-bottom:1px dotted transparent}
+  .log .dn:hover{color:var(--ink);border-color:var(--line2)}
+  .log .res{margin-left:auto;font-size:11px}
+  .ev{margin:2px 0 8px 67px;padding:9px 11px;border-left:2px solid var(--line2);background:#0a0e12;border-radius:0 8px 8px 0;
+    color:var(--dim);font-size:11.5px;line-height:1.6;white-space:pre-wrap}
+  .ev .q{color:var(--amb)}
+  .cursor::after{content:"▋";color:var(--grn);animation:bl 1s steps(2) infinite}
+  @keyframes bl{50%{opacity:0}}
+
+  .c-grn{color:var(--grn)} .c-amb{color:var(--amb)} .c-red{color:var(--red)} .c-blu{color:var(--blu)} .c-dim{color:var(--dim)}
+  .bg-grn{background:rgba(70,226,160,.12);color:var(--grn);border:1px solid rgba(70,226,160,.3)}
+  .bg-amb{background:rgba(255,194,75,.12);color:var(--amb);border:1px solid rgba(255,194,75,.3)}
+  .bg-red{background:rgba(255,93,108,.13);color:var(--red);border:1px solid rgba(255,93,108,.34)}
+  .bg-dim{background:rgba(124,139,151,.1);color:var(--dim);border:1px solid var(--line2)}
+
+  .empty{padding:30px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:13px}
+  .foot{color:var(--faint);font-family:var(--mono);font-size:11px;text-align:center;padding:8px 0 40px}
+  .foot a{color:var(--dim)}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="logo"><span class="zap">⚡</span> <span>zing<b>.</b>console</span><span class="v">v0.3</span></div>
+  <nav class="nav">
+    <a class="on" href="#">扫描</a><a href="#">历史</a><a href="#">知识库</a><a href="#">API</a>
+  </nav>
+  <span class="tag"><i>●</i> 85 模型画像 · 7 平台 · 14 检测器</span>
+</div></header>
+
+<main class="wrap">
+  <section class="lede">
+    <h1>中转站<span class="hl">货不对板</span>检测台</h1>
+    <p>把它指向一个中转站的 <span class="kbd">base_url</span> 与声称的模型，zing 跑一整套黑盒探针，对照内置的原生模型画像，给出有证据支撑的结论——而不是凭感觉。</p>
+  </section>
+
+  <div class="grid">
+    <!-- LEFT: form -->
+    <form class="card" id="form" onsubmit="return false">
+      <div class="hd"><span class="dot"></span> 目标端点 / target</div>
+      <div class="bd">
+        <div class="scenchip" id="sc-honest">
+          <button type="button" class="on" data-s="honest"><b>① 诚实端点</b>api.deepseek.com · deepseek-v4-flash</button>
+        </div>
+        <div class="scenchip fake" id="sc-fake">
+          <button type="button" data-s="fake"><b>② 货不对板示例</b>某中转站 · 拿 doubao 冒充 deepseek</button>
+        </div>
+
+        <div class="fld"><label>base_url</label><input id="i-url" value="https://api.deepseek.com/v1"></div>
+        <div class="fld"><label>api_key</label><input id="i-key" value="env:ZING_API_KEY" type="text"></div>
+        <div class="two">
+          <div class="fld"><label>声称模型 (claimed)</label><input id="i-model" value="deepseek-v4-flash"></div>
+          <div class="fld"><label>实际请求 id (可选)</label><input id="i-actual" placeholder="同上"></div>
+        </div>
+        <div class="fld"><label>探测套件 suite</label>
+          <div class="seg" id="suite">
+            <button type="button">smoke</button><button type="button">standard</button>
+            <button type="button" class="on">deep</button><button type="button">full</button>
+          </div>
+        </div>
+        <button class="run" id="run">▸ 运行审计</button>
+      </div>
+    </form>
+
+    <!-- RIGHT -->
+    <div class="stack">
+      <div class="card">
+        <div class="hd"><span class="dot"></span> 结论 / verdict</div>
+        <div class="verdict idle" id="verdict">运行审计后在此显示结论 ▌</div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><span class="dot"></span> 维度评分 / 9 dimensions</div>
+        <div class="bd"><div class="dims" id="dims"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><span class="dot"></span> 实时探测日志 / detectors <span style="margin-left:auto" id="prog" class="c-dim"></span></div>
+        <div class="bd"><div class="log" id="log"><div class="empty">// 等待启动… 选择上方场景并点击「运行审计」</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">zing 报告的是行为偏离与风险的可复现证据，不是欺诈的密码学证明。· <a href="#">zing compare</a> 对照可信基线可得最强结论。</div>
+</main>
+
+<script>
+/* ----- mock data model (mirrors zing's real output) ----- */
+const DIMS = [
+  ["model_identity","模型身份",22],["context_window","上下文窗口",20],["capability","能力声明",14],
+  ["billing","计费",8],["protocol","协议兼容",8],["connectivity","连通性",8],
+  ["reliability","可靠性",8],["streaming","流式",6],["security","安全",6],
+];
+const DETECTORS = [
+  ["connectivity","连通性"],["protocol","协议兼容"],["model_identity","模型身份指纹"],
+  ["capability","能力核验"],["context_window","真实上下文窗口"],["streaming","流式真实性"],
+  ["billing","计费/用量"],["reliability","并发可靠性"],["security","传输与密钥"],
+  ["determinism","确定性/缓存"],["injected_prompt","注入式系统提示"],["integrity","响应完整性"],
+  ["prompt_cache","前缀缓存"],["quality_judge","LLM 质量评审"],
+];
+const SCEN = {
+  honest:{
+    url:"https://api.deepseek.com/v1", model:"deepseek-v4-flash", actual:"",
+    risk:"clean", label:"✓ 一致 CLEAN", color:"grn", score:94, rating:"A", conf:"medium",
+    head:"行为与所声称的模型一致。",
+    sum:"九大维度未见显著偏离；自我标识、上下文召回、能力声明均与 deepseek-v4-flash 的原生画像吻合。",
+    dims:{model_identity:100,context_window:96,capability:90,billing:null,protocol:88,connectivity:95,reliability:100,streaming:100,security:100},
+    res:{model_identity:["pass","一致"],context_window:["pass","≈1M"],capability:["pass","工具+JSON"],billing:["info","推理token"],
+      protocol:["warn","多轮 inconclusive"],connectivity:["pass","92ms"],reliability:["pass","8/8"],streaming:["pass","真流式"],
+      security:["pass","HTTPS"],determinism:["pass","随机"],injected_prompt:["pass","无注入"],integrity:["pass","完好"],
+      prompt_cache:["info","有缓存"],quality_judge:["pass","深度一致"]},
+    ev:{model_identity:'self-id ▸ "I am DeepSeek-V4, a model from DeepSeek（深度求索).”\n→ 命中本品牌关键词，无竞品品牌。',
+        billing:'completion=120 > 视觉估算≈21，但 deepseek-v4-flash 为推理模型，含隐藏思考 token —— 判为预期，不算虚高。'}
+  },
+  fake:{
+    url:"https://relay.cheap-llm.example/v1", model:"deepseek-v4-pro", actual:"doubao-seed-2-0-mini-260428",
+    risk:"high", label:"✗ 高风险 HIGH", color:"red", score:21, rating:"F", conf:"medium",
+    head:"强证据表明该中转站并未按宣称提供模型。",
+    sum:"声称 deepseek-v4-pro，但端点自我标识为字节跳动的 Doubao，且上下文窗口、能力指纹均与所声称模型不符。",
+    dims:{model_identity:20,context_window:35,capability:55,billing:100,protocol:90,connectivity:100,reliability:100,streaming:100,security:100},
+    res:{model_identity:["fail","竞品品牌"],context_window:["fail","≈256K«1M"],capability:["warn","能力缺口"],billing:["pass","一致"],
+      protocol:["pass","合规"],connectivity:["pass","65ms"],reliability:["pass","8/8"],streaming:["pass","真流式"],
+      security:["pass","HTTPS"],determinism:["pass","随机"],injected_prompt:["pass","无注入"],integrity:["pass","完好"],
+      prompt_cache:["info","有缓存"],quality_judge:["warn","风格偏弱"]},
+    ev:{model_identity:'self-id ▸ <span class="q">"I\'m Doubao, an AI assistant developed by ByteDance."</span>\n→ 在「声称 deepseek-v4-pro」下出现竞品品牌 doubao / 字节跳动 —— 强替换信号。',
+        context_window:'二分探测：≈256K 即召回失败，远低于所声称的 1,000,000 —— 疑似静默截断或替换为更小窗口模型。'}
+  }
+};
+const RISK = {
+  clean:{c:"grn",txt:"CLEAN"}, low:{c:"blu",txt:"LOW"}, medium:{c:"amb",txt:"MEDIUM"}, high:{c:"red",txt:"HIGH"}
+};
+const SCORECOL = s => s>=85?"grn":s>=70?"amb":"red";
+
+let cur="honest";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+function selectScenario(s){
+  cur=s;
+  $$("#sc-honest button,#sc-fake button").forEach(b=>b.classList.toggle("on",b.dataset.s===s));
+  const d=SCEN[s];
+  $("#i-url").value=d.url; $("#i-model").value=d.model; $("#i-actual").value=d.actual;
+  resetView();
+}
+$("#sc-honest button").onclick=()=>selectScenario("honest");
+$("#sc-fake button").onclick=()=>selectScenario("fake");
+$$("#suite button").forEach(b=>b.onclick=()=>{$$("#suite button").forEach(x=>x.classList.remove("on"));b.classList.add("on")});
+
+function resetView(){
+  $("#verdict").className="verdict idle"; $("#verdict").textContent="运行审计后在此显示结论 ▌";
+  $("#dims").innerHTML=""; $("#log").innerHTML='<div class="empty">// 等待启动…</div>'; $("#prog").textContent="";
+}
+
+function renderDims(){
+  $("#dims").innerHTML = DIMS.map(([k,nm,wt])=>`
+    <div class="dim" data-k="${k}">
+      <div class="nm">${nm}</div><div class="sc" id="sc-${k}">—</div>
+      <div class="wt">权重 ${wt}</div><div></div>
+      <div class="meter"><i id="m-${k}"></i></div>
+    </div>`).join("");
+}
+
+let t0=0;
+function stamp(){const ms=Math.round(performance.now()-t0);return String(ms).padStart(4," ")+"ms";}
+
+async function run(){
+  const d=SCEN[cur];
+  $("#run").disabled=true; $("#run").textContent="▸ 审计中…";
+  resetView(); renderDims();
+  $("#log").innerHTML=""; t0=performance.now();
+  const ICON={pass:'<span class="c-grn">✓</span>',warn:'<span class="c-amb">▲</span>',fail:'<span class="c-red">✗</span>',info:'<span class="c-blu">ℹ</span>'};
+
+  for(let i=0;i<DETECTORS.length;i++){
+    const [k,nm]=DETECTORS[i];
+    const r=d.res[k]||["info","—"];
+    // running line
+    const run=document.createElement("div"); run.className="ln";
+    run.innerHTML=`<span class="t">${stamp()}</span><span class="ic c-amb">▸</span><span class="dn cursor">${k} · ${nm}</span>`;
+    $("#log").appendChild(run); $("#log").scrollTop=1e9;
+    await sleep(120+Math.random()*230);
+    // resolve
+    const cls=r[0]==="fail"?"c-red":r[0]==="warn"?"c-amb":r[0]==="info"?"c-blu":"c-grn";
+    run.innerHTML=`<span class="t">${stamp()}</span><span class="ic">${ICON[r[0]]}</span>`+
+      `<span class="dn" data-ev="${k}">${k} · ${nm}</span><span class="res ${cls}">${r[1]}</span>`;
+    if(d.ev[k]){run.querySelector(".dn").onclick=()=>toggleEv(run,k,d)}
+    // fill matching dimension
+    if(d.dims[k]!==undefined) fillDim(k,d.dims[k]);
+    $("#prog").textContent=`${i+1}/${DETECTORS.length}`;
+    $("#log").scrollTop=1e9;
+  }
+  // any dims not tied to a single detector
+  DIMS.forEach(([k])=>{if(d.dims[k]!==undefined)fillDim(k,d.dims[k])});
+  await sleep(260);
+  showVerdict(d);
+  $("#run").disabled=false; $("#run").textContent="▸ 重新运行";
+}
+
+function toggleEv(row,k,d){
+  const nx=row.nextElementSibling;
+  if(nx&&nx.classList.contains("ev")){nx.remove();return;}
+  const ev=document.createElement("div"); ev.className="ev"; ev.innerHTML=d.ev[k];
+  row.after(ev);
+}
+function fillDim(k,v){
+  const sc=$("#sc-"+k), m=$("#m-"+k); if(!sc)return;
+  if(v===null){sc.textContent="—";sc.className="sc c-dim";m.style.background="var(--faint)";m.style.width="20%";m.style.opacity=".4";return;}
+  sc.textContent=v; const col=SCORECOL(v); sc.className="sc c-"+col;
+  m.style.background=`linear-gradient(90deg,var(--${col}),var(--${col}))`; m.style.width=v+"%";
+}
+function showVerdict(d){
+  const v=$("#verdict"); v.className="verdict";
+  const col=d.color, circ=2*Math.PI*52, off=circ*(1-d.score/100);
+  v.innerHTML=`
+    <div class="ring">
+      <svg width="116" height="116"><circle cx="58" cy="58" r="52" stroke="var(--line2)" stroke-width="8" fill="none"/>
+      <circle cx="58" cy="58" r="52" stroke="var(--${col})" stroke-width="8" fill="none" stroke-linecap="round"
+        stroke-dasharray="${circ}" stroke-dashoffset="${circ}" style="transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)" id="ringc"/></svg>
+      <div class="score"><b class="c-${col}">${d.score}</b><span>/100 · ${d.rating}</span></div>
+    </div>
+    <div class="meta">
+      <span class="pill bg-${col}">${RISK[d.risk].txt} RISK</span>
+      <h2>${d.head}</h2>
+      <p>${d.sum} <span class="c-dim">置信度 ${d.conf}.</span></p>
+    </div>
+    <div class="grade c-${col}">${d.rating}</div>`;
+  requestAnimationFrame(()=>{$("#ringc").style.strokeDashoffset=off});
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+$("#run").onclick=run;
+renderDims();
+</script>
+</body>
+</html>

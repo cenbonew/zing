@@ -8,9 +8,11 @@ internally.
 
 from __future__ import annotations
 
-from contextlib import AsyncExitStack
+from collections.abc import Callable
+from contextlib import AsyncExitStack, suppress
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import zing.detectors  # noqa: F401  -- populates the detector REGISTRY
 from zing import __version__
@@ -65,6 +67,7 @@ async def run_audit(
     mode: str = "check",
     command: str | None = None,
     kb_dirs: list[Path] | None = None,
+    on_event: Callable[[dict[str, Any]], None] | None = None,
 ) -> AuditReport:
     kb = load_knowledge_base(kb_dirs)
     # Resolve against the CLAIMED model (defaults to the requested model id), so an
@@ -102,9 +105,24 @@ async def run_audit(
             has_baseline=baseline_client is not None,
             enabled=options.enabled,
         )
+        def _emit(event: dict[str, Any]) -> None:
+            if on_event is not None:
+                # a progress sink must never break the audit
+                with suppress(Exception):
+                    on_event(event)
+
+        total = len(detectors)
+        _emit({"type": "start", "total": total, "suite": options.suite,
+               "target": target.name, "claimed_model": target.claimed})
         results: list[DetectorResult] = []
-        for detector in detectors:
-            results.append(await run_detector(detector, ctx))
+        for i, detector in enumerate(detectors):
+            _emit({"type": "detector_start", "index": i, "total": total,
+                   "id": detector.id, "name": detector.name, "dimension": detector.dimension.value})
+            res = await run_detector(detector, ctx)
+            results.append(res)
+            _emit({"type": "detector_done", "index": i, "total": total,
+                   "id": res.id, "name": res.name, "dimension": res.dimension.value,
+                   "status": res.status.value, "score": res.score})
 
     reliability = _extract_reliability(results)
     dimensions = build_dimensions(results, reliability)

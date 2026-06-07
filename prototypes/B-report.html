@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing · 中转站验真报告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..800&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f7f3ea; --paper2:#fffdf8; --ink:#211c16; --ink2:#5b5246; --faint:#9a9082;
+    --rule:#e3dccd; --rule2:#d6cdb9;
+    --seal:#c0402b;            /* vermilion stamp */
+    --good:#3f7d52; --goodbg:#e9f1e8;
+    --warn:#b8852a; --warnbg:#f6eed9;
+    --bad:#bb3b34;  --badbg:#f6e6e1;
+    --serif:"Fraunces",Georgia,serif;
+    --sc:"Noto Serif SC",serif;
+    --sans:"Public Sans",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(900px 500px at 110% -5%, #efe7d4 0%, transparent 55%),
+      var(--paper);
+    color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  }
+  /* faint paper grain */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E")}
+  .wrap{position:relative;z-index:1;max-width:840px;margin:0 auto;padding:0 24px}
+
+  header{display:flex;align-items:center;gap:12px;padding:26px 0 14px}
+  .mark{font-family:var(--serif);font-weight:900;font-size:26px;letter-spacing:-1px}
+  .mark .dot{color:var(--seal)}
+  .mark sup{font-family:var(--sans);font-weight:700;font-size:11px;color:var(--faint);letter-spacing:.5px}
+  header .who{margin-left:auto;font-size:12.5px;color:var(--ink2);text-align:right;line-height:1.5}
+  header .who b{font-family:var(--serif)}
+
+  /* intro / input */
+  .hero{padding:18px 0 6px}
+  .eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--seal);font-weight:700}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,58px);line-height:1.02;margin:10px 0 0;letter-spacing:-1.5px}
+  .hero h1 em{font-style:italic;color:var(--seal)}
+  .hero p{font-size:16px;color:var(--ink2);max-width:54ch;margin:14px 0 0;line-height:1.6}
+
+  .panel{background:var(--paper2);border:1px solid var(--rule2);border-radius:4px;
+    box-shadow:0 1px 0 #fff inset, 0 22px 50px -36px rgba(40,30,15,.5);margin-top:26px}
+  .panel .row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;padding:20px 22px}
+  .field{flex:1;min-width:180px}
+  .field label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:6px}
+  .field input{width:100%;border:0;border-bottom:1.5px solid var(--rule2);background:transparent;font-family:var(--serif);
+    font-size:18px;color:var(--ink);padding:6px 2px;outline:none}
+  .field input:focus{border-color:var(--seal)}
+  .verify{font-family:var(--sans);font-weight:800;font-size:15px;color:#fff;background:var(--ink);border:0;border-radius:3px;
+    padding:13px 26px;cursor:pointer;letter-spacing:.3px;transition:.18s;white-space:nowrap}
+  .verify:hover{background:var(--seal)} .verify:disabled{opacity:.5;cursor:wait}
+  .switch{display:flex;gap:0;border-top:1px solid var(--rule);font-size:13px}
+  .switch button{flex:1;background:transparent;border:0;border-right:1px solid var(--rule);padding:11px;cursor:pointer;
+    color:var(--ink2);font-family:var(--sans);font-weight:600;transition:.15s}
+  .switch button:last-child{border-right:0}
+  .switch button.on{background:var(--ink);color:var(--paper2)}
+  .switch button.on.bad{background:var(--bad)} .switch button.on.good{background:var(--good)}
+
+  /* scanning */
+  .scanning{display:none;text-align:center;padding:60px 0}
+  .scanning.show{display:block}
+  .scanning .lab{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--ink2)}
+  .scanning .tick{font-size:14px;color:var(--faint);margin-top:10px;min-height:20px}
+  .bar{height:3px;background:var(--rule);border-radius:2px;max-width:340px;margin:20px auto 0;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--seal);transition:width .2s linear}
+
+  /* ---------- the certificate ---------- */
+  .cert{display:none;margin:30px 0 50px}
+  .cert.show{display:block;animation:rise .6s cubic-bezier(.2,.8,.2,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}}
+  .doc{position:relative;background:var(--paper2);border:1px solid var(--rule2);border-radius:5px;overflow:hidden;
+    box-shadow:0 30px 70px -44px rgba(40,30,15,.55)}
+  .doc::before{content:"";position:absolute;inset:0;border:1px solid var(--rule);margin:9px;border-radius:3px;pointer-events:none}
+  .doc .pad{padding:34px 38px}
+  @media(max-width:560px){.doc .pad{padding:24px 22px}}
+
+  .doc .crown{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--rule);padding-bottom:16px}
+  .doc .crown .t{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .doc .crown .id{font-family:var(--serif);font-size:13px;color:var(--ink2)}
+  .target{font-family:var(--serif);font-weight:600;font-size:22px;margin:18px 0 2px;letter-spacing:-.5px;word-break:break-all}
+  .claim{font-size:14px;color:var(--ink2)}
+  .claim b{color:var(--ink)}
+
+  .verdictrow{display:flex;align-items:center;gap:26px;margin:26px 0 8px}
+  @media(max-width:560px){.verdictrow{flex-direction:column;align-items:flex-start;gap:16px}}
+  .grade{font-family:var(--serif);font-weight:900;font-size:96px;line-height:.8;letter-spacing:-4px}
+  .vmeta{flex:1}
+  .stamp-line{font-family:var(--sc);font-weight:900;font-size:30px;line-height:1.1;letter-spacing:1px}
+  .vmeta p{font-size:15.5px;line-height:1.65;color:var(--ink2);margin:8px 0 0;max-width:48ch}
+  .scoreline{display:flex;gap:22px;margin-top:14px;font-size:13px;color:var(--ink2)}
+  .scoreline b{font-family:var(--serif);font-size:17px;color:var(--ink)}
+
+  /* the wax seal */
+  .seal{position:absolute;right:26px;top:90px;width:118px;height:118px;border-radius:50%;display:grid;place-items:center;
+    color:#fff;transform:rotate(-11deg);box-shadow:0 12px 26px -12px rgba(0,0,0,.4);text-align:center;
+    border:2px dashed rgba(255,255,255,.6)}
+  .seal.good{background:radial-gradient(circle at 35% 30%,#5a9b6c,#356b46)}
+  .seal.warn{background:radial-gradient(circle at 35% 30%,#d2a24a,#9c6f1f)}
+  .seal.bad{background:radial-gradient(circle at 35% 30%,#cf564a,#9a2b24)}
+  .seal .big{font-family:var(--sc);font-weight:900;font-size:30px;line-height:1}
+  .seal .sm{font-size:8.5px;letter-spacing:2px;margin-top:3px;opacity:.92}
+  @media(max-width:560px){.seal{position:static;margin:14px 0;transform:rotate(-4deg)}}
+
+  /* report card rows */
+  .section-t{font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:.3px;margin:30px 0 12px;
+    padding-top:18px;border-top:1px solid var(--rule);display:flex;align-items:baseline;gap:8px}
+  .section-t span{font-size:11px;color:var(--faint);font-family:var(--sans);letter-spacing:2px;text-transform:uppercase}
+  .cardline{display:grid;grid-template-columns:200px 1fr auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px dotted var(--rule)}
+  @media(max-width:560px){.cardline{grid-template-columns:1fr auto}.cardline .bar2{grid-column:1/-1;order:3}}
+  .cardline .nm{font-weight:600;font-size:14px}
+  .cardline .nm small{display:block;font-weight:400;color:var(--faint);font-size:11.5px;font-family:var(--sans)}
+  .bar2{height:7px;background:#ece5d6;border-radius:5px;overflow:hidden}
+  .bar2 i{display:block;height:100%;width:0;border-radius:5px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+  .badge{font-family:var(--sans);font-weight:800;font-size:11px;letter-spacing:.5px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .b-good{background:var(--goodbg);color:var(--good)} .b-warn{background:var(--warnbg);color:var(--warn)} .b-bad{background:var(--badbg);color:var(--bad)} .b-dim{background:#eee8da;color:var(--faint)}
+
+  .why{margin-top:6px}
+  .why .item{display:flex;gap:13px;padding:13px 0;border-bottom:1px dotted var(--rule)}
+  .why .dot{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff}
+  .why .item p{margin:0;font-size:14.5px;line-height:1.6}
+  .why .item p b{font-family:var(--serif)}
+  .why .quote{font-family:var(--serif);font-style:italic;color:var(--seal);background:#fbf2ee;border-left:2px solid var(--seal);
+    padding:3px 10px;border-radius:0 4px 4px 0;display:inline-block;margin-top:5px}
+
+  .fineprint{font-size:12px;color:var(--faint);line-height:1.6;margin-top:24px;padding-top:16px;border-top:1px solid var(--rule)}
+  .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .actions button{font-family:var(--sans);font-weight:700;font-size:13px;padding:10px 18px;border-radius:3px;cursor:pointer;border:1px solid var(--rule2);background:var(--paper2);color:var(--ink)}
+  .actions button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .foot{text-align:center;color:var(--faint);font-size:12px;padding:10px 0 50px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark">zing<span class="dot">.</span><sup>验真</sup></div>
+    <div class="who">独立黑盒检验 · 不经手你的密钥<br><b>本地优先</b> · 开源 Apache-2.0</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">中转站 · 货不对板检验</div>
+    <h1>你买的，<em>真的是</em><br>你以为的那个模型吗？</h1>
+    <p>输入中转站地址和它声称的模型，zing 会像第三方质检一样跑一遍黑盒检验，出具一份能看懂、有依据的「验真报告」。</p>
+
+    <div class="panel">
+      <div class="row">
+        <div class="field" style="flex:2"><label>中转站地址</label><input id="i-url" value="https://api.deepseek.com/v1"></div>
+        <div class="field"><label>声称的模型</label><input id="i-model" value="deepseek-v4-flash"></div>
+        <button class="verify" id="go">开始检验 →</button>
+      </div>
+      <div class="switch" id="sw">
+        <button class="on good" data-s="honest">演示：诚实的官方端点</button>
+        <button data-s="fake">演示：拿豆包冒充 DeepSeek</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="scanning" id="scan">
+    <div class="lab" id="scanlab">正在检验…</div>
+    <div class="tick" id="scantick"></div>
+    <div class="bar"><i id="scanbar"></i></div>
+  </div>
+
+  <section class="cert" id="cert">
+    <div class="doc">
+      <div class="seal" id="seal"></div>
+      <div class="pad">
+        <div class="crown">
+          <div class="t">Authenticity Report · 验真报告</div>
+          <div class="id" id="repid">№ ZING-2026</div>
+        </div>
+        <div class="target" id="t-target">—</div>
+        <div class="claim" id="t-claim">—</div>
+
+        <div class="verdictrow">
+          <div class="grade" id="t-grade">—</div>
+          <div class="vmeta">
+            <div class="stamp-line" id="t-stamp">—</div>
+            <p id="t-sum">—</p>
+            <div class="scoreline">
+              <div>综合健康分 <b id="t-score">—</b>/100</div>
+              <div>结论置信度 <b id="t-conf">—</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-t">逐项体检 <span>9 dimensions</span></div>
+        <div id="cardlist"></div>
+
+        <div class="section-t" id="whytitle">为什么这么判 <span>plain-language findings</span></div>
+        <div class="why" id="why"></div>
+
+        <div class="actions">
+          <button class="pri">下载 PDF 报告</button>
+          <button>对照官方基线复检</button>
+          <button>复制可分享链接</button>
+        </div>
+        <div class="fineprint">
+          zing 出具的是<strong>行为偏离与风险的可复现证据</strong>，不是欺诈的法律/密码学证明。中转站可能按概率路由到不同模型；请结合样本量、计费设置与当地法律自行判断，切勿仅凭单次结果公开指控厂商。
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="foot">zing · 中转站验真 — 让「这家不太对劲」变成一份可复现的报告。</div>
+</div>
+
+<script>
+const DATA={
+  honest:{
+    target:"api.deepseek.com", claim:'声称模型：<b>deepseek-v4-flash</b> · 协议 OpenAI 兼容',
+    cls:"good", grade:"A", stamp:"验证通过", score:94, conf:"中",
+    sum:"九大维度未见显著偏离。该端点的自我标识、上下文召回与能力声明，均与 deepseek-v4-flash 的原生表现吻合——你买到的，大概率就是它本身。",
+    dims:[["模型身份","它是不是它自称的那个？",100,"good","一致"],
+      ["上下文窗口","长文是否真能记住？",96,"good","≈1M"],
+      ["能力声明","工具/JSON 是否真支持？",90,"good","齐全"],
+      ["计费用量","token 有没有虚报？",92,"good","合理"],
+      ["协议兼容","接口是否规范？",88,"good","规范"],
+      ["连通性","稳定可达？",95,"good","92ms"],
+      ["并发可靠","压力下稳不稳？",100,"good","8/8"],
+      ["流式真实","是真流式还是假装？",100,"good","真流式"],
+      ["传输安全","密钥是否裸奔？",100,"good","HTTPS"]],
+    why:[["good","自我标识一致","问它「你是谁」，它回答 <b>DeepSeek-V4（深度求索）</b>，命中本品牌、无任何竞品品牌。"],
+      ["good","长上下文真实","二分探测到接近 100 万 token 仍能准确召回——与所声称的 1M 窗口相符。"],
+      ["good","计费未见虚高","报告的 completion token 偏高，但 deepseek-v4-flash 是推理模型、含隐藏思考 token，属正常，<b>不算虚报</b>。"]]
+  },
+  fake:{
+    target:"relay.cheap-llm.example", claim:'声称模型：<b>deepseek-v4-pro</b> · 实测请求 id：doubao-seed-2-0-mini',
+    cls:"bad", grade:"F", stamp:"货不对板", score:21, conf:"中",
+    sum:"该端点声称提供 deepseek-v4-pro，但当被问及身份时自报为<b>字节跳动的豆包（Doubao）</b>，且真实上下文窗口、能力指纹均与所声称模型不符。强证据表明：它并没有给你 DeepSeek。",
+    dims:[["模型身份","它是不是它自称的那个？",20,"bad","竟是豆包"],
+      ["上下文窗口","长文是否真能记住？",35,"bad","≈256K«1M"],
+      ["能力声明","工具/JSON 是否真支持？",55,"warn","有缺口"],
+      ["计费用量","token 有没有虚报？",100,"good","一致"],
+      ["协议兼容","接口是否规范？",90,"good","规范"],
+      ["连通性","稳定可达？",100,"good","65ms"],
+      ["并发可靠","压力下稳不稳？",100,"good","8/8"],
+      ["流式真实","是真流式还是假装？",100,"good","真流式"],
+      ["传输安全","密钥是否裸奔？",100,"good","HTTPS"]],
+    why:[["bad","自报为竞品品牌（最强信号）","问它「你是谁」，它回答：",'I\'m Doubao, an AI assistant developed by ByteDance.',"——在「声称 deepseek-v4-pro」的前提下出现豆包/字节跳动，是典型的替换证据。"],
+      ["bad","上下文窗口对不上","只探到约 256K 就开始召回失败，远低于所声称的 100 万 token——疑似被换成了更小窗口的模型。"],
+      ["warn","能力指纹有缺口","部分能力探针的表现与 deepseek-v4-pro 的原生画像不一致，进一步指向替换。"]]
+  }
+};
+const ICON={good:"✓",warn:"!",bad:"✕"};
+const COL={good:"var(--good)",warn:"var(--warn)",bad:"var(--bad)"};
+const STEPS=["连通端点…","核对自我身份…","二分探测上下文窗口…","核验工具与 JSON 能力…","比对计费用量…","检查流式与传输安全…","汇总证据…"];
+let cur="honest";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+
+$$("#sw button").forEach(b=>b.onclick=()=>{
+  cur=b.dataset.s;
+  $$("#sw button").forEach(x=>{x.classList.remove("on","good","bad");});
+  b.classList.add("on",cur==="honest"?"good":"bad");
+  $("#i-url").value=cur==="honest"?"https://api.deepseek.com/v1":"https://relay.cheap-llm.example/v1";
+  $("#i-model").value=cur==="honest"?"deepseek-v4-flash":"deepseek-v4-pro";
+  $("#cert").classList.remove("show");
+});
+
+$("#go").onclick=async()=>{
+  $("#go").disabled=true; $("#cert").classList.remove("show");
+  $("#scan").classList.add("show");
+  for(let i=0;i<STEPS.length;i++){
+    $("#scantick").textContent=STEPS[i];
+    $("#scanbar").style.width=Math.round((i+1)/STEPS.length*100)+"%";
+    await new Promise(r=>setTimeout(r,260+Math.random()*220));
+  }
+  $("#scan").classList.remove("show");
+  render(DATA[cur]);
+  $("#go").disabled=false;
+};
+
+function render(d){
+  $("#repid").textContent="№ ZING-2026-"+(cur==="honest"?"0007":"0042");
+  $("#t-target").textContent=d.target;
+  $("#t-claim").innerHTML=d.claim;
+  $("#t-grade").textContent=d.grade; $("#t-grade").style.color=COL[d.cls];
+  $("#t-stamp").textContent=d.stamp; $("#t-stamp").style.color=COL[d.cls];
+  $("#t-sum").innerHTML=d.sum; $("#t-score").textContent=d.score; $("#t-conf").textContent=d.conf;
+  const seal=$("#seal"); seal.className="seal "+d.cls;
+  seal.innerHTML=`<div><div class="big">${d.stamp}</div><div class="sm">ZING VERIFIED</div></div>`;
+
+  $("#cardlist").innerHTML=d.dims.map(([nm,desc,sc,cls,tag])=>`
+    <div class="cardline">
+      <div class="nm">${nm}<small>${desc}</small></div>
+      <div class="bar2"><i style="width:0" data-w="${sc}" data-c="${cls}"></i></div>
+      <div class="badge b-${cls}">${tag}</div>
+    </div>`).join("");
+
+  $("#why").innerHTML=d.why.map(it=>{
+    const [cls,title,body,quote,after]=[it[0],it[1],it[2],it[3],it[4]];
+    return `<div class="item"><div class="dot" style="background:${COL[cls]}">${ICON[cls]}</div>
+      <div><p><b>${title}。</b>${body}${quote?` <span class="quote">${quote}</span>`:""}${after?` ${after}`:""}</p></div></div>`;
+  }).join("");
+
+  $("#cert").classList.add("show");
+  requestAnimationFrame(()=>{$$("#cardlist .bar2 i").forEach(i=>{i.style.width=i.dataset.w+"%";i.style.background=COL[i.dataset.c]})});
+  $("#cert").scrollIntoView({behavior:"smooth",block:"start"});
+}
+</script>
+</body>
+</html>

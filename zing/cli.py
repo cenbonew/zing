@@ -609,6 +609,44 @@ def kb_command(
     console.print(f"{total} models across {len(provs)} providers.")
 
 
+@app.command("serve")
+def serve_command(
+    host: Annotated[str, typer.Option("--host", help="Bind address (default localhost only).")] = "127.0.0.1",
+    port: Annotated[int, typer.Option("--port", "-p", help="Port to serve on.")] = 8000,
+    open_browser: Annotated[bool, typer.Option("--open/--no-open", help="Open the UI in a browser.")] = True,
+) -> None:
+    """Serve the local web UI — a point-and-click front end for `zing check`.
+
+    Runs entirely on your machine: keys entered in the browser reach only this
+    local server and the target relay, never a third party. Requires the web extra:
+    `pip install 'zing-audit[web]'`.
+    """
+    try:
+        import uvicorn
+
+        from zing.web.server import create_app
+    except ImportError as exc:
+        err_console.print(
+            "[red]The web UI needs the optional 'web' extra.[/red]\n"
+            "Install it with:  [bold]pip install 'zing-audit[web]'[/bold]"
+        )
+        raise typer.Exit(code=2) from exc
+
+    url = f"http://{'localhost' if host in ('127.0.0.1', '0.0.0.0') else host}:{port}"
+    console.print(f"[green]zing[/green] web UI → [bold]{url}[/bold]   (Ctrl-C to stop)")
+    if host == "0.0.0.0":
+        err_console.print(
+            "[yellow]![/yellow] Binding 0.0.0.0 exposes the audit API (and any keys you "
+            "type) to your network. Prefer the default 127.0.0.1."
+        )
+    if open_browser:
+        import threading
+        import webbrowser
+
+        threading.Timer(0.8, lambda: webbrowser.open(url)).start()
+    uvicorn.run(create_app(), host=host, port=port, log_level="warning")
+
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,

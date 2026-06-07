@@ -6,6 +6,17 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`zing serve` — a local web UI.** A point-and-click front end for `zing check`:
+  enter a relay + the model it claims, watch the audit stream **live** (a radar scan
+  with per-detector progress over SSE), then get a shareable verdict report (grade,
+  per-dimension breakdown, plain-language findings, downloadable JSON). Runs entirely
+  on your machine — keys typed in the browser reach only your local server and the
+  target relay, never a third party. New optional extra: `pip install 'zing-audit[web]'`
+  (fastapi + uvicorn). `run_audit` gained an `on_event` progress callback that powers
+  the live stream.
+
 ## [0.4.0] — agent/LLM ergonomics
 
 Make zing pleasant to drive from another program or model.
