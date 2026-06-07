@@ -6,6 +6,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] — local web UI (`zing serve`)
+
 ### Added
 
 - **`zing serve` — a local web UI.** A point-and-click front end for `zing check`:
@@ -126,7 +128,8 @@ streaming, or inflates token billing (货不对板检测).
   text is redacted before it reaches any report (JSON/Markdown/HTML).
 - `--fail-under` / `--fail-on-risk` exit-code gates for CI use.
 
-[Unreleased]: https://github.com/cenbonew/zing/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/cenbonew/zing/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/cenbonew/zing/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cenbonew/zing/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cenbonew/zing/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/cenbonew/zing/compare/v0.2.0...v0.2.1
