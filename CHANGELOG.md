@@ -6,6 +6,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] — web: Chinese findings, history/trends, advanced console
+
 ### Added
 
 - **Findings localized to Chinese (web UI).** A new `zing/web/static/i18n.js` catalog
@@ -158,7 +160,8 @@ streaming, or inflates token billing (货不对板检测).
   text is redacted before it reaches any report (JSON/Markdown/HTML).
 - `--fail-under` / `--fail-on-risk` exit-code gates for CI use.
 
-[Unreleased]: https://github.com/cenbonew/zing/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/cenbonew/zing/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/cenbonew/zing/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/cenbonew/zing/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cenbonew/zing/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cenbonew/zing/compare/v0.3.0...v0.4.0
