@@ -38,6 +38,7 @@ def _redact(config: TargetConfig) -> RedactedTarget:
         kind=config.kind,
         base_url=config.base_url,
         model=config.model,
+        claimed_model=config.claimed_model,
         declared_provider=config.declared_provider,
         api_key_fingerprint=fingerprint_secret(config.api_key),
     )
@@ -66,7 +67,9 @@ async def run_audit(
     kb_dirs: list[Path] | None = None,
 ) -> AuditReport:
     kb = load_knowledge_base(kb_dirs)
-    profile = kb.resolve(target.model, target.declared_provider)
+    # Resolve against the CLAIMED model (defaults to the requested model id), so an
+    # endpoint serving model X can be audited against the profile it's sold as.
+    profile = kb.resolve(target.claimed, target.declared_provider)
 
     async with AsyncExitStack() as stack:
         client = await stack.enter_async_context(make_client(target))

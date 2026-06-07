@@ -81,11 +81,16 @@ zing compare \
 zing check --base-url https://relay.example.com/v1 --model claude-opus-4-8 \
   --api-key env:ZING_API_KEY --api anthropic
 
-# 4) inspect the bundled knowledge base
+# 4) confirm a suspected substitution: audit the relay's REAL model id against the
+#    profile it's sold as (here: a Doubao model passed off as deepseek-v4-flash)
+zing check --base-url https://relay.example.com/v1 --api-key env:ZING_API_KEY \
+  --model doubao-seed-2-0-lite --claimed-model deepseek-v4-flash
+
+# 5) inspect the bundled knowledge base
 zing kb            # all 85 models
 zing kb deepseek   # one provider
 
-# 5) generate a config you can commit
+# 6) generate a config you can commit
 zing init          # writes zing.yaml
 zing check -c zing.yaml
 ```

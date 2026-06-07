@@ -53,6 +53,17 @@ def heuristic_token_count(text: str) -> int:
     return cjk + pieces
 
 
+def is_exact_tokenizer(tokenizer: str | None) -> bool:
+    """True when we can count tokens EXACTLY (a tiktoken OpenAI-family encoding is
+    available). For any other family the count is a heuristic that can be off by a
+    lot — especially for reasoning models and CJK — so billing checks must not treat
+    a divergence as proof of inflation."""
+    if not tokenizer:
+        return False
+    name = _TIKTOKEN_ENCODINGS.get(tokenizer.lower())
+    return name is not None and _load_tiktoken(name) is not None
+
+
 def estimate_tokens(text: str, tokenizer: str | None = None) -> int:
     """Best-effort token count for ``text`` under the given tokenizer family."""
     if not text:

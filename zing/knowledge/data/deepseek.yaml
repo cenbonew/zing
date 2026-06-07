@@ -29,6 +29,7 @@ models:
   usage_in_stream: true
   identity_keywords:
   - deepseek
+  - 深度求索
   - deepseek-v3
   - deepseek-chat
   identity_forbidden:
@@ -65,6 +66,7 @@ models:
   usage_in_stream: true
   identity_keywords:
   - deepseek
+  - 深度求索
   - deepseek-r1
   - deepseek-reasoner
   identity_forbidden:
@@ -99,6 +101,7 @@ models:
   usage_in_stream: true
   identity_keywords:
   - deepseek
+  - 深度求索
   - deepseek-v4
   - deepseek-v4-flash
   identity_forbidden:
@@ -133,6 +136,7 @@ models:
   usage_in_stream: true
   identity_keywords:
   - deepseek
+  - 深度求索
   - deepseek-v4
   - deepseek-v4-pro
   identity_forbidden:

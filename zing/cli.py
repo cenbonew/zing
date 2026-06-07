@@ -185,6 +185,7 @@ def _target_from(
     timeout: float | None,
     headers: list[str] | None,
     api: str | None = None,
+    claimed_model: str | None = None,
 ) -> TargetConfig:
     fs = section(cfg, sect)
     merged_headers = merge_headers(fs.get("headers"), headers)
@@ -198,6 +199,7 @@ def _target_from(
         timeout_sec=timeout if timeout is not None else fs.get("timeout_sec"),
         headers=merged_headers,
         api=api or fs.get("api"),
+        claimed_model=claimed_model or fs.get("claimed_model"),
     )
 
 
@@ -296,7 +298,8 @@ def check_command(
     config: Annotated[Path | None, typer.Option("--config", "-c", help="YAML config path.")] = None,
     base_url: Annotated[str | None, typer.Option("--base-url", help="Relay base URL, e.g. https://relay.example.com/v1.")] = None,
     api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
-    model: Annotated[str | None, typer.Option("--model", help="Model id the relay claims to serve.")] = None,
+    model: Annotated[str | None, typer.Option("--model", help="Model id actually sent in requests.")] = None,
+    claimed_model: Annotated[str | None, typer.Option("--claimed-model", help="Model the relay claims to serve, if different from --model (audits the real model against this profile).")] = None,
     name: Annotated[str | None, typer.Option("--name", help="Display name for the target.")] = None,
     api: Annotated[str | None, typer.Option("--api", help="Wire protocol: auto | openai | anthropic.")] = None,
     declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup (openai, anthropic, deepseek, ...).")] = None,
@@ -325,7 +328,7 @@ def check_command(
         target = _target_from(
             cfg, "target", kind="target", name=name, base_url=base_url, api_key=api_key,
             model=model, declared_provider=declared_provider, timeout=timeout, headers=header,
-            api=api,
+            api=api, claimed_model=claimed_model,
         )
         options = _build_options(
             cfg, suite=suite, judge=judge, only=only, skip=skip,

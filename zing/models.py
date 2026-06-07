@@ -73,10 +73,18 @@ class TargetConfig(BaseModel):
     kind: str = "target"  # "target" | "baseline"
     base_url: str
     api_key: str = ""
-    model: str
+    model: str  # the model id actually sent in requests
+    # The model the relay CLAIMS to serve (for KB lookup / comparison). Defaults to
+    # `model`. Set it to audit an endpoint's real model id against a different claim
+    # — e.g. request `doubao-...` but verify it against the `deepseek-v4-flash` profile.
+    claimed_model: str | None = None
     # Wire protocol: "auto" infers from the base_url/model, or force "openai"
     # (Chat Completions) / "anthropic" (Messages API).
     api: str = "auto"
+
+    @property
+    def claimed(self) -> str:
+        return self.claimed_model or self.model
     # Optional declared metadata used to pick the right knowledge-base profile and
     # to compare claims vs reality. If absent, zing infers from the model id.
     declared_provider: str | None = None
@@ -229,6 +237,7 @@ class RedactedTarget(BaseModel):
     kind: str
     base_url: str
     model: str
+    claimed_model: str | None = None
     declared_provider: str | None = None
     api_key_fingerprint: str | None = None
 
