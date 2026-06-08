@@ -6,6 +6,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] — image/audio generation audits, embeddings/rerank in the web UI
+
 ### Added
 
 - **Image & audio (TTS) generation audits (`zing image` / `zing audio`).** Two more
@@ -239,7 +241,8 @@ streaming, or inflates token billing (货不对板检测).
   text is redacted before it reaches any report (JSON/Markdown/HTML).
 - `--fail-under` / `--fail-on-risk` exit-code gates for CI use.
 
-[Unreleased]: https://github.com/cenbonew/zing/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/cenbonew/zing/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/cenbonew/zing/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/cenbonew/zing/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/cenbonew/zing/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/cenbonew/zing/compare/v0.6.0...v0.7.0
