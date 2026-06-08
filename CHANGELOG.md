@@ -6,6 +6,32 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Embedding & rerank audits (`zing embed` / `zing rerank`).** A focused auditor for
+  the non-chat surface, separate from the 9-dimension chat pipeline. `embed` checks
+  connectivity, **dimension match** (returned vector length vs the claimed model's
+  native dimension — the headline 货不对板 signal; e.g. a relay claiming 3072-d
+  `text-embedding-3-large` but returning 1024-d is flagged HIGH), determinism (same
+  input → cosine ≈ 1), distinctness (unrelated inputs → cosine well below 1), and the
+  echoed `model` field. `rerank` runs a known-answer probe (the obviously-relevant
+  document must rank first). Both support `--json` and `--fail-on-risk`. KB gained an
+  `embedding_dimensions` field and profiles for OpenAI `text-embedding-3-small`/`-large`/
+  `ada-002` and Qwen `text-embedding-v3`/`-v4`. Verified live against Aliyun
+  text-embedding-v4 (honest → 100/100; sold as `-3-large` → HIGH dimension mismatch).
+- **Monitoring in the web UI (`/watches`).** `zing serve` now has a built-in monitor:
+  add a watch (target + suite + interval + alert threshold + webhook URLs) and an
+  in-process background scheduler re-runs each enabled watch on its interval, persists
+  every run to history, and POSTs a Chinese alert to your webhooks when risk crosses
+  the threshold or regresses. Run-now / pause / delete from the page. API keys are
+  stored only in `~/.zing` and never returned to the browser or shown in the listing.
+  Vision findings are now localized to Chinese in the report.
+- **GitHub CI Action.** A bundled composite action (`uses: cenbonew/zing@vX.Y.Z`) gates
+  any workflow on a relay audit: runs `zing check --compact --fail-on-risk`, exposes
+  `risk`/`score`/`rating` outputs, writes a run summary, and fails the job when the gate
+  trips. The relay key is passed via a secret and never echoed. See `docs/CI.md` and the
+  example workflow.
+
 ## [0.8.0] — Responses API, vision audit, monitoring
 
 ### Added

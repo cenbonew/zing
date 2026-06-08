@@ -48,6 +48,10 @@ class ModelProfile(BaseModel):
     tokenizer: str | None = None
     modalities: list[str] = Field(default_factory=lambda: ["text"])
     reasoning: bool = False
+    # Native output dimensionality of an embedding model's vectors. 0 means the
+    # model is not an embedding model (or the dimension is unknown). The embedding
+    # auditor compares a relay's returned vector length against this.
+    embedding_dimensions: int = 0
     # Capability claims to verify.
     tool_format: str | None = None        # openai_function | anthropic_tool_use | ...
     supports_tools: bool = True

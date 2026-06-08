@@ -794,6 +794,153 @@ def watch_command(
         raise typer.Exit(code=0) from None
 
 
+def _print_embed_verdict(verdict: dict, title: str) -> None:
+    """Render an embedding/rerank verdict dict (from zing.embed_audit) with rich."""
+    risk = RiskLevel(verdict["risk_level"])
+    style, label = _RISK_STYLE.get(risk, ("white", risk.value))
+    tgt = verdict["target"]
+    body = (
+        f"Target : {tgt['name']}  ·  model [bold]{tgt['model']}[/]"
+        f"{'  ·  claimed ' + tgt['claimed_model'] if tgt.get('claimed_model') else ''}"
+        f"{'  ·  provider ' + tgt['declared_provider'] if tgt.get('declared_provider') else ''}\n"
+        f"Score  : {verdict['score']}/100"
+    )
+    console.print(Panel(body, title=f"[{style}]{label}[/]  —  {title}", border_style=style.split()[-1]))
+
+    table = Table(show_lines=False, expand=False)
+    table.add_column("Status")
+    table.add_column("Severity")
+    table.add_column("Check")
+    table.add_column("Summary")
+    for f in verdict["findings"]:
+        st = Status(f["status"])
+        st_style = _STATUS_STYLE.get(st, "white")
+        table.add_row(
+            f"[{st_style}]{st.value}[/]",
+            f["severity"],
+            f["id"],
+            f["summary"],
+        )
+    console.print(table)
+
+
+@app.command("embed")
+def embed_command(
+    base_url: Annotated[str | None, typer.Option("--base-url", help="Embedding endpoint base URL, e.g. https://relay.example.com/v1.")] = None,
+    api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
+    model: Annotated[str | None, typer.Option("--model", help="Embedding model id actually sent in requests.")] = None,
+    claimed_model: Annotated[str | None, typer.Option("--claimed-model", help="Model the relay claims to serve, if different from --model (resolves the claimed dimension from the KB).")] = None,
+    declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup (openai, qwen, ...).")] = None,
+    claimed_dimensions: Annotated[int | None, typer.Option("--claimed-dimensions", help="Override the expected vector dimension instead of resolving it from the KB (0 = unknown).")] = None,
+    kb_dir: Annotated[list[Path] | None, typer.Option("--kb-dir", help="Extra knowledge-base directory (repeatable).")] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the verdict as JSON to stdout.")] = False,
+    fail_on_risk: Annotated[str | None, typer.Option("--fail-on-risk", help="Exit 1 if risk >= this (low|medium|high).")] = None,
+) -> None:
+    """Audit an embeddings endpoint (a non-chat surface).
+
+    Runs embedding-specific checks — connectivity, vector-dimension match against
+    the claimed model, determinism, and distinctness — instead of the chat
+    detector pipeline. The expected dimension is resolved from the bundled
+    knowledge base for the claimed model (override with --claimed-dimensions).
+    """
+    try:
+        target = build_target(
+            kind="target", name=None, base_url=base_url, api_key=api_key, model=model,
+            declared_provider=declared_provider, claimed_model=claimed_model,
+        )
+        fail_on_risk = validate_risk(fail_on_risk)
+    except ConfigError as exc:
+        if as_json:
+            _emit_machine_error(exc)
+        err_console.print(f"[red]Config error:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+
+    # Resolve the claimed embedding dimension from the KB unless overridden.
+    dims = claimed_dimensions if claimed_dimensions is not None else 0
+    if claimed_dimensions is None:
+        kb = load_knowledge_base(list(kb_dir) if kb_dir else None)
+        resolved = kb.resolve(target.claimed, provider_hint=target.declared_provider)
+        if resolved is not None:
+            dims = resolved.model.embedding_dimensions
+
+    from zing.embed_audit import audit_embeddings
+
+    verdict = asyncio.run(audit_embeddings(target, dims))
+
+    if as_json:
+        print(json.dumps(verdict, ensure_ascii=False, indent=2))
+    else:
+        _print_embed_verdict(verdict, "Embedding audit")
+
+    raise typer.Exit(code=_embed_exit_code(verdict, fail_on_risk))
+
+
+@app.command("rerank")
+def rerank_command(
+    base_url: Annotated[str | None, typer.Option("--base-url", help="Rerank endpoint base URL, e.g. https://relay.example.com/v1.")] = None,
+    api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
+    model: Annotated[str | None, typer.Option("--model", help="Rerank model id actually sent in requests.")] = None,
+    declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint (for display).")] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the verdict as JSON to stdout.")] = False,
+    fail_on_risk: Annotated[str | None, typer.Option("--fail-on-risk", help="Exit 1 if risk >= this (low|medium|high).")] = None,
+) -> None:
+    """Audit a rerank endpoint with a built-in known-answer probe (non-chat surface).
+
+    Sends a query with one obviously-relevant document mixed among distractors; a
+    genuine reranker must rank that document first. Prints pass/fail.
+    """
+    try:
+        target = build_target(
+            kind="target", name=None, base_url=base_url, api_key=api_key, model=model,
+            declared_provider=declared_provider,
+        )
+        fail_on_risk = validate_risk(fail_on_risk)
+    except ConfigError as exc:
+        if as_json:
+            _emit_machine_error(exc)
+        err_console.print(f"[red]Config error:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+
+    # Built-in known-answer probe: document 2 is the clear answer to the query.
+    query = "What is the capital of France?"
+    documents = [
+        "Bananas are a good source of potassium and dietary fiber.",
+        "The Great Wall of China is visible from low Earth orbit on a clear day.",
+        "Paris is the capital and most populous city of France.",
+        "Photosynthesis converts sunlight into chemical energy in plants.",
+    ]
+    expected_top_index = 2
+
+    from zing.embed_audit import audit_rerank
+
+    verdict = asyncio.run(audit_rerank(target, query, documents, expected_top_index))
+
+    if as_json:
+        print(json.dumps(verdict, ensure_ascii=False, indent=2))
+    else:
+        _print_embed_verdict(verdict, "Rerank audit (known-answer probe)")
+
+    raise typer.Exit(code=_embed_exit_code(verdict, fail_on_risk))
+
+
+def _embed_exit_code(verdict: dict, fail_on_risk: str | None) -> int:
+    """Exit 1 when the embedding/rerank verdict risk >= the --fail-on-risk gate."""
+    if not fail_on_risk:
+        return 0
+    try:
+        threshold = RiskLevel(fail_on_risk)
+        risk = RiskLevel(verdict["risk_level"])
+    except ValueError:
+        return 0
+    if (
+        threshold in _RISK_ORDER
+        and risk in _RISK_ORDER
+        and _RISK_ORDER.index(risk) >= _RISK_ORDER.index(threshold)
+    ):
+        return 1
+    return 0
+
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,

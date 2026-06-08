@@ -1,0 +1,163 @@
+name: "zing relay audit"
+description: >-
+  Audit whether an LLM relay actually serves the model it claims (货不对板检测)
+  and gate CI on the result. Runs `zing check --compact --fail-on-risk`, exposes
+  the risk / score / rating as outputs, and fails the job when the relay's risk
+  meets or exceeds your threshold.
+author: "zing contributors"
+branding:
+  icon: "shield"
+  color: "purple"
+
+inputs:
+  base-url:
+    description: "Relay base URL, e.g. https://relay.example.com/v1."
+    required: true
+  api-key:
+    description: >-
+      Relay API key. Pass a caller secret (e.g. ${{ secrets.RELAY_API_KEY }}).
+      It is forwarded to zing via an environment variable and is never echoed.
+    required: true
+  model:
+    description: "Model id actually sent in requests."
+    required: true
+  claimed-model:
+    description: "Model the relay claims to serve, if different from `model`."
+    required: false
+    default: ""
+  api:
+    description: "Wire protocol: auto | openai | anthropic."
+    required: false
+    default: "auto"
+  declared-provider:
+    description: "Provider hint for KB lookup (openai, anthropic, deepseek, ...)."
+    required: false
+    default: ""
+  suite:
+    description: "Detector suite: smoke | standard | deep | full."
+    required: false
+    default: "standard"
+  fail-on-risk:
+    description: "Fail the job when risk >= this level: low | medium | high."
+    required: false
+    default: "high"
+  python-version:
+    description: "Python version used to install and run zing."
+    required: false
+    default: "3.12"
+  version:
+    description: >-
+      pip install spec for zing. Defaults to the latest published `zing-audit`.
+      Pin it for reproducible runs, e.g. `zing-audit==0.8.0`.
+    required: false
+    default: "zing-audit"
+
+outputs:
+  risk:
+    description: "Risk level reported by zing (clean | low | medium | high | inconclusive)."
+    value: ${{ steps.audit.outputs.risk }}
+  score:
+    description: "Overall score 0-100 (may be empty if zing could not score the relay)."
+    value: ${{ steps.audit.outputs.score }}
+  rating:
+    description: "Human-readable rating from the verdict (may be empty)."
+    value: ${{ steps.audit.outputs.rating }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install zing
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install "${{ inputs.version }}"
+
+    - name: Run zing audit
+      id: audit
+      shell: bash
+      # The relay key is passed through the environment (never on the command
+      # line and never echoed). `zing check --api-key env:VAR` resolves it.
+      env:
+        ZING_RELAY_API_KEY: ${{ inputs.api-key }}
+      run: |
+        set -o pipefail
+
+        args=(
+          check
+          --base-url "${{ inputs.base-url }}"
+          --api-key "env:ZING_RELAY_API_KEY"
+          --model "${{ inputs.model }}"
+          --api "${{ inputs.api }}"
+          --suite "${{ inputs.suite }}"
+          --fail-on-risk "${{ inputs.fail-on-risk }}"
+          --compact
+        )
+        if [ -n "${{ inputs.claimed-model }}" ]; then
+          args+=(--claimed-model "${{ inputs.claimed-model }}")
+        fi
+        if [ -n "${{ inputs.declared-provider }}" ]; then
+          args+=(--declared-provider "${{ inputs.declared-provider }}")
+        fi
+
+        # Capture the compact JSON verdict. zing exits non-zero when the gate
+        # trips (or 2 on a config error); remember that code and re-raise it
+        # after we have parsed and surfaced the verdict.
+        set +e
+        report="$(zing "${args[@]}")"
+        code=$?
+        set -e
+        printf '%s\n' "$report"
+
+        # Parse risk/score/rating from the compact JSON shape:
+        #   {"verdict": {"risk": "...", "score": <num|null>, "rating": "...|null"}}
+        # Reads from a temp file so the JSON never reaches a shell variable that
+        # could be word-split, and so the key (which is not in the report) stays
+        # out of any parsing surface.
+        printf '%s' "$report" >"${RUNNER_TEMP:-/tmp}/zing-report.json"
+        python - "${RUNNER_TEMP:-/tmp}/zing-report.json" <<'PY' >>"$GITHUB_OUTPUT"
+        import json, sys
+
+        with open(sys.argv[1], encoding="utf-8") as fh:
+            report = json.load(fh)
+        verdict = report.get("verdict", {})
+        risk = verdict.get("risk", "") or ""
+        score = verdict.get("score")
+        score = "" if score is None else str(score)
+        rating = verdict.get("rating", "") or ""
+        print(f"risk={risk}")
+        print(f"score={score}")
+        print(f"rating={rating}")
+        PY
+
+        # Concise human summary on the run's Summary tab.
+        python - "${RUNNER_TEMP:-/tmp}/zing-report.json" "${{ inputs.fail-on-risk }}" "$code" <<'PY' >>"$GITHUB_STEP_SUMMARY"
+        import json, sys
+
+        with open(sys.argv[1], encoding="utf-8") as fh:
+            report = json.load(fh)
+        threshold, code = sys.argv[2], sys.argv[3]
+        v = report.get("verdict", {})
+        target = report.get("target", {})
+        score = v.get("score")
+        score = "—" if score is None else score
+        status = "FAILED" if code != "0" else "passed"
+        print("## zing relay audit")
+        print("")
+        print(f"- **Target:** `{target.get('name', '?')}` "
+              f"(`{target.get('model', '?')}` @ `{target.get('base_url', '?')}`)")
+        print(f"- **Risk:** `{v.get('risk', '?')}`  ·  "
+              f"**Score:** `{score}`/100  ·  **Rating:** `{v.get('rating') or '—'}`")
+        print(f"- **Gate:** fail-on-risk `{threshold}` → **{status}**")
+        headline = v.get("headline")
+        if headline:
+            print("")
+            print(f"> {headline}")
+        PY
+
+        # Re-raise zing's own exit code so the gate (or config error) fails the job.
+        exit "$code"

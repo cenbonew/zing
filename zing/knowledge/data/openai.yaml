@@ -10,6 +10,72 @@ base_url_hints:
 - /v1/responses
 default_tool_format: openai_function
 models:
+- id: text-embedding-3-small
+  aliases: []
+  family: text-embedding-3
+  context_window_tokens: 8191
+  max_output_tokens: -1
+  knowledge_cutoff: '2021-09-01'
+  tokenizer: cl100k_base
+  modalities:
+  - text
+  reasoning: false
+  supports_tools: false
+  embedding_dimensions: 1536
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - cohere
+  - voyage
+  - gemini
+  - google
+  notes: 'Embedding model (POST /v1/embeddings, not a chat model). Default 1536-dim output; supports Matryoshka truncation via the `dimensions` parameter (any value <=1536). 8191-token input limit. $0.02 per 1M tokens. Replaces text-embedding-ada-002 at lower cost with higher MTEB/MIRACL scores.'
+- id: text-embedding-3-large
+  aliases: []
+  family: text-embedding-3
+  context_window_tokens: 8191
+  max_output_tokens: -1
+  knowledge_cutoff: '2021-09-01'
+  tokenizer: cl100k_base
+  modalities:
+  - text
+  reasoning: false
+  supports_tools: false
+  embedding_dimensions: 3072
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - cohere
+  - voyage
+  - gemini
+  - google
+  notes: 'Embedding model (POST /v1/embeddings). Default 3072-dim output; supports Matryoshka truncation via the `dimensions` parameter (e.g. 256/1024). 8191-token input limit. $0.13 per 1M tokens. OpenAI''s best-performing embedding model.'
+- id: text-embedding-ada-002
+  aliases: []
+  family: text-embedding-ada
+  context_window_tokens: 8191
+  max_output_tokens: -1
+  knowledge_cutoff: '2021-09-01'
+  tokenizer: cl100k_base
+  modalities:
+  - text
+  reasoning: false
+  supports_tools: false
+  embedding_dimensions: 1536
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - cohere
+  - voyage
+  - gemini
+  - google
+  notes: 'Legacy embedding model (POST /v1/embeddings). Fixed 1536-dim output; no `dimensions` truncation parameter. 8191-token input limit. Superseded by the text-embedding-3 family but still widely served.'
 - id: gpt-5.5
   aliases:
   - gpt-5.5-2026-04-23

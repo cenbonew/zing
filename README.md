@@ -187,6 +187,63 @@ zing watch --base-url https://relay.example.com/v1 --api-key env:ZING_API_KEY \
 Alerts are formatted for **Slack / Feishu (飞书) / DingTalk (钉钉) / generic JSON**,
 auto-detected from the webhook URL.
 
+Prefer a UI? `zing serve` has a built-in monitor at **`/watches`** (🔔 监控): add a
+watch in the browser and an in-process background scheduler re-runs it on its interval,
+persists every run to history, and fires the same webhook alerts on a threshold cross or
+regression. Run-now / pause / delete from the page. Keys are stored only in `~/.zing` and
+never returned to the browser.
+
+## Embedding & rerank audits
+
+Embeddings and rerank are a non-chat surface, so zing audits them with a focused
+standalone auditor instead of the 9-dimension chat pipeline.
+
+```bash
+# Expected vector dimension is resolved from the bundled KB for the claimed model.
+zing embed --base-url https://relay.example.com/v1 \
+           --model text-embedding-3-large --claimed-model text-embedding-3-large --fail-on-risk high
+
+# Or override the expected dimension directly:
+zing embed --base-url ... --model my-embed --claimed-dimensions 1024 --json
+
+# Rerank: a built-in known-answer probe — a genuine reranker must rank the
+# obviously-relevant document first.
+zing rerank --base-url https://relay.example.com/v1 --model my-rerank
+```
+
+`embed` checks connectivity, **dimension match** (returned vector length vs the claimed
+model's native dimension — the headline 货不对板 signal; a relay claiming 3072-d
+`text-embedding-3-large` but returning 1024-d is a substituted model), determinism (same
+input → cosine ≈ 1), distinctness (unrelated inputs → cosine well below 1), and the
+echoed `model` field. Bundled KB profiles: OpenAI `text-embedding-3-small` (1536),
+`text-embedding-3-large` (3072), `text-embedding-ada-002` (1536), Qwen
+`text-embedding-v3`/`-v4` (1024).
+
+## Use in CI (GitHub Action)
+
+Gate any workflow on a relay audit with the bundled composite action. It runs
+`zing check --compact --fail-on-risk`, exposes `risk` / `score` / `rating` as outputs,
+writes a summary to the run, and fails the job when the risk gate trips.
+
+```yaml
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - id: zing
+        uses: cenbonew/zing@v0.9.0          # pin to a release tag
+        with:
+          base-url: https://relay.example.com/v1
+          api-key: ${{ secrets.RELAY_API_KEY }}   # caller secret; never echoed
+          model: gpt-4o
+          fail-on-risk: high
+      - run: echo "risk=${{ steps.zing.outputs.risk }} score=${{ steps.zing.outputs.score }}"
+```
+
+The relay key is forwarded via an environment variable (`--api-key env:…`), so it never
+appears on a command line. See [docs/CI.md](docs/CI.md) for the full inputs/outputs table
+and a deploy-gating example.
+
 ## Suites
 
 | Suite | Detectors | Cost |
