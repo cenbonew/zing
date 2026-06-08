@@ -219,6 +219,35 @@ echoed `model` field. Bundled KB profiles: OpenAI `text-embedding-3-small` (1536
 `text-embedding-3-large` (3072), `text-embedding-ada-002` (1536), Qwen
 `text-embedding-v3`/`-v4` (1024).
 
+Both also live in the web UI — `zing serve` has a **工具箱 / Tools** page at `/tools`
+(linked from the nav) with embed/rerank forms that render the same localized verdict.
+
+## Image & audio (TTS) generation audits
+
+Two more non-chat surfaces: image generation (`POST /v1/images/generations`) and
+text-to-speech (`POST /v1/audio/speech`). All decoding is pure stdlib — image
+dimensions from header bytes (PNG/JPEG/GIF/WebP), WAV duration via the `wave` module.
+
+```bash
+# Does a relay claiming DALL·E 3 actually return the requested 1792x1024? A
+# downscaled / wrong-size image (or a size outside the claimed model's native sizes,
+# resolved from the KB) is the headline 货不对板 signal.
+zing image --base-url https://relay.example.com/v1 --api-key env:RELAY_KEY \
+  --model dall-e-3 --claimed-model dall-e-3 --size 1792x1024 --fail-on-risk high
+
+# Does a relay claiming tts-1-hd return real audio whose length scales with the input
+# (not a fixed placeholder, not HTML/JSON masquerading as audio)?
+zing audio --base-url https://relay.example.com/v1 --api-key env:RELAY_KEY \
+  --model tts-1-hd --voice alloy --format wav --save clip.wav
+```
+
+`image` checks: connectivity, valid/decodable format, **size match** (decoded WxH vs the
+request and the claimed model's native sizes — FAIL/HIGH on mismatch), distinctness (two
+prompts → different images, catching a fixed placeholder), count, model field. `audio`
+checks: connectivity, container/format validity, format honored, non-trivial duration
+(scales with input length), distinctness, model field. KB ships OpenAI DALL·E 2/3,
+gpt-image-1, tts-1/tts-1-hd/gpt-4o-mini-tts, and Qwen image/TTS profiles.
+
 ## Use in CI (GitHub Action)
 
 Gate any workflow on a relay audit with the bundled composite action. It runs

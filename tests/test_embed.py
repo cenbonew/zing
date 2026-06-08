@@ -14,6 +14,7 @@ Scenarios:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 
@@ -29,9 +30,22 @@ MODEL = "text-embedding-3-large"
 SECRET = "sk-embed-secret-key-123456"
 
 
-def _unit_vector(dim: int, seed: float) -> list[float]:
-    """A deterministic, input-dependent vector of length ``dim`` (cosine-friendly)."""
-    return [math.sin(seed + i) for i in range(dim)]
+def _stable_key(text: str) -> int:
+    """A process-stable integer key for ``text`` (NOT the salted builtin ``hash``)."""
+    return int(hashlib.sha256(text.encode("utf-8")).hexdigest(), 16)
+
+
+def _unit_vector(dim: int, key: int) -> list[float]:
+    """Deterministic vector of length ``dim``.
+
+    A dominant spike at a key-determined index makes *distinct* keys near-orthogonal
+    (low cosine, so distinctness PASSES), while an *identical* key yields an identical
+    vector (determinism is exact). Independent of ``PYTHONHASHSEED`` — same key in,
+    same vector out, every process — so the distinctness check can never flake.
+    """
+    v = [0.001 * math.sin(key % 997 + i) for i in range(dim)]
+    v[key % dim] += 10.0
+    return v
 
 
 class EmbedMock:
@@ -80,8 +94,8 @@ class EmbedMock:
             # Identical vector for every input when collapsed; otherwise a vector
             # that is identical for identical text (determinism) but distinct for
             # distinct text (distinctness).
-            seed = 0.0 if self.collapse else float(abs(hash(text)) % 1000) / 100.0
-            data.append({"object": "embedding", "index": i, "embedding": _unit_vector(self.dim, seed)})
+            key = 0 if self.collapse else _stable_key(text)
+            data.append({"object": "embedding", "index": i, "embedding": _unit_vector(self.dim, key)})
         return httpx.Response(
             200,
             json={

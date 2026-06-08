@@ -45,6 +45,42 @@ _STATIC = Path(__file__).parent / "static"
 # the polling tick.
 _SCHEDULER_TICK_SEC = 30.0
 
+# Built-in known-answer rerank probe: one document (index 2) is unmistakably the
+# most relevant answer to the query. A genuine reranker must rank it first.
+_RERANK_PROBE_QUERY = "What is the capital of France?"
+_RERANK_PROBE_DOCS = [
+    "Bananas are a good source of potassium.",
+    "The Great Wall of China is very long.",
+    "Paris is the capital of France.",
+    "Photosynthesis happens in plants.",
+]
+_RERANK_PROBE_TOP = 2
+
+
+def _coerce_int(value: Any) -> int:
+    """Best-effort int from JSON input (str/float/None all tolerated). 0 on failure."""
+    if value is None:
+        return 0
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _kb_embedding_dimensions(model_id: str | None, provider_hint: str | None) -> int:
+    """Native embedding dimension for ``model_id`` from the KB; 0 if unknown."""
+    if not model_id:
+        return 0
+    try:
+        from zing.knowledge import load_knowledge_base
+
+        resolved = load_knowledge_base().resolve(model_id, provider_hint=provider_hint)
+    except Exception:
+        return 0
+    if resolved is None:
+        return 0
+    return int(resolved.model.embedding_dimensions or 0)
+
 
 async def _run_one_watch(row: dict[str, Any]) -> None:
     """Run a single due watch once: audit, persist, alert on regression/threshold.
@@ -404,6 +440,80 @@ def create_app() -> FastAPI:
         if refreshed and refreshed.get("last_report_id") is not None:
             report = history.get(int(refreshed["last_report_id"]))
         return JSONResponse({"ok": True, "report": report})
+
+    # ----- Tools: embedding & rerank auditors (non-chat surface) ---------- #
+    @app.get("/tools")
+    async def tools_page() -> Any:
+        return FileResponse(_STATIC / "tools.html")
+
+    @app.post("/api/embed")
+    async def embed_audit(request: Request) -> Any:
+        # Lazy import: the embed auditor pulls in the client stack only on demand.
+        from zing.embed_audit import audit_embeddings
+
+        body = await request.json()
+        try:
+            target = build_target(
+                kind="target",
+                name=body.get("name") or "embed",
+                base_url=body.get("base_url"),
+                api_key=body.get("api_key"),
+                model=body.get("model"),
+                claimed_model=body.get("claimed_model") or None,
+                declared_provider=body.get("declared_provider") or None,
+                api=validate_api(body.get("api")),
+            )
+        except ConfigError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+
+        # Resolve the expected output dimension: an explicit claimed value wins;
+        # otherwise look the claimed (or requested) model up in the KB. 0 = unknown,
+        # in which case the auditor records the observed dimension instead.
+        claimed_dimensions = _coerce_int(body.get("claimed_dimensions"))
+        if claimed_dimensions <= 0:
+            claimed_dimensions = _kb_embedding_dimensions(
+                target.claimed_model or target.model,
+                target.declared_provider,
+            )
+
+        # The verdict is already redacted (api_key is fingerprinted in `target`).
+        verdict = await audit_embeddings(target, claimed_dimensions)
+        return JSONResponse(verdict)
+
+    @app.post("/api/rerank")
+    async def rerank_audit(request: Request) -> Any:
+        from zing.embed_audit import audit_rerank
+
+        body = await request.json()
+        try:
+            target = build_target(
+                kind="target",
+                name=body.get("name") or "rerank",
+                base_url=body.get("base_url"),
+                api_key=body.get("api_key"),
+                model=body.get("model"),
+                api=validate_api(body.get("api")),
+            )
+        except ConfigError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+
+        # Use the caller's query/documents when given, else a built-in known-answer
+        # probe where one document is unmistakably the most relevant.
+        query = body.get("query")
+        documents = body.get("documents")
+        expected_top_index = body.get("expected_top_index")
+        if not (isinstance(query, str) and query.strip()) or not (
+            isinstance(documents, list) and len(documents) >= 2
+        ):
+            query = _RERANK_PROBE_QUERY
+            documents = list(_RERANK_PROBE_DOCS)
+            expected_top_index = _RERANK_PROBE_TOP
+        expected_top_index = _coerce_int(expected_top_index)
+        if not 0 <= expected_top_index < len(documents):
+            expected_top_index = 0
+
+        verdict = await audit_rerank(target, query, documents, expected_top_index)
+        return JSONResponse(verdict)
 
     # Static assets (e.g. future JS/CSS split-outs) under /assets.
     assets = _STATIC / "assets"

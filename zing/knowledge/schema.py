@@ -52,6 +52,14 @@ class ModelProfile(BaseModel):
     # model is not an embedding model (or the dimension is unknown). The embedding
     # auditor compares a relay's returned vector length against this.
     embedding_dimensions: int = 0
+    # Native output sizes an image-generation model supports, as "WxH" strings
+    # (e.g. ["1024x1024", "1792x1024"]). Empty = not an image model / unknown. The
+    # image auditor decodes the returned bytes and checks the dimensions against
+    # the requested size and this list.
+    image_sizes: list[str] = Field(default_factory=list)
+    # Voice ids a TTS/audio model supports (e.g. ["alloy", "nova"]). Empty = not
+    # an audio model / unknown.
+    audio_voices: list[str] = Field(default_factory=list)
     # Capability claims to verify.
     tool_format: str | None = None        # openai_function | anthropic_tool_use | ...
     supports_tools: bool = True

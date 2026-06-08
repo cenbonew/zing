@@ -60,6 +60,75 @@ models:
   - gemini
   - google
   notes: 'DashScope text-embedding model (POST /compatible-mode/v1/embeddings). Default 1024-dim output; selectable dimensions 1024/768/512 via the `dimensions` parameter. 8192-token input limit. Multilingual.'
+- id: wan2.2-t2i-flash
+  aliases:
+  - wanx2.1-t2i-turbo
+  - wan-t2i
+  family: wan
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - image
+  reasoning: false
+  supports_tools: false
+  image_sizes:
+  - 1024x1024
+  - 1280x720
+  - 720x1280
+  - 1440x810
+  - 810x1440
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义
+  - alibaba
+  - 阿里云
+  - wan
+  - 万相
+  identity_forbidden:
+  - openai
+  - dall-e
+  - dalle
+  - midjourney
+  - stability
+  - flux
+  notes: 'Alibaba Tongyi Wanxiang (通义万相) text-to-image model on DashScope. Common sizes 1024x1024 plus 16:9 / 9:16 variants (e.g. 1280x720). DashScope serves this via its image-synthesis API; an OpenAI-style /images/generations relay should still honor the requested size. Returned sizes outside this set behind a claimed Wan id are a downgrade tell.'
+- id: qwen3-tts-flash
+  aliases:
+  - qwen-tts
+  - qwen-tts-latest
+  family: qwen-tts
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - audio
+  reasoning: false
+  supports_tools: false
+  audio_voices:
+  - Cherry
+  - Serena
+  - Ethan
+  - Chelsie
+  - Dylan
+  - Jada
+  - Sunny
+  identity_keywords:
+  - qwen
+  - tongyi
+  - 通义
+  - alibaba
+  - 阿里云
+  identity_forbidden:
+  - openai
+  - elevenlabs
+  - azure
+  - 字节
+  - doubao
+  notes: 'Alibaba Qwen text-to-speech model on DashScope. Multilingual / multi-dialect with named voices (Cherry, Serena, Ethan, Chelsie, ...). Streaming and non-streaming synthesis. A relay returning a foreign voice set or non-audio body behind a claimed Qwen-TTS id is a tell.'
 - id: qwen3.7-max
   aliases:
   - qwen3.7-max-preview
