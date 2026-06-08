@@ -238,6 +238,34 @@ def create_app() -> FastAPI:
     async def i18n_js() -> Any:
         return FileResponse(_STATIC / "i18n.js", media_type="application/javascript")
 
+    @app.get("/icons.js")
+    async def icons_js() -> Any:
+        return FileResponse(_STATIC / "icons.js", media_type="application/javascript")
+
+    @app.get("/modelpicker.js")
+    async def modelpicker_js() -> Any:
+        return FileResponse(
+            _STATIC / "modelpicker.js", media_type="application/javascript"
+        )
+
+    @app.get("/api/kb")
+    async def kb() -> Any:
+        # Public model metadata only — no keys, no secrets. Mirrors the grouping
+        # the CLI `kb --json` command uses: providers sorted, each with its models.
+        from zing.knowledge import load_knowledge_base
+
+        knowledge = load_knowledge_base()
+        provs = sorted(knowledge.providers.values(), key=lambda p: p.provider)
+        providers = [
+            {
+                "provider": prov.provider,
+                "display_name": prov.display_name,
+                "models": [{"id": m.id, "aliases": list(m.aliases)} for m in prov.models],
+            }
+            for prov in provs
+        ]
+        return JSONResponse({"providers": providers})
+
     @app.post("/api/audit/stream")
     async def audit_stream(request: Request) -> Any:
         body = await request.json()

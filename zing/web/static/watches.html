@@ -89,14 +89,22 @@
   .tg input:checked+.track::after{transform:translateX(16px)}
 
   .foot{text-align:center;color:var(--faint);font-size:12px;padding:24px 0 0;line-height:1.6}
+
+  /* inline icon alignment */
+  .pill-ico,.reassure-ico,.cta-ico{display:inline-flex;align-items:center;vertical-align:-.18em}
+  .logo .b .zicon{width:16px;height:16px}
+  header .pill .zicon{width:14px;height:14px}
+  .reassure .zicon{width:14px;height:14px}
+  .cta .zicon{width:18px;height:18px}
+  .wact button .zicon{width:15px;height:15px;vertical-align:-.16em;margin-right:3px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
-    <a class="pill right" href="/">← 返回检测</a>
-    <a class="pill" href="/history">📊 检测历史</a>
+    <div class="logo"><span class="b" id="logo-icon"></span><span>zing<b>.</b></span></div>
+    <a class="pill right" href="/"><span id="back-icon" class="pill-ico"></span> 返回检测</a>
+    <a class="pill" href="/history"><span id="hist-icon" class="pill-ico"></span> 检测历史</a>
   </header>
 
   <div class="hero">
@@ -152,8 +160,8 @@
         <textarea class="in" id="f-hooks" placeholder="https://hooks.slack.com/services/...&#10;https://open.feishu.cn/open-apis/bot/v2/hook/..."></textarea>
       </div>
       <div class="formerr" id="formerr"></div>
-      <button class="cta" id="add">＋ 添加监控</button>
-      <div class="reassure">🔒 全程<b>本地运行</b>。API Key 仅保存在本机 <b>~/.zing</b> 的本地数据库里，<b>绝不</b>出现在监控列表里、也不会发给浏览器。</div>
+      <button class="cta" id="add"><span id="add-icon" class="cta-ico"></span> 添加监控</button>
+      <div class="reassure"><span id="lock-icon" class="reassure-ico"></span> 全程<b>本地运行</b>。API Key 仅保存在本机 <b>~/.zing</b> 的本地数据库里，<b>绝不</b>出现在监控列表里、也不会发给浏览器。</div>
     </form>
   </div>
 
@@ -165,6 +173,8 @@
 </div>
 
 <script src="/i18n.js"></script>
+<script src="/icons.js"></script>
+<script src="/modelpicker.js"></script>
 <script>
 (function(){
   "use strict";
@@ -172,6 +182,10 @@
     clean:"一致", low:"基本可信", medium:"存在偏离", high:"货不对板", inconclusive:"信号不足"
   };
   var $ = function(id){ return document.getElementById(id); };
+
+  function icon(name, opts){
+    return (typeof window.zingIcon === "function") ? window.zingIcon(name, opts) : "";
+  }
 
   function esc(s){
     return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
@@ -232,8 +246,8 @@
           '<span>上次：' + fmtTime(w.last_run_ts) + scorePart + '</span>' +
         '</div>' +
         '<div class="wact">' +
-          '<button class="run" data-run="'+w.id+'">▶ 立即运行</button>' +
-          '<button class="del" data-del="'+w.id+'">删除</button>' +
+          '<button class="run" data-run="'+w.id+'">' + icon("play") + '立即运行</button>' +
+          '<button class="del" data-del="'+w.id+'">' + icon("trash") + '删除</button>' +
         '</div>';
       list.appendChild(el);
     });
@@ -294,12 +308,12 @@
     var delId = t.getAttribute && t.getAttribute("data-del");
     if(runId){
       t.disabled = true;
-      var orig = t.textContent;
-      t.textContent = "运行中…";
+      var orig = t.innerHTML;
+      t.innerHTML = icon("refresh") + "运行中…";
       fetch("/api/watches/"+runId+"/run", {method:"POST"}).then(function(r){
         return r.json();
       }).then(function(){ load(); }).catch(function(){
-        t.disabled = false; t.textContent = orig; alert("运行失败");
+        t.disabled = false; t.innerHTML = orig; alert("运行失败");
       });
     } else if(delId){
       if(!confirm("删除这个监控？")) return;
@@ -318,6 +332,30 @@
       }).then(load);
     }
   });
+
+  // populate static-markup icons (icons.js loaded above)
+  (function paintStaticIcons(){
+    var slots = {
+      "logo-icon": "bolt",
+      "back-icon": "arrowLeft",
+      "hist-icon": "chart",
+      "add-icon": "plus",
+      "lock-icon": "lock"
+    };
+    Object.keys(slots).forEach(function(id){
+      var el = $(id);
+      if(el) el.innerHTML = icon(slots[id]);
+    });
+  })();
+
+  // wire the model picker on the "声称模型" field (canonical value holder stays #f-claimed)
+  if(window.ZingModelPicker && typeof window.ZingModelPicker.enhance === "function"){
+    window.ZingModelPicker.enhance({
+      claimedInput: "#f-claimed",
+      providerInput: "#f-prov",
+      label: "声称模型"
+    });
+  }
 
   load();
 })();

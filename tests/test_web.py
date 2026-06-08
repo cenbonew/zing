@@ -65,6 +65,36 @@ def test_serves_console_and_history_and_i18n(client):
     assert j.status_code == 200 and "ZING_I18N" in j.text
 
 
+def test_serves_icons_and_modelpicker_js(client):
+    icons = client.get("/icons.js")
+    assert icons.status_code == 200
+    assert "application/javascript" in icons.headers["content-type"]
+    assert "ZING_ICONS" in icons.text and "zingIcon" in icons.text
+
+    mp = client.get("/modelpicker.js")
+    assert mp.status_code == 200
+    assert "application/javascript" in mp.headers["content-type"]
+    assert "ZingModelPicker" in mp.text
+
+
+def test_api_kb_lists_providers_with_models(client):
+    r = client.get("/api/kb")
+    assert r.status_code == 200
+    body = r.json()
+    providers = body["providers"]
+    assert isinstance(providers, list) and providers
+    # Every provider entry exposes only public metadata (no api keys).
+    for p in providers:
+        assert {"provider", "display_name", "models"} <= set(p)
+        for m in p["models"]:
+            assert set(m) == {"id", "aliases"}
+    # At least one provider has models; deepseek ships a deepseek-* id.
+    assert any(p["models"] for p in providers)
+    deepseek = next((p for p in providers if p["provider"] == "deepseek"), None)
+    assert deepseek is not None
+    assert any(m["id"].startswith("deepseek") for m in deepseek["models"])
+
+
 def test_history_module_roundtrip(tmp_path, monkeypatch):
     monkeypatch.setenv("ZING_DATA_DIR", str(tmp_path))
     from zing.web import history

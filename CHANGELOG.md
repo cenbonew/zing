@@ -6,6 +6,22 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Web UI: claimed-model picker.** The “claimed model” field is now a provider → model
+  picker driven by the bundled knowledge base (pick e.g. *DeepSeek* then
+  *deepseek-v4-flash*) instead of free typing, with a **自定义输入** toggle that falls back
+  to a plain text box for unlisted ids. Wired into the audit form, the advanced console,
+  the watch form, and the embeddings tool. Backed by a new `GET /api/kb` endpoint
+  (public model metadata only — no secrets).
+
+### Changed
+
+- **Web UI: all emoji replaced with SVG icons.** A single canonical inline-SVG icon set
+  (`/icons.js`, `window.zingIcon`) renders every glyph — logo, nav (tools/history/watch),
+  lock, status check/cross/info, arrows, carets, run/delete/etc. — as crisp,
+  `currentColor` line icons across all pages, replacing the previous emoji.
+
 ## [0.10.0] — image/audio generation audits, embeddings/rerank in the web UI
 
 ### Added
