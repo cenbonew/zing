@@ -38,6 +38,15 @@ from zing.config import (
 from zing.knowledge import load_knowledge_base
 from zing.models import AuditReport, RiskLevel, Status, TargetConfig
 
+# Risk ordering for the `watch` alert threshold (clean < low < medium < high).
+_WATCH_RISK_RANK = {
+    RiskLevel.CLEAN: 0,
+    RiskLevel.INCONCLUSIVE: 1,
+    RiskLevel.LOW: 2,
+    RiskLevel.MEDIUM: 3,
+    RiskLevel.HIGH: 4,
+}
+
 app = typer.Typer(
     name="zing",
     help=(
@@ -645,6 +654,144 @@ def serve_command(
 
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
     uvicorn.run(create_app(), host=host, port=port, log_level="warning")
+
+
+@app.command("watch")
+def watch_command(
+    config: Annotated[Path | None, typer.Option("--config", "-c", help="YAML config path (reuses the same [target]/[run] shape as `check`).")] = None,
+    base_url: Annotated[str | None, typer.Option("--base-url", help="Relay base URL, e.g. https://relay.example.com/v1.")] = None,
+    api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
+    model: Annotated[str | None, typer.Option("--model", help="Model id actually sent in requests.")] = None,
+    claimed_model: Annotated[str | None, typer.Option("--claimed-model", help="Model the relay claims to serve, if different from --model.")] = None,
+    name: Annotated[str | None, typer.Option("--name", help="Display name for the target.")] = None,
+    api: Annotated[str | None, typer.Option("--api", help="Wire protocol: auto | openai | anthropic.")] = None,
+    declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup.")] = None,
+    header: Annotated[list[str] | None, typer.Option("--header", "-H", help="Extra header 'Name: value' (repeatable).")] = None,
+    suite: Annotated[str | None, typer.Option("--suite", help="smoke | standard | deep | full.")] = None,
+    interval: Annotated[int, typer.Option("--interval", help="Seconds between re-audit cycles.")] = 3600,
+    once: Annotated[bool, typer.Option("--once", help="Run a single cycle and exit (no loop).")] = False,
+    webhook: Annotated[list[str] | None, typer.Option("--webhook", help="Alert webhook URL (repeatable).")] = None,
+    webhook_kind: Annotated[str, typer.Option("--webhook-kind", help="auto | slack | feishu | dingtalk | generic.")] = "auto",
+    alert_on: Annotated[str, typer.Option("--alert-on", help="Alert when risk >= this: low | medium | high.")] = "medium",
+    alert_on_regression: Annotated[bool, typer.Option("--alert-on-regression/--no-alert-on-regression", help="Also alert when risk is worse than the previous saved run for this target+model.")] = True,
+) -> None:
+    """Continuously re-audit a relay on a schedule and alert webhooks on risk.
+
+    Each cycle runs a `check`-mode audit, persists it to the local history store,
+    compares against the previous saved run for this target+model, and POSTs a
+    concise alert to each --webhook when the risk crosses --alert-on (or regresses,
+    unless --no-alert-on-regression). Use --once for a single cycle (e.g. in cron),
+    or leave it looping with --interval. Ctrl-C stops cleanly.
+    """
+    from zing import notify
+    from zing.runner import run_audit
+
+    try:
+        cfg = load_config_file(config)
+        target = _target_from(
+            cfg, "target", kind="target", name=name, base_url=base_url, api_key=api_key,
+            model=model, declared_provider=declared_provider, timeout=None, headers=header,
+            api=api, claimed_model=claimed_model,
+        )
+        options = _build_options(cfg, suite=suite)
+        # Validate --alert-on against the allowed risk levels (low|medium|high),
+        # then map it to a RiskLevel for threshold comparison.
+        validate_risk(alert_on)
+        threshold = RiskLevel(alert_on)
+    except ConfigError as exc:
+        err_console.print(f"[red]Config error:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+
+    webhooks = list(webhook or [])
+    kb_dirs = None
+
+    def _should_alert(report: AuditReport, previous: dict | None) -> bool:
+        rank = _WATCH_RISK_RANK
+        cur_rank = rank.get(report.verdict.risk_level, rank[RiskLevel.INCONCLUSIVE])
+        if cur_rank >= rank[threshold]:
+            return True
+        if alert_on_regression and previous is not None:
+            cur_dict = json.loads(report.model_dump_json())
+            return notify.regressed(cur_dict, previous)
+        return False
+
+    def _previous_run(target: TargetConfig) -> dict | None:
+        """The most recent prior saved report for this target+claimed model, if any."""
+        try:
+            from zing.web import history
+        except Exception:
+            return None
+        try:
+            rows = history.recent(limit=50)
+        except Exception:
+            return None
+        claimed = target.claimed_model or target.model
+        for row in rows:
+            if row.get("base_url") == target.base_url and row.get("claimed_model") == claimed:
+                rid = row.get("id")
+                if rid is not None:
+                    full = history.get(int(rid))
+                    if full is not None:
+                        return full
+        return None
+
+    async def _cycle() -> None:
+        previous = _previous_run(target)
+        command = "zing " + " ".join(sys.argv[1:])
+        report = await run_audit(
+            target, options, mode="check", command=command, kb_dirs=kb_dirs
+        )
+
+        # Persist (best-effort): a history failure must never break the watch loop.
+        try:
+            from zing.web import history
+            history.save(json.loads(report.model_dump_json()))
+        except Exception:
+            pass
+
+        v = report.verdict
+        style, label = _RISK_STYLE.get(v.risk_level, ("white", v.risk_level.value))
+        score = "n/a" if v.overall_score is None else f"{v.overall_score}/100"
+        from datetime import datetime
+        stamp = datetime.now().strftime("%H:%M:%S")
+        console.print(
+            f"[dim]{stamp}[/] [{style}]{label}[/] · {score} · "
+            f"{target.base_url} · {target.claimed_model or target.model}"
+        )
+
+        if not _should_alert(report, previous):
+            return
+        if not webhooks:
+            console.print("  [yellow]![/] alert condition met but no --webhook configured")
+            return
+        report_dict = json.loads(report.model_dump_json())
+        for url in webhooks:
+            ok = await notify.send(url, report_dict, kind=webhook_kind, previous=previous)
+            mark = "[green]✓[/]" if ok else "[red]✗[/]"
+            host = url.split("/")[2] if "://" in url else url
+            console.print(f"  {mark} alert → {host}")
+
+    async def _loop() -> None:
+        while True:
+            try:
+                await _cycle()
+            except Exception as exc:  # one bad cycle shouldn't kill the watcher
+                err_console.print(f"[red]Cycle error:[/red] {exc}")
+            if once:
+                return
+            await asyncio.sleep(max(1, interval))
+
+    console.print(
+        f"[green]zing watch[/] · every [bold]{interval}s[/] · "
+        f"alert ≥ [bold]{threshold.value}[/]"
+        + ("" if not webhooks else f" · {len(webhooks)} webhook(s)")
+        + ("  (Ctrl-C to stop)" if not once else "")
+    )
+    try:
+        asyncio.run(_loop())
+    except KeyboardInterrupt:
+        console.print("\n[dim]watch stopped.[/]")
+        raise typer.Exit(code=0) from None
 
 
 @app.callback(invoke_without_command=True)
