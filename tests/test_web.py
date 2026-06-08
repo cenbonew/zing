@@ -77,6 +77,14 @@ def test_serves_icons_and_modelpicker_js(client):
     assert "ZingModelPicker" in mp.text
 
 
+def test_serves_favicon(client):
+    for path in ("/favicon.svg", "/favicon.ico"):
+        r = client.get(path)
+        assert r.status_code == 200, path
+        assert "image/svg+xml" in r.headers["content-type"]
+        assert "<svg" in r.text
+
+
 def test_api_kb_lists_providers_with_models(client):
     r = client.get("/api/kb")
     assert r.status_code == 200

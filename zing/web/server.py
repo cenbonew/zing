@@ -248,6 +248,15 @@ def create_app() -> FastAPI:
             _STATIC / "modelpicker.js", media_type="application/javascript"
         )
 
+    @app.get("/favicon.svg")
+    async def favicon_svg() -> Any:
+        return FileResponse(_STATIC / "favicon.svg", media_type="image/svg+xml")
+
+    # Browsers request /favicon.ico by default; serve the same SVG mark.
+    @app.get("/favicon.ico")
+    async def favicon_ico() -> Any:
+        return FileResponse(_STATIC / "favicon.svg", media_type="image/svg+xml")
+
     @app.get("/api/kb")
     async def kb() -> Any:
         # Public model metadata only — no keys, no secrets. Mirrors the grouping

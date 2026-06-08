@@ -6,6 +6,20 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Web UI polish.** The claimed-model picker now shows short provider names (e.g.
+  *DeepSeek* instead of *DeepSeek (DeepSeek-AI / Hangzhou DeepSeek)*; full name on
+  hover) and lays its 供应商 / 模型 selects out as an even, full-width responsive grid
+  (the field gets its own row on every page) — fixing the cramped layout. The picker
+  is now theme-aware via `--zmp-*` CSS variables, so it renders correctly on the dark
+  console as well as the light pages.
+
+### Added
+
+- **Favicon.** An SVG site icon (the zing bolt mark) served at `/favicon.svg`
+  (`/favicon.ico` aliases it) and linked from every page.
+
 ## [0.11.0] — web UI: claimed-model picker + all-SVG icons
 
 ### Added

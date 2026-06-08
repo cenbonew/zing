@@ -28,6 +28,22 @@
 
   var _kbPromise = null; // shared across every enhance() call on the page
 
+  // Inject layout CSS once. A class selector (.zmp .zmp-row) outranks the element
+  // rules some pages put on `div`/`select`, so the two selects always grid evenly
+  // instead of collapsing to their intrinsic widths.
+  function injectStyle() {
+    if (document.getElementById("zmp-style")) return;
+    var css =
+      ".zmp{width:100%}" +
+      ".zmp .zmp-row{display:grid !important;" +
+      "grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;width:100%}" +
+      ".zmp .zmp-row>select{width:100% !important;min-width:0;box-sizing:border-box}";
+    var st = document.createElement("style");
+    st.id = "zmp-style";
+    st.textContent = css;
+    (document.head || document.documentElement).appendChild(st);
+  }
+
   function loadKb() {
     if (_kbPromise == null) {
       _kbPromise = fetch("/api/kb")
@@ -60,28 +76,43 @@
     return ids;
   }
 
-  // Minimal inline styles keyed off the page's CSS vars so the picker matches
-  // the local .in / select look without needing the page to ship extra CSS.
+  // Inline styles keyed off CSS vars (with --zmp-* theme overrides) so the picker
+  // matches the local .in / select look on light pages AND adapts to the dark
+  // console, which sets --zmp-* in its :root. Fallbacks reproduce the light look.
   function styleSelect(sel) {
-    sel.style.width = "100%";
-    sel.style.border = "1.5px solid var(--line, #e7ece5)";
-    sel.style.background = "#fbfdfa";
-    sel.style.borderRadius = "13px";
+    sel.style.flex = "1 1 170px";
+    sel.style.minWidth = "0"; // allow shrink + ellipsis instead of overflow
+    sel.style.boxSizing = "border-box";
+    sel.style.border = "1.5px solid var(--zmp-border, var(--line, #e7ece5))";
+    sel.style.background = "var(--zmp-bg, #fbfdfa)";
+    sel.style.borderRadius = "var(--zmp-radius, 13px)";
     sel.style.fontFamily = "var(--sans, system-ui, sans-serif)";
     sel.style.fontWeight = "500";
-    sel.style.fontSize = "15.5px";
-    sel.style.color = "var(--ink, #0c211e)";
+    sel.style.fontSize = "15px";
+    sel.style.color = "var(--zmp-fg, var(--ink, #0c211e))";
     sel.style.padding = "12px 13px";
     sel.style.outline = "none";
     sel.style.cursor = "pointer";
     sel.addEventListener("focus", function () {
-      sel.style.borderColor = "var(--teal, #0f6f5f)";
-      sel.style.boxShadow = "0 0 0 4px rgba(15,111,95,.12)";
+      sel.style.borderColor = "var(--zmp-focus, var(--teal, #0f6f5f))";
+      sel.style.boxShadow = "0 0 0 4px var(--zmp-ring, rgba(15,111,95,.12))";
     });
     sel.addEventListener("blur", function () {
-      sel.style.borderColor = "var(--line, #e7ece5)";
+      sel.style.borderColor = "var(--zmp-border, var(--line, #e7ece5))";
       sel.style.boxShadow = "none";
     });
+  }
+
+  // Short, human label for a provider: drop the long parenthetical / secondary
+  // names so the dropdown reads "DeepSeek" not "DeepSeek (DeepSeek-AI / …)".
+  function shortProvider(name) {
+    if (!name) return name || "";
+    var s = String(name)
+      .replace(/\s*[（(].*$/, "") // from the first parenthesis onward
+      .replace(/\s+\/\s+.*$/, "") // after " / " (secondary/native names)
+      .replace(/[,;].*$/, "") // trailing clauses
+      .trim();
+    return s || name;
   }
 
   function opt(value, text) {
@@ -108,6 +139,7 @@
   }
 
   function build(claimedInput, providerInput, providers, label) {
+    injectStyle();
     var ids = knownIds(providers);
 
     // Container inserted right before the original input; the input is moved
@@ -117,16 +149,16 @@
     wrap.style.display = "flex";
     wrap.style.flexDirection = "column";
     wrap.style.gap = "8px";
+    wrap.style.width = "100%";
 
     var parent = claimedInput.parentNode;
     parent.insertBefore(wrap, claimedInput);
 
-    // The two selects live in their own row container so we can hide/show them
-    // as a unit when toggling to custom mode.
+    // The two selects sit side by side and wrap to stacked when the row is
+    // narrow, so the picker looks right whether it's a full-width row or a
+    // half-width grid cell. They hide/show as a unit when toggling to custom.
     var selectRow = document.createElement("div");
-    selectRow.style.display = "flex";
-    selectRow.style.flexDirection = "column";
-    selectRow.style.gap = "8px";
+    selectRow.className = "zmp-row";
 
     var provSel = document.createElement("select");
     var modelSel = document.createElement("select");
@@ -140,7 +172,9 @@
 
     provSel.appendChild(opt("", "选择供应商…"));
     providers.forEach(function (p) {
-      provSel.appendChild(opt(p.provider, p.display_name || p.provider));
+      var o = opt(p.provider, shortProvider(p.display_name || p.provider));
+      o.title = p.display_name || p.provider; // full name on hover
+      provSel.appendChild(o);
     });
     modelSel.appendChild(opt("", "选择模型…"));
     modelSel.disabled = true;
@@ -156,7 +190,7 @@
     toggle.style.fontSize = "12px";
     toggle.style.fontWeight = "700";
     toggle.style.fontFamily = "var(--sans, system-ui, sans-serif)";
-    toggle.style.color = "var(--teal, #0f6f5f)";
+    toggle.style.color = "var(--zmp-accent, var(--teal, #0f6f5f))";
     toggle.style.background = "none";
     toggle.style.border = "0";
     toggle.style.padding = "0";

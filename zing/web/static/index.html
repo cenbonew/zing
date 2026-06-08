@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>zing — 中转站验真</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
@@ -167,12 +168,10 @@
           <div class="row-help"><div class="lab" style="margin:0">API Key</div><span style="font-size:11.5px;color:var(--faint)">支持 env:VAR / file:/path</span></div>
           <input class="in" id="i-key" placeholder="sk-... 或 env:ZING_API_KEY" value="env:ZING_API_KEY">
         </div>
-        <div class="two">
-          <div class="grp"><div class="lab">声称的模型</div><input class="in" id="i-model" value="deepseek-v4-flash"></div>
-          <div class="grp">
-            <div class="row-help"><div class="lab" style="margin:0">实际请求 id</div><button type="button" id="adv-t">可选</button></div>
-            <input class="in" id="i-claimed" placeholder="留空=同上（疑似替换时填真实 id）">
-          </div>
+        <div class="grp"><div class="lab">声称的模型</div><input class="in" id="i-model" value="deepseek-v4-flash"></div>
+        <div class="grp">
+          <div class="row-help"><div class="lab" style="margin:0">实际请求 id</div><button type="button" id="adv-t">可选</button></div>
+          <input class="in" id="i-claimed" placeholder="留空=同上（疑似替换时填真实 id）">
         </div>
         <div class="two">
           <div class="grp"><div class="lab">协议</div>
