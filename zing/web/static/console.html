@@ -88,6 +88,8 @@
   .run{width:100%;margin-top:4px;font-family:var(--mono);font-weight:800;font-size:14px;letter-spacing:.5px;
     color:#06120c;background:linear-gradient(180deg,#5bf0ad,#33c98a);border:0;border-radius:10px;padding:13px;cursor:pointer;
     box-shadow:0 10px 30px -12px var(--grn);transition:.15s}
+  .run{display:flex;align-items:center;justify-content:center;gap:7px}
+  .run-ic{display:inline-flex;align-items:center}
   .run:hover{filter:brightness(1.06)} .run:active{transform:translateY(1px)}
   .run:disabled{filter:grayscale(.5) brightness(.7);cursor:not-allowed}
 
@@ -170,10 +172,12 @@
   .foot{color:var(--faint);font-family:var(--mono);font-size:11px;text-align:center;padding:8px 0 40px}
   .foot a{color:var(--dim)}
 </style>
+<script src="/icons.js"></script>
+<script src="/modelpicker.js"></script>
 </head>
 <body>
 <header><div class="wrap bar">
-  <div class="logo"><span class="zap">⚡</span> <span>zing<b>.</b>console</span><span class="v" id="ver">dev</span></div>
+  <div class="logo"><span class="zap" id="logo-icon"></span> <span>zing<b>.</b>console</span><span class="v" id="ver">dev</span></div>
   <nav class="nav">
     <a class="on" href="#">扫描</a><a href="/">报告视图 /</a><a href="/history">历史 /history</a>
   </nav>
@@ -213,7 +217,7 @@
         </div>
 
         <div class="cmp" id="cmp">
-          <button type="button" class="cmp-toggle" id="cmp-t"><span>+ baseline / compare (对照可信基线 · 更强结论)</span><span class="cv">⌄</span></button>
+          <button type="button" class="cmp-toggle" id="cmp-t"><span>+ baseline / compare (对照可信基线 · 更强结论)</span><span class="cv" id="cmp-caret"></span></button>
           <div class="cmp-body" id="cmp-body"><div class="cmp-inner">
             <p class="cmp-hint">填一个你信任的同款模型端点（如官方 API）。质量评审与篡改检测在有基线时才升到最高级别。</p>
             <div class="fld"><label>baseline base_url</label><input id="b-url" placeholder="https://api.deepseek.com/v1"></div>
@@ -229,7 +233,7 @@
           </div></div>
         </div>
 
-        <button class="run" id="run">▸ 运行审计 / run audit</button>
+        <button class="run" id="run"><span id="run-icon" class="run-ic"></span><span id="run-label">运行审计 / run audit</span></button>
       </div>
     </form>
 
@@ -257,6 +261,17 @@
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 
+/* canonical SVG icon helper (icons.js -> window.zingIcon); never throws */
+function ic(name,opts){try{return window.zingIcon?window.zingIcon(name,opts||{}):"";}catch(e){return "";}}
+
+/* inject static-markup icons once on load */
+function paintStaticIcons(){
+  const logo=$("#logo-icon"); if(logo) logo.innerHTML=ic("bolt",{size:16});
+  const caret=$("#cmp-caret"); if(caret) caret.innerHTML=ic("chevronDown",{size:14});
+  const runIc=$("#run-icon"); if(runIc) runIc.innerHTML=ic("arrowRight",{size:16});
+}
+paintStaticIcons();
+
 /* 9 dimensions: id, zh name, weight (canonical weighting from prompt contract) */
 const DIMS = [
   ["model_identity","模型身份 model_identity",22],["context_window","上下文窗口 context_window",20],
@@ -270,10 +285,10 @@ const RISK = {
 };
 const STATC={pass:"grn",warn:"amb",fail:"red",info:"blu",inconclusive:"grey",not_run:"grey",error:"red"};
 const SEVC={info:"blu",low:"amb",medium:"amb",high:"red",critical:"red"};
-const ICON={pass:'<span class="c-grn">✓</span>',warn:'<span class="c-amb">▲</span>',
-  fail:'<span class="c-red">✗</span>',info:'<span class="c-blu">ℹ</span>',
+const ICON={pass:`<span class="c-grn">${ic("check")}</span>`,warn:'<span class="c-amb">▲</span>',
+  fail:`<span class="c-red">${ic("x")}</span>`,info:`<span class="c-blu">${ic("info")}</span>`,
   inconclusive:'<span class="c-grey">?</span>',not_run:'<span class="c-grey">–</span>',
-  error:'<span class="c-red">✗</span>'};
+  error:`<span class="c-red">${ic("x")}</span>`};
 const SEVRANK={critical:5,high:4,medium:3,low:2,info:1};
 const scoreCol = v => v==null?"grey":v>=85?"grn":v>=70?"amb":"red";
 
@@ -336,7 +351,7 @@ async function startAudit(){
   }
 
   running=true;
-  $("#run").disabled=true; $("#run").textContent="▸ 审计中…";
+  $("#run").disabled=true; $("#run-label").textContent="审计中…";
   resetView();
   t0=performance.now();
 
@@ -357,11 +372,11 @@ async function startAudit(){
   }catch(e){
     sysLine('<span class="c-red">connection failed · '+esc(String(e.message||e))+'</span>');
     $("#formerr").innerHTML='<div class="errbox">! 连接本地服务失败：'+esc(String(e.message||e))+'</div>';
-    if($("#verdict").classList.contains("idle")) $("#verdict").textContent="连接失败 ✗";
+    if($("#verdict").classList.contains("idle")) $("#verdict").innerHTML=`连接失败 <span class="c-red">${ic("x",{size:18})}</span>`;
   }finally{
     running=false;
     $("#logdot").classList.remove("live");
-    $("#run").disabled=false; $("#run").textContent="▸ 重新运行 / re-run";
+    $("#run").disabled=false; $("#run-label").textContent="重新运行 / re-run";
   }
 }
 
@@ -395,7 +410,7 @@ function handle(ev){
   }else if(ev.type==="error"){
     sysLine(`<span class="c-red">error · ${esc(ev.message)}</span>`);
     $("#formerr").innerHTML='<div class="errbox">! 检测失败：'+esc(ev.message)+'</div>';
-    if($("#verdict").classList.contains("idle")) $("#verdict").textContent="审计中断 ✗";
+    if($("#verdict").classList.contains("idle")) $("#verdict").innerHTML=`审计中断 <span class="c-red">${ic("x",{size:18})}</span>`;
   }else if(ev.type==="done"){
     sysLine('<span class="c-dim">— stream done —</span>');
     if($("#verdict").classList.contains("idle")) $("#verdict").textContent="未收到报告（已结束）";
@@ -411,7 +426,7 @@ function sysLine(html){
 
 function startRow(ev){
   const ln=document.createElement("div"); ln.className="ln";
-  ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic c-amb">▸</span>`+
+  ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic c-amb">${ic("play")}</span>`+
     `<span class="dn cursor">${esc(ev.id)} · ${esc(ev.name||"")} <span class="c-dim">[${esc(ev.dimension||"")}]</span></span>`;
   $("#log").appendChild(ln); $("#log").scrollTop=1e9;
   rows[ev.id]={row:ln, ev};
@@ -449,7 +464,7 @@ function findingHtml(ev,f){
   let h=`<span class="fhd">${ICON[f.status]||"·"} ${esc(f.title||f.id||"finding")}</span> `+
         `<span class="sev ${sevc}">[${esc((f.severity||f.status||"").toUpperCase())}]</span>`;
   if(f.summary) h+=`<span class="sum">${esc(f.summary)}</span>`;
-  if(f.recommendation) h+=`<span class="rec">→ ${esc(f.recommendation)}</span>`;
+  if(f.recommendation) h+=`<span class="rec">${ic("arrowRight",{size:13})} ${esc(f.recommendation)}</span>`;
   const e=f.evidence;
   if(e&&typeof e==="object"){
     const keys=Object.keys(e).slice(0,12);
@@ -465,7 +480,7 @@ function notableLine(ev,f){
   const sevc="c-"+(SEVC[f.severity]||STATC[f.status]||"dim");
   const ln=document.createElement("div"); ln.className="ln";
   ln.innerHTML=`<span class="t">${stamp()}</span><span class="ic">${ICON[f.status]||"!"}</span>`+
-    `<span class="dn has">↳ <span class="${sevc}">${esc(f.title||f.id||"finding")}</span> <span class="c-dim">(${esc(ev.id)})</span></span>`+
+    `<span class="dn has">${ic("cornerDownRight",{size:14})} <span class="${sevc}">${esc(f.title||f.id||"finding")}</span> <span class="c-dim">(${esc(ev.id)})</span></span>`+
     `<span class="res"><span class="${sevc}">${esc((f.severity||f.status||"").toUpperCase())}</span></span>`;
   ln.querySelector(".dn").onclick=()=>{
     const nx=ln.nextElementSibling;
@@ -511,7 +526,7 @@ function showVerdict(r){
       ${kf.length?`<ul class="kf">${kf.map(k=>{
         const kfTxt = typeof k==="string"?k:(k.title||k.summary||JSON.stringify(k));
         const kfc = typeof k==="object"&&k.severity?("c-"+(SEVC[k.severity]||"dim")):"c-amb";
-        return `<li><span class="b ${kfc}">▸</span><span>${esc(kfTxt)}</span></li>`;
+        return `<li><span class="b ${kfc}">${ic("play")}</span><span>${esc(kfTxt)}</span></li>`;
       }).join("")}</ul>`:""}
     </div>
     <div class="grade c-${col}">${esc(v.rating||"")}</div>`;
@@ -524,6 +539,13 @@ function zhHead(v){
     inconclusive:"信号不足，无法判定（连通或覆盖不够）"};
   return m[v.risk_level]||v.headline||"";
 }
+
+/* model picker: enhance the claimed-model input (stays the value source) */
+try{
+  if(window.ZingModelPicker){
+    window.ZingModelPicker.enhance({claimedInput:"#i-claimed",providerInput:"#i-prov"});
+  }
+}catch(e){}
 </script>
 </body>
 </html>

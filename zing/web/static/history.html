@@ -104,13 +104,15 @@
   .loading{padding:18px 22px;color:var(--faint);font-size:13px;font-family:var(--mono)}
 
   .foot{text-align:center;color:var(--faint);font-size:12px;padding:18px 0 30px;line-height:1.6}
+  .zicon{vertical-align:middle;flex:none}
 </style>
+<script src="/icons.js"></script>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
-    <span class="pill">🔒 本地历史 · 存于 <b>~/.zing</b></span>
+    <div class="logo"><span class="b" id="logoIcon"></span><span>zing<b>.</b></span></div>
+    <span class="pill"><span id="lockIcon" style="vertical-align:-2px"></span> 本地历史 · 存于 <b>~/.zing</b></span>
   </header>
 
   <div class="hero">
@@ -119,7 +121,7 @@
   </div>
 
   <div class="topbar">
-    <a class="back" href="/">← 返回检测</a>
+    <a class="back" href="/"><span id="backIcon" style="vertical-align:-3px"></span> 返回检测</a>
     <button class="clr" id="clr">清空历史</button>
   </div>
 
@@ -142,9 +144,17 @@ const DIMNAME={model_identity:["模型身份","它是不是它自称的那个？
   capability:["能力声明","工具/JSON 是否真支持？"],billing:["计费用量","token 有没有虚报？"],
   protocol:["协议兼容","接口是否规范？"],connectivity:["连通性","稳定可达？"],reliability:["并发可靠","压力下稳不稳？"],
   streaming:["流式真实","真流式还是假装？"],security:["传输安全","密钥是否安全？"]};
-const ICON={pass:"✓",warn:"!",fail:"✕",info:"ℹ",inconclusive:"?",not_run:"–",error:"✕"};
+// status -> canonical icon name (no question-mark/dash glyphs in the set; use the
+// closest neutral "info" for inconclusive/not_run). Rendered ~13px, inherits currentColor.
+const ICON_NAME={pass:"check",warn:"warning",fail:"x",info:"info",inconclusive:"info",not_run:"info",error:"x"};
+const statusIcon=s=>window.zingIcon(ICON_NAME[s]||"warning",{size:13});
 
 let openRow=null;  // currently expanded <tr> trigger, so we can toggle/close
+
+// paint static-markup icons (logo bolt, lock pill, back arrow)
+$("#logoIcon").innerHTML=window.zingIcon("bolt",{size:18});
+$("#lockIcon").innerHTML=window.zingIcon("lock",{size:14});
+$("#backIcon").innerHTML=window.zingIcon("arrowLeft",{size:15});
 
 load();
 
@@ -153,13 +163,13 @@ async function load(){
     const rows=await fetch("/api/history").then(r=>r.json());
     render(Array.isArray(rows)?rows:[]);
   }catch(e){
-    $("#card").innerHTML=`<div class="empty"><div class="big">⚠️</div>无法读取历史：${esc(String(e.message||e))}<br><br>请确认本地 zing 服务在运行。</div>`;
+    $("#card").innerHTML=`<div class="empty"><div class="big">${window.zingIcon("warning",{size:34})}</div>无法读取历史：${esc(String(e.message||e))}<br><br>请确认本地 zing 服务在运行。</div>`;
   }
 }
 
 function render(rows){
   if(!rows.length){
-    $("#card").innerHTML=`<div class="empty"><div class="big">🗂️</div>还没有检测记录。<br><br><a href="/">去跑第一次检测 →</a></div>`;
+    $("#card").innerHTML=`<div class="empty"><div class="big">${window.zingIcon("folder",{size:34})}</div>还没有检测记录。<br><br><a href="/">去跑第一次检测 ${window.zingIcon("arrowRight",{size:15})}</a></div>`;
     return;
   }
   // group by base_url + claimed_model, preserving newest-first encounter order
@@ -280,7 +290,7 @@ function dimRow(d){const [nm,desc]=DIMNAME[d.dimension]||[d.dimension,""];const 
     <div class="ba"><i data-w="${d.score==null?15:d.score}" data-c="${d.score==null?'var(--faint)':c}"></i></div>
     <div class="bdg2" style="background:var(--${STATC[d.status]}bg,#eee);color:${VAR(STATC[d.status]||'grey')}">${sc}</div></div>`;}
 function findRow(f){const c=VAR(SEVC[f.severity]||"grey");const ev=evText(f.evidence);
-  return `<div class="f"><div class="dot" style="background:${c}">${ICON[f.status]||"!"}</div>
+  return `<div class="f"><div class="dot" style="background:${c}">${statusIcon(f.status)}</div>
     <div style="flex:1;min-width:0"><div class="ft">${esc(f.title)}</div>
     <div class="fs">${esc(f.summary||"")}${f.recommendation?` <span style="color:var(--faint)">· 建议：${esc(f.recommendation)}</span>`:""}</div>
     ${ev?`<div class="ev">${esc(ev)}</div><span class="more">查看证据</span>`:""}</div></div>`;}
@@ -288,7 +298,8 @@ function evText(e){if(!e||typeof e!=="object")return "";const keys=Object.keys(e
   return keys.map(k=>`${k}: ${fmt(e[k])}`).join("\n");}
 function fmt(x){if(x==null)return "null";if(typeof x==="object")return JSON.stringify(x).slice(0,200);return String(x).slice(0,240);}
 function sevRank(s){return {critical:5,high:4,medium:3,low:2,info:1}[s]||0;}
-function riskGlyph(r){return r==="high"?"✕":r==="clean"?"✓":r==="inconclusive"?"?":"▲";}
+function riskGlyph(r){const n=r==="high"?"x":r==="clean"?"check":r==="inconclusive"?"info":"warning";
+  return window.zingIcon(n,{size:14});}
 function zhHead(v){const m={clean:"行为与所声称的模型一致",low:"基本一致，存在少量小问题",medium:"部分行为与所声称的模型不符 —— 建议核实",high:"它给的并不是你所声称的模型",inconclusive:"信号不足，无法判定（连通或覆盖不够）"};return m[v.risk_level]||v.headline||"";}
 function zhConf(c){return {high:"高",medium:"中",low:"低"}[c]||c||"—";}
 

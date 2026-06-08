@@ -27,8 +27,11 @@
   .logo{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.4px;text-decoration:none;color:var(--ink)}
   .logo .b{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--ink);color:var(--lime);font-size:16px;box-shadow:0 8px 22px -10px var(--teal)}
   .logo b{color:var(--teal)}
-  header .pill{font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;text-decoration:none}
+  header .pill{font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
   header .pill b{color:var(--teal)}
+  .pill-ic{display:inline-flex;align-items:center}
+  .adv-plus-ic{display:inline-flex;align-items:center;vertical-align:-2px}
+  .cta-ic{display:inline-flex;align-items:center}
 
   .hero{padding:26px 0 4px}
   .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1.06;letter-spacing:-1px;margin:0}
@@ -93,9 +96,9 @@
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="/"><span class="b">⚡</span><span>zing<b>.</b></span></a>
-    <a class="pill" href="/" style="margin-left:auto">← 返回检测</a>
-    <span class="pill">🔒 本地运行 · 密钥<b>不经手</b></span>
+    <a class="logo" href="/"><span class="b" id="logo-icon"></span><span>zing<b>.</b></span></a>
+    <a class="pill" href="/" style="margin-left:auto"><span class="pill-ic" id="back-icon"></span> 返回检测</a>
+    <span class="pill"><span class="pill-ic" id="lock-icon"></span> 本地运行 · 密钥<b>不经手</b></span>
   </header>
 
   <div class="hero">
@@ -126,7 +129,7 @@
       </div>
       <div class="grp"><div class="lab">协议</div>
         <div class="seg" data-seg="e-api"><button type="button" class="on" data-v="auto">自动</button><button type="button" data-v="openai">OpenAI</button><button type="button" data-v="anthropic">Anthropic</button></div></div>
-      <button class="cta" id="e-go">核验嵌入端点 <span>→</span></button>
+      <button class="cta" id="e-go">核验嵌入端点 <span class="cta-ic"></span></button>
       <div class="reassure">请求在 <b>你本地的 zing 服务</b> 发起，密钥只用于连接目标中转站，<b>不上传任何第三方</b>。</div>
       <div id="e-out"></div>
     </form>
@@ -141,7 +144,7 @@
       <div class="grp"><div class="lab">重排模型 id</div><input class="in" id="r-model" placeholder="bge-reranker-v2-m3"></div>
 
       <div class="adv" id="r-adv">
-        <button type="button" class="adv-toggle" id="r-adv-t"><span>＋ 自定义探针（默认用内置的已知答案探针）</span><span class="cv">⌄</span></button>
+        <button type="button" class="adv-toggle" id="r-adv-t"><span><span class="adv-plus-ic"></span> 自定义探针（默认用内置的已知答案探针）</span><span class="cv" id="adv-caret-ic"></span></button>
         <div class="adv-body" id="r-adv-body"><div class="adv-inner">
           <p class="adv-hint">不填则使用 zing 内置探针：一个问题加几段文档，其中<b>唯一显而易见的答案</b>应被排在首位。若要自定义，填入查询、每行一段文档，并指定预期排首位的文档行号（从 0 起）。</p>
           <div class="grp"><div class="lab">查询 query</div><input class="in" id="r-query" placeholder="What is the capital of France?"></div>
@@ -150,7 +153,7 @@
         </div></div>
       </div>
 
-      <button class="cta" id="r-go">核验重排端点 <span>→</span></button>
+      <button class="cta" id="r-go">核验重排端点 <span class="cta-ic"></span></button>
       <div class="reassure">请求在 <b>你本地的 zing 服务</b> 发起，密钥只用于连接目标中转站，<b>不上传任何第三方</b>。</div>
       <div id="r-out"></div>
     </form>
@@ -160,9 +163,13 @@
 </div>
 
 <script src="/i18n.js"></script>
+<script src="/icons.js"></script>
+<script src="/modelpicker.js"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const ICON={pass:"✓",warn:"!",fail:"✕",info:"ℹ",inconclusive:"?",not_run:"–",error:"✕"};
+function ic(name,opts){return (window.zingIcon?zingIcon(name,opts):"");}
+// finding-status -> canonical icon name
+const ICON={pass:"check",warn:"warning",fail:"x",info:"info",inconclusive:"info",not_run:"arrowRight",error:"x"};
 const STATC={pass:"good",warn:"warn",fail:"bad",info:"sky",inconclusive:"grey",not_run:"grey",error:"bad"};
 const SEVC={info:"sky",low:"warn",medium:"warn",high:"bad",critical:"bad"};
 const VAR=k=>`var(--${k})`;
@@ -195,7 +202,7 @@ function renderResult(outSel,verdict){
   const t=v.target||{};
   const findings=(v.findings||[]).map(f=>{
     const c=VAR(SEVC[f.severity]||STATC[f.status]||"grey"), L=loc(f), ev=evText(f.evidence);
-    return `<div class="f"><div class="dot" style="background:${c}">${ICON[f.status]||"•"}</div>
+    return `<div class="f"><div class="dot" style="background:${c}">${ic(ICON[f.status]||"info",{size:13})}</div>
       <div style="flex:1;min-width:0"><div class="ft">${esc(L.title)}</div>
       <div class="fs">${esc(L.summary)}</div>
       ${ev?`<div class="ev">${esc(ev)}</div>`:""}</div></div>`;
@@ -244,6 +251,22 @@ $("#r-go").onclick=()=>{
   if(!payload.base_url||!payload.model){$("#r-out").innerHTML='<div class="errbox">请填写中转站地址和模型 id。</div>';return;}
   postAudit("/api/rerank",payload,$("#r-go"),"#r-out");
 };
+
+// inline static-markup icons (replaces former emoji/glyphs)
+(function initIcons(){
+  const set=(sel,name,opts)=>{const el=$(sel);if(el)el.innerHTML=ic(name,opts);};
+  set("#logo-icon","bolt",{size:16});
+  set("#back-icon","arrowLeft",{size:14});
+  set("#lock-icon","lock",{size:13});
+  set("#adv-plus-ic","plus",{size:14});
+  set("#adv-caret-ic","chevronDown",{size:14});
+  $$(".cta-ic").forEach(el=>el.innerHTML=ic("arrowRight",{size:18}));
+})();
+
+// wire the model picker on the claimed-model input (canonical value source unchanged)
+if(window.ZingModelPicker){
+  ZingModelPicker.enhance({claimedInput:"#e-claimed",providerInput:"#e-provider"});
+}
 </script>
 </body>
 </html>

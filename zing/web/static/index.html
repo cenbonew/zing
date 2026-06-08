@@ -136,16 +136,22 @@
   .actions button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
   .errbox{background:var(--badbg);border:1px solid #f2c9c0;color:var(--bad);border-radius:14px;padding:16px;margin-top:14px;font-size:14px;line-height:1.5}
   .foot{text-align:center;color:var(--faint);font-size:12px;padding:14px 0 30px;line-height:1.6}
+  /* inline canonical SVG icons: align to text, inherit currentColor */
+  .pico{display:inline-flex;vertical-align:-.12em}.pico .zicon{width:1em;height:1em}
+  .logo .b .zicon,.radar .core .zicon{width:1em;height:1em}
+  .cmp-toggle .cv{display:inline-flex}.cmp-toggle .cv .zicon{width:1em;height:1em}
+  .cta span .zicon{width:1em;height:1em;vertical-align:-.12em}
+  .det .ic .zicon,.fi .fdot .zicon,.f .dot .zicon,.vpill .zicon{width:1em;height:1em;vertical-align:-.12em}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
-    <a class="pill" href="/tools" style="margin-left:auto;text-decoration:none">🧰 工具</a>
-    <a class="pill" href="/history" style="text-decoration:none">📊 检测历史</a>
-    <a class="pill" href="/watches" style="text-decoration:none">🔔 监控</a>
-    <span class="pill">🔒 本地运行 · 密钥<b>不经手</b></span>
+    <div class="logo"><span class="b" id="logo-b"></span><span>zing<b>.</b></span></div>
+    <a class="pill" href="/tools" style="margin-left:auto;text-decoration:none"><span class="pico" id="ic-tools"></span> 工具</a>
+    <a class="pill" href="/history" style="text-decoration:none"><span class="pico" id="ic-history"></span> 检测历史</a>
+    <a class="pill" href="/watches" style="text-decoration:none"><span class="pico" id="ic-watches"></span> 监控</a>
+    <span class="pill"><span class="pico" id="ic-lock"></span> 本地运行 · 密钥<b>不经手</b></span>
   </header>
 
   <!-- STEP 1 -->
@@ -175,7 +181,7 @@
             <div class="seg" id="suite"><button type="button" data-v="smoke">smoke</button><button type="button" class="on" data-v="standard">standard</button><button type="button" data-v="deep">deep</button></div></div>
         </div>
         <div class="cmp" id="cmp">
-          <button type="button" class="cmp-toggle" id="cmp-t"><span>＋ 对照可信基线（compare · 更强结论）</span><span class="cv">⌄</span></button>
+          <button type="button" class="cmp-toggle" id="cmp-t"><span><span class="pico" id="ic-plus"></span> 对照可信基线（compare · 更强结论）</span><span class="cv" id="ic-cv"></span></button>
           <div class="cmp-body" id="cmp-body"><div class="cmp-inner">
             <p class="cmp-hint">填一个你<b>信任的同款模型端点</b>（如官方 API）。zing 会用它佐证目标的表现，让替换/降级判定更可靠——质量评审与篡改检测在有基线时才会升到最高级别。</p>
             <div class="grp"><div class="lab">基线 base_url</div><input class="in" id="b-url" placeholder="https://api.deepseek.com/v1"></div>
@@ -187,7 +193,7 @@
             </div>
           </div></div>
         </div>
-        <button class="cta" id="go">开始检测 <span>→</span></button>
+        <button class="cta" id="go">开始检测 <span id="ic-go-arrow"></span></button>
         <div class="reassure">检测在 <b>你本地的 zing 服务</b> 发起，密钥只用于连接目标中转站，<b>不上传任何第三方</b>。</div>
         <div id="formerr"></div>
       </form>
@@ -199,7 +205,7 @@
   <section class="view" id="v2">
     <div class="card" style="margin-top:26px">
       <div class="scan">
-        <div class="radar"><div class="ripple"></div><div class="ripple"></div><div class="ripple"></div><div class="sweep"></div><div class="core">⚡</div></div>
+        <div class="radar"><div class="ripple"></div><div class="ripple"></div><div class="ripple"></div><div class="sweep"></div><div class="core" id="radar-core"></div></div>
         <h2>正在体检…</h2>
         <div class="now" id="now">连接端点…</div>
         <div class="pbar"><i id="pbar"></i></div>
@@ -222,6 +228,8 @@
 </div>
 
 <script src="/i18n.js"></script>
+<script src="/icons.js"></script>
+<script src="/modelpicker.js"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const RISK={clean:{c:"good",bg:"goodbg",t:"大概率是真货"},low:{c:"sky",bg:"skybg",t:"基本可信，小瑕疵"},
@@ -234,7 +242,11 @@ const DIMNAME={model_identity:["模型身份","它是不是它自称的那个？
   capability:["能力声明","工具/JSON 是否真支持？"],billing:["计费用量","token 有没有虚报？"],
   protocol:["协议兼容","接口是否规范？"],connectivity:["连通性","稳定可达？"],reliability:["并发可靠","压力下稳不稳？"],
   streaming:["流式真实","真流式还是假装？"],security:["传输安全","密钥是否安全？"]};
-const ICON={pass:"✓",warn:"!",fail:"✕",info:"ℹ",inconclusive:"?",not_run:"–",error:"✕"};
+// canonical icon-name per status; rendered as SVG via zingIcon().
+// inconclusive/not_run have no dedicated glyph -> closest canonical is "info".
+const ICON_NAME={pass:"check",warn:"warning",fail:"x",info:"info",inconclusive:"info",not_run:"info",error:"x"};
+const ico=(name,opts)=>(window.zingIcon?zingIcon(name,opts||{}):"");
+const ICON=new Proxy({},{get:(_,k)=>ico(ICON_NAME[k]||"info")});
 
 let lastReport=null;
 function go(n){$$(".view").forEach(v=>v.classList.remove("show"));$("#v"+n).classList.add("show");window.scrollTo({top:0,behavior:"smooth"});}
@@ -286,12 +298,12 @@ function handle(ev,seen){
   }else if(ev.type==="detector_start"){
     if(!seen[ev.id]){
       const d=document.createElement("div");d.className="det run";d.id="det-"+ev.id;
-      d.innerHTML=`<span class="ic">▸</span><span>${zhDet(ev)}</span>`;$("#dets").appendChild(d);seen[ev.id]=d;
+      d.innerHTML=`<span class="ic">${ico("play")}</span><span>${zhDet(ev)}</span>`;$("#dets").appendChild(d);seen[ev.id]=d;
     }
     $("#now").textContent=zhDet(ev)+" …";
   }else if(ev.type==="detector_done"){
     const d=seen[ev.id]||$("#det-"+ev.id);
-    if(d){d.className="det "+ev.status;d.querySelector(".ic").textContent=ICON[ev.status]||"•";}
+    if(d){d.className="det "+ev.status;d.querySelector(".ic").innerHTML=ICON[ev.status];}
     const pct=Math.round((ev.index+1)/(ev.total||1)*100);$("#pbar").style.width=pct+"%";
     (ev.findings||[]).forEach(f=>{
       if(["fail","warn","error"].includes(f.status)||["high","critical"].includes(f.severity)) addFeed(ev,f);
@@ -379,10 +391,29 @@ function evText(e){if(!e||typeof e!=="object")return "";const keys=Object.keys(e
   return keys.map(k=>`${k}: ${fmt(e[k])}`).join("\n");}
 function fmt(x){if(x==null)return "null";if(typeof x==="object")return JSON.stringify(x).slice(0,200);return String(x).slice(0,240);}
 function sevRank(s){return {critical:5,high:4,medium:3,low:2,info:1}[s]||0;}
-function riskGlyph(r){return r==="high"?"✕":r==="clean"?"✓":r==="inconclusive"?"?":"▲";}
+function riskGlyph(r){return ico(r==="high"?"x":r==="clean"?"check":r==="inconclusive"?"info":"warning");}
 function zhHead(v){const m={clean:"行为与所声称的模型一致",low:"基本一致，存在少量小问题",medium:"部分行为与所声称的模型不符 —— 建议核实",high:"它给的并不是你所声称的模型",inconclusive:"信号不足，无法判定（连通或覆盖不够）"};return m[v.risk_level]||v.headline||"";}
 function zhConf(c){return {high:"高",medium:"中",low:"低"}[c]||c||"—";}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+// --- inline canonical SVG icons into static markup + wire model picker ---
+(function initUI(){
+  const set=(id,name,opts)=>{const el=document.getElementById(id);if(el)el.innerHTML=ico(name,opts);};
+  set("logo-b","bolt",{size:16});
+  set("radar-core","bolt",{size:22});
+  set("ic-tools","toolbox");
+  set("ic-history","chart");
+  set("ic-watches","bell");
+  set("ic-lock","lock");
+  set("ic-plus","plus");
+  set("ic-cv","chevronDown");
+  set("ic-go-arrow","arrowRight");
+  // "声称的模型" (#i-model) is the canonical claimed-model value the picker writes into.
+  // This form has no provider text input (protocol is a segmented control), so providerInput is omitted.
+  if(window.ZingModelPicker){
+    try{ZingModelPicker.enhance({claimedInput:"#i-model"});}catch(e){}
+  }
+})();
 </script>
 </body>
 </html>
