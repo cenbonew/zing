@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>zing — 工具箱 · 嵌入 / 重排验真</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
@@ -119,10 +120,8 @@
         <div class="row-help"><div class="lab" style="margin:0">API Key</div><span style="font-size:11.5px;color:var(--faint)">支持 env:VAR / file:/path</span></div>
         <input class="in" id="e-key" placeholder="sk-... 或 env:ZING_API_KEY">
       </div>
-      <div class="two">
-        <div class="grp"><div class="lab">实际请求模型 id</div><input class="in" id="e-model" placeholder="text-embedding-3-large"></div>
-        <div class="grp"><div class="lab">声称的模型（可选）</div><input class="in" id="e-claimed" placeholder="留空=同上"></div>
-      </div>
+      <div class="grp"><div class="lab">实际请求模型 id</div><input class="in" id="e-model" placeholder="text-embedding-3-large"></div>
+      <div class="grp"><div class="lab">声称的模型（可选）</div><input class="in" id="e-claimed" placeholder="留空=同上"></div>
       <div class="two">
         <div class="grp"><div class="lab">声称维度（可选）</div><input class="in" id="e-dims" type="number" min="0" placeholder="留空=查知识库"></div>
         <div class="grp"><div class="lab">声明厂商（可选）</div><input class="in" id="e-provider" placeholder="openai / deepseek …"></div>
