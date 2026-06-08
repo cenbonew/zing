@@ -1,9 +1,5 @@
 name: "zing relay audit"
-description: >-
-  Audit whether an LLM relay actually serves the model it claims (货不对板检测)
-  and gate CI on the result. Runs `zing check --compact --fail-on-risk`, exposes
-  the risk / score / rating as outputs, and fails the job when the relay's risk
-  meets or exceeds your threshold.
+description: "Audit whether an LLM relay serves its claimed model (货不对板检测); fail CI when risk meets your threshold."
 author: "zing contributors"
 branding:
   icon: "shield"
