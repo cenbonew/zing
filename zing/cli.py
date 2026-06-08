@@ -941,6 +941,131 @@ def _embed_exit_code(verdict: dict, fail_on_risk: str | None) -> int:
     return 0
 
 
+@app.command("image")
+def image_command(
+    base_url: Annotated[str | None, typer.Option("--base-url", help="Image endpoint base URL, e.g. https://relay.example.com/v1.")] = None,
+    api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
+    model: Annotated[str | None, typer.Option("--model", help="Image model id actually sent in requests.")] = None,
+    claimed_model: Annotated[str | None, typer.Option("--claimed-model", help="Model the relay claims to serve, if different from --model (resolves the native sizes from the KB).")] = None,
+    declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup (openai, qwen, ...).")] = None,
+    size: Annotated[str, typer.Option("--size", help="Requested image size as WxH.")] = "1024x1024",
+    save: Annotated[Path | None, typer.Option("--save", help="Write the first generated image to this path for inspection.")] = None,
+    kb_dir: Annotated[list[Path] | None, typer.Option("--kb-dir", help="Extra knowledge-base directory (repeatable).")] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the verdict as JSON to stdout.")] = False,
+    fail_on_risk: Annotated[str | None, typer.Option("--fail-on-risk", help="Exit 1 if risk >= this (low|medium|high).")] = None,
+) -> None:
+    """Audit an image-generation endpoint (POST /v1/images/generations, a non-chat surface).
+
+    Generates two images, decodes their headers with pure stdlib (no Pillow), and
+    checks connectivity, format, that the returned WxH matches the request (and the
+    claimed model's native sizes from the KB — the headline 货不对板 signal), the
+    image count, and distinctness across two different prompts.
+    """
+    try:
+        target = build_target(
+            kind="target", name=None, base_url=base_url, api_key=api_key, model=model,
+            declared_provider=declared_provider, claimed_model=claimed_model,
+        )
+        fail_on_risk = validate_risk(fail_on_risk)
+    except ConfigError as exc:
+        if as_json:
+            _emit_machine_error(exc)
+        err_console.print(f"[red]Config error:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+
+    # Resolve the claimed native sizes from the KB for the size-match check.
+    kb = load_knowledge_base(list(kb_dir) if kb_dir else None)
+    resolved = kb.resolve(target.claimed, provider_hint=target.declared_provider)
+    claimed_sizes = list(resolved.model.image_sizes) if resolved is not None else []
+
+    from zing.media_audit import audit_image
+
+    async def _go() -> tuple[dict, bytes | None]:
+        # Optionally fetch one image for --save using the same client/decoding path.
+        sample: bytes | None = None
+        verdict = await audit_image(target, size=size, claimed_sizes=claimed_sizes)
+        if save is not None:
+            async with make_client(target) as client:
+                _outcome, images = await client.images_generate(
+                    "A single sample image for inspection.", size, n=1
+                )
+            if images:
+                sample = images[0]
+        return verdict, sample
+
+    verdict, sample = asyncio.run(_go())
+    if save is not None and sample:
+        save.write_bytes(sample)
+
+    if as_json:
+        print(json.dumps(verdict, ensure_ascii=False, indent=2))
+    else:
+        _print_embed_verdict(verdict, "Image generation audit")
+        if save is not None and sample:
+            console.print(f"\n[dim]Saved sample image → {save}[/]")
+
+    raise typer.Exit(code=_embed_exit_code(verdict, fail_on_risk))
+
+
+@app.command("audio")
+def audio_command(
+    base_url: Annotated[str | None, typer.Option("--base-url", help="Audio/TTS endpoint base URL, e.g. https://relay.example.com/v1.")] = None,
+    api_key: Annotated[str | None, typer.Option("--api-key", help="API key, or env:VAR / file:/path reference.")] = None,
+    model: Annotated[str | None, typer.Option("--model", help="TTS model id actually sent in requests.")] = None,
+    claimed_model: Annotated[str | None, typer.Option("--claimed-model", help="Model the relay claims to serve, if different from --model.")] = None,
+    declared_provider: Annotated[str | None, typer.Option("--declared-provider", help="Provider hint for KB lookup (openai, qwen, ...).")] = None,
+    voice: Annotated[str, typer.Option("--voice", help="Voice id to request.")] = "alloy",
+    fmt: Annotated[str, typer.Option("--format", help="Requested audio format (wav|mp3|opus|flac).")] = "wav",
+    text: Annotated[str, typer.Option("--text", help="Probe sentence to synthesize.")] = "The quick brown fox jumps over the lazy dog.",
+    save: Annotated[Path | None, typer.Option("--save", help="Write a synthesized clip to this path for inspection.")] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the verdict as JSON to stdout.")] = False,
+    fail_on_risk: Annotated[str | None, typer.Option("--fail-on-risk", help="Exit 1 if risk >= this (low|medium|high).")] = None,
+) -> None:
+    """Audit an audio/TTS endpoint (POST /v1/audio/speech, a non-chat surface).
+
+    Synthesizes a short and a long input, checks connectivity, that the body is
+    actually the requested audio format (WAV/MP3/OGG/FLAC magic, not HTML/JSON),
+    that the clip is non-trivial and its length scales with the input (WAV duration
+    is decoded with the stdlib wave module), and distinctness across inputs.
+    """
+    try:
+        target = build_target(
+            kind="target", name=None, base_url=base_url, api_key=api_key, model=model,
+            declared_provider=declared_provider, claimed_model=claimed_model,
+        )
+        fail_on_risk = validate_risk(fail_on_risk)
+    except ConfigError as exc:
+        if as_json:
+            _emit_machine_error(exc)
+        err_console.print(f"[red]Config error:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+
+    from zing.media_audit import audit_audio
+
+    async def _go() -> tuple[dict, bytes | None]:
+        sample: bytes | None = None
+        verdict = await audit_audio(target, voice=voice, fmt=fmt)
+        if save is not None:
+            async with make_client(target) as client:
+                _outcome, audio = await client.audio_speech(text, voice, fmt)
+            if audio:
+                sample = audio
+        return verdict, sample
+
+    verdict, sample = asyncio.run(_go())
+    if save is not None and sample:
+        save.write_bytes(sample)
+
+    if as_json:
+        print(json.dumps(verdict, ensure_ascii=False, indent=2))
+    else:
+        _print_embed_verdict(verdict, "Audio (TTS) generation audit")
+        if save is not None and sample:
+            console.print(f"\n[dim]Saved sample clip → {save}[/]")
+
+    raise typer.Exit(code=_embed_exit_code(verdict, fail_on_risk))
+
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,

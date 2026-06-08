@@ -372,6 +372,46 @@
       title: "LLM 评委：评估结果不确定",
       tpl: "评委无法给出确定结论（置信度 {judge_confidence}）。",
     },
+
+    // -- embeddings (non-chat surface: zing/embed_audit.py) ----------------- //
+    "embed.connectivity": {
+      // status-dependent (PASS reachable / ERROR unreachable or malformed);
+      // a single safe template keyed on the always-present dimension/vector count.
+      title: "嵌入端点连通性",
+      tpl: "返回 {vectors} 个向量，维度 {dimension}。",
+    },
+    "embed.dimension": {
+      // status-dependent (PASS match / FAIL mismatch / INFO unknown claim)
+      title: "向量维度是否与所声称模型一致",
+      tpl: "返回 {returned} 维向量，所声称模型应为 {claimed} 维。",
+    },
+    "embed.determinism": {
+      // PASS (cosine ~1) or WARN (drifts below threshold)
+      title: "嵌入是否确定性可复现",
+      tpl: "同一输入两次的余弦相似度为 {cosine}（阈值 {threshold}）。",
+    },
+    "embed.distinctness": {
+      // PASS (distinct) or WARN (near-identical = degenerate backend)
+      title: "不同输入是否产生可区分的向量",
+      tpl: "两段无关文本的余弦相似度为 {cosine}（阈值 {threshold}）。",
+    },
+    "embed.model_field": {
+      title: "回显的 model 字段",
+      tpl: "中继上报的模型为 {model_returned}，请求的是 {model_requested}，所声称为 {claimed_model}。",
+    },
+
+    // -- rerank (non-chat surface: known-answer probe) --------------------- //
+    "rerank.connectivity": {
+      // status-dependent (PASS reachable / ERROR unreachable or empty);
+      // keyed on the result count present in the reachable branch.
+      title: "重排端点连通性",
+      tpl: "返回 {results} 条排序结果。",
+    },
+    "rerank.known_answer": {
+      // PASS (obvious answer ranked first) or WARN (it was not)
+      title: "是否把显而易见的答案排在首位",
+      tpl: "排在首位的是文档 {top_index}，预期应为文档 {expected}（排名顺序 {ranking}）。",
+    },
   };
 
   // Generic fallback title for unknown finding ids.

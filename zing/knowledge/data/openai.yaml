@@ -76,6 +76,172 @@ models:
   - gemini
   - google
   notes: 'Legacy embedding model (POST /v1/embeddings). Fixed 1536-dim output; no `dimensions` truncation parameter. 8191-token input limit. Superseded by the text-embedding-3 family but still widely served.'
+- id: gpt-image-1
+  aliases: []
+  family: gpt-image
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - image
+  reasoning: false
+  supports_tools: false
+  image_sizes:
+  - 1024x1024
+  - 1536x1024
+  - 1024x1536
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - stability
+  - midjourney
+  - flux
+  - black forest labs
+  notes: 'Image-generation model (POST /v1/images/generations). Native sizes 1024x1024 (square), 1536x1024 (landscape), 1024x1536 (portrait); also accepts auto. Returns b64_json by default. Quality tiers low/medium/high. Supersedes DALL-E for the Images API and adds image editing/inpainting.'
+- id: dall-e-3
+  aliases:
+  - dalle-3
+  - dall-e
+  family: dall-e
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - image
+  reasoning: false
+  supports_tools: false
+  image_sizes:
+  - 1024x1024
+  - 1792x1024
+  - 1024x1792
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - stability
+  - midjourney
+  - flux
+  notes: 'Image-generation model (POST /v1/images/generations). Native sizes 1024x1024, 1792x1024 (landscape), 1024x1792 (portrait) — n must be 1. Supports quality standard/hd and style vivid/natural. A relay returning 1024x1024 for a 1792x1024 request (or DALL-E-2-only sizes) is a downgrade tell.'
+- id: dall-e-2
+  aliases:
+  - dalle-2
+  family: dall-e
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - image
+  reasoning: false
+  supports_tools: false
+  image_sizes:
+  - 256x256
+  - 512x512
+  - 1024x1024
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - stability
+  - midjourney
+  - flux
+  notes: 'Legacy image-generation model (POST /v1/images/generations). Only square sizes 256x256, 512x512, 1024x1024; supports up to n=10 and image edits/variations. A common cheaper substitute behind a claimed DALL-E-3 / gpt-image-1 id.'
+- id: tts-1
+  aliases: []
+  family: tts
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - audio
+  reasoning: false
+  supports_tools: false
+  audio_voices:
+  - alloy
+  - ash
+  - ballad
+  - coral
+  - echo
+  - fable
+  - onyx
+  - nova
+  - sage
+  - shimmer
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - elevenlabs
+  - azure
+  notes: 'Text-to-speech model (POST /v1/audio/speech). Real-time-optimized. response_format mp3/opus/aac/flac/wav/pcm. Built-in voices alloy/ash/ballad/coral/echo/fable/onyx/nova/sage/shimmer. $15 per 1M input chars.'
+- id: tts-1-hd
+  aliases: []
+  family: tts
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - audio
+  reasoning: false
+  supports_tools: false
+  audio_voices:
+  - alloy
+  - ash
+  - ballad
+  - coral
+  - echo
+  - fable
+  - onyx
+  - nova
+  - sage
+  - shimmer
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - elevenlabs
+  - azure
+  notes: 'Higher-quality text-to-speech model (POST /v1/audio/speech), $30 per 1M input chars. Same voice set and response formats as tts-1. A relay quietly serving tts-1 behind a claimed tts-1-hd id is a downgrade.'
+- id: gpt-4o-mini-tts
+  aliases: []
+  family: tts
+  context_window_tokens: -1
+  max_output_tokens: -1
+  knowledge_cutoff: null
+  tokenizer: null
+  modalities:
+  - audio
+  reasoning: false
+  supports_tools: false
+  audio_voices:
+  - alloy
+  - ash
+  - ballad
+  - coral
+  - echo
+  - fable
+  - onyx
+  - nova
+  - sage
+  - shimmer
+  identity_keywords:
+  - openai
+  identity_forbidden:
+  - qwen
+  - alibaba
+  - elevenlabs
+  - azure
+  notes: 'GPT-4o-mini-based steerable TTS model (POST /v1/audio/speech) — accepts an `instructions` field to control tone/accent/emotion. Same voice set as tts-1. Priced per audio token.'
 - id: gpt-5.5
   aliases:
   - gpt-5.5-2026-04-23

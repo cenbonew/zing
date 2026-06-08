@@ -10,6 +10,8 @@ adds the OpenAI Chat Completions request/response and SSE handling.
 
 from __future__ import annotations
 
+import base64
+import contextlib
 import json
 import time
 from typing import Any
@@ -41,6 +43,14 @@ class OpenAICompatibleClient(BaseHTTPClient):
     @property
     def rerank_url(self) -> str:
         return f"{self.base_url}/rerank"
+
+    @property
+    def images_url(self) -> str:
+        return f"{self.base_url}/images/generations"
+
+    @property
+    def audio_speech_url(self) -> str:
+        return f"{self.base_url}/audio/speech"
 
     def _headers(self) -> dict[str, str]:
         headers = {
@@ -206,6 +216,101 @@ class OpenAICompatibleClient(BaseHTTPClient):
                 return outcome, results
         except Exception as exc:
             return self._exception_outcome(exc, started), []
+
+    async def images_generate(
+        self,
+        prompt: str,
+        size: str,
+        n: int = 1,
+        response_format: str = "b64_json",
+    ) -> tuple[CompletionOutcome, list[bytes]]:
+        """POST /images/generations. Returns (outcome, list-of-image-bytes).
+
+        Decodes each ``data[i].b64_json`` to raw bytes; if a row carries only a
+        ``url`` it GETs that url (over the same session) to fetch the bytes. On any
+        error the outcome carries the redacted failure and the byte list is empty.
+        Non-chat surface — never routes through the chat detector pipeline.
+        """
+        body: dict[str, Any] = {
+            "model": self.config.model,
+            "prompt": prompt,
+            "size": size,
+            "n": n,
+            "response_format": response_format,
+        }
+        started = time.perf_counter()
+        try:
+            async with self._session() as client:
+                response = await client.post(self.images_url, json=body)
+                duration_ms = (time.perf_counter() - started) * 1000
+                headers = redact_headers(dict(response.headers), extra_secrets=self._extra_secrets())
+                if response.status_code >= 400:
+                    return self._error_from_response(response, duration_ms, headers), []
+
+                data = response.json() if response.content else {}
+                images: list[bytes] = []
+                rows = data.get("data") if isinstance(data, dict) else None
+                if isinstance(rows, list):
+                    for row in rows:
+                        if not isinstance(row, dict):
+                            continue
+                        b64 = row.get("b64_json")
+                        if isinstance(b64, str) and b64:
+                            with contextlib.suppress(ValueError, TypeError):
+                                images.append(base64.b64decode(b64))
+                            continue
+                        url = row.get("url")
+                        if isinstance(url, str) and url:
+                            img_resp = await client.get(url)
+                            if img_resp.status_code < 400 and img_resp.content:
+                                images.append(img_resp.content)
+                outcome = CompletionOutcome(
+                    ok=True,
+                    status_code=response.status_code,
+                    usage=data.get("usage") if isinstance(data, dict) else None,
+                    duration_ms=duration_ms,
+                    headers=headers,
+                    model_returned=data.get("model") if isinstance(data, dict) else None,
+                )
+                return outcome, images
+        except Exception as exc:
+            return self._exception_outcome(exc, started), []
+
+    async def audio_speech(
+        self, text: str, voice: str, response_format: str = "wav"
+    ) -> tuple[CompletionOutcome, bytes]:
+        """POST /audio/speech. Returns (outcome, raw-audio-bytes).
+
+        The response body is the raw audio file (``response.content``); there is no
+        JSON envelope. On any error the outcome carries the redacted failure and the
+        byte string is empty. Non-chat surface — no detector pipeline.
+        """
+        body: dict[str, Any] = {
+            "model": self.config.model,
+            "input": text,
+            "voice": voice,
+            "response_format": response_format,
+        }
+        started = time.perf_counter()
+        try:
+            async with self._session() as client:
+                response = await client.post(self.audio_speech_url, json=body)
+                duration_ms = (time.perf_counter() - started) * 1000
+                headers = redact_headers(dict(response.headers), extra_secrets=self._extra_secrets())
+                if response.status_code >= 400:
+                    return self._error_from_response(response, duration_ms, headers), b""
+
+                audio = response.content or b""
+                outcome = CompletionOutcome(
+                    ok=True,
+                    status_code=response.status_code,
+                    duration_ms=duration_ms,
+                    headers=headers,
+                    model_returned=response.headers.get("x-model"),
+                )
+                return outcome, audio
+        except Exception as exc:
+            return self._exception_outcome(exc, started), b""
 
     async def complete(self, spec: RequestSpec) -> CompletionOutcome:
         body = self._build_body(spec)

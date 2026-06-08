@@ -6,6 +6,36 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Image & audio (TTS) generation audits (`zing image` / `zing audio`).** Two more
+  non-chat surfaces. `image` (POST `/v1/images/generations`) checks the returned bytes
+  are a valid, decodable image and that the **decoded dimensions match the requested
+  size and the claimed model's native sizes** (a downscale/wrong-size is the headline
+  货不对板 signal), plus distinctness (two prompts → different images, catching a fixed
+  placeholder), count, and the echoed model. `audio` (POST `/v1/audio/speech`) checks
+  the bytes are valid audio of the requested container, non-trivial (WAV duration > 0
+  and scales with input length), format-honored, and distinct. All decoding is pure
+  stdlib (PNG/JPEG/GIF/WebP header parsing; the `wave` module) — no Pillow/numpy. KB
+  gained `image_sizes` / `audio_voices` and profiles for OpenAI DALL·E 2/3, gpt-image-1,
+  tts-1/tts-1-hd/gpt-4o-mini-tts, plus Qwen image/TTS.
+- **Embeddings & rerank in the web UI (`/tools`).** `zing serve` gains a 工具箱 / Tools
+  page (linked from the nav) wrapping the existing embedding/rerank auditors: `POST
+  /api/embed` and `POST /api/rerank`. Enter a relay + model and get a localized risk
+  badge, score, and findings table; the dimension mismatch is surfaced as the headline
+  signal (the expected dimension is resolved from the KB when left blank). Rerank uses a
+  built-in known-answer probe by default, with an advanced panel for a custom query/docs.
+  Keys stay local and are never echoed back to the browser. Verified live against Aliyun
+  text-embedding-v4.
+
+### Fixed
+
+- **Flaky embedding test.** `tests/test_embed.py`'s mock seeded vectors with the builtin
+  `hash()` (salted by `PYTHONHASHSEED`), so two distinct inputs could collide mod 1000
+  and collapse the distinctness check, failing intermittently in CI. The mock now derives
+  a process-stable key via `hashlib` and uses a per-input spike vector, so distinct
+  inputs are reliably near-orthogonal — deterministic across all hash seeds.
+
 ## [0.9.0] — embedding/rerank audits, web-UI monitoring, CI Action
 
 ### Added
