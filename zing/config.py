@@ -18,7 +18,7 @@ from zing.models import TargetConfig
 SUITES = ("smoke", "standard", "deep", "full")
 FORMATS = ("json", "md", "html", "all")
 RISK_LEVELS = ("low", "medium", "high")
-APIS = ("auto", "openai", "anthropic")
+APIS = ("auto", "openai", "anthropic", "responses")
 
 
 class ConfigError(Exception):

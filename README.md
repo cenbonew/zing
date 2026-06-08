@@ -10,7 +10,8 @@
 proxy) actually serves the model it claims to — or quietly substitutes a cheaper
 one, truncates your context window, fakes streaming, or inflates token billing
 (**货不对板检测**). It speaks both **OpenAI Chat Completions** and the
-**Anthropic Messages API** (auto-detected, or forced with `--api`).
+**Anthropic Messages API**, and the **OpenAI Responses API** (`/v1/responses`) —
+auto-detected, or forced with `--api openai|anthropic|responses`.
 
 You point it at a relay endpoint and the model it advertises; zing runs a battery
 of black-box probes, compares the observed behavior against a bundled knowledge
@@ -145,7 +146,7 @@ zing scores nine dimensions. The three that most directly reveal 货不对板
 |---|---|
 | **model_identity** | Silent model downgrade/substitution — self-identification, knowledge-cutoff, tokenizer fingerprints, the echoed `model` field |
 | **context_window** | Silent context truncation (claim 1M, recall fails at 32K) and lost-in-the-middle from cheap RAG/summarization shims, via needle-in-a-haystack + binary search |
-| **capability** | Tool-calling / JSON-mode / json-schema / max-output claims that aren't actually delivered (or *over*-delivered, hinting at a substitute) |
+| **capability** | Tool-calling / JSON-mode / json-schema / max-output claims that aren't actually delivered (or *over*-delivered, hinting at a substitute); and **vision** — a model claiming image input is sent a known-answer generated image to confirm it actually "sees" |
 | **billing** | Token/usage inflation and missing/unverifiable usage accounting, via an independent tokenizer estimate |
 | **streaming** | Fake streaming (buffer-then-chunk) detected from chunk count and inter-chunk timing |
 | **protocol** | OpenAI-compatibility conformance: multi-turn, stop sequences, response shape, error schema — and a determinism sub-check for response caching that ignores temperature/seed |
@@ -170,6 +171,21 @@ which relay trick it maps to, and its false-positive caveats.
 zing check --base-url ... --model gpt-4o --suite deep --judge \
   --judge-base-url https://api.openai.com/v1 --judge-api-key env:OPENAI_API_KEY --judge-model gpt-4o-mini
 ```
+
+## Monitoring (`zing watch`)
+
+Relays can serve the real model today and quietly swap it next week. `zing watch`
+re-audits on a schedule, records each run to history, and alerts a webhook when the
+risk crosses a threshold or **regresses** versus the previous run.
+
+```bash
+zing watch --base-url https://relay.example.com/v1 --api-key env:ZING_API_KEY \
+  --model gpt-4o --suite standard --interval 3600 \
+  --alert-on medium --webhook "$FEISHU_WEBHOOK"      # or --once for cron
+```
+
+Alerts are formatted for **Slack / Feishu (飞书) / DingTalk (钉钉) / generic JSON**,
+auto-detected from the webhook URL.
 
 ## Suites
 

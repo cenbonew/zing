@@ -6,6 +6,25 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **OpenAI Responses API (`/v1/responses`).** A third wire protocol behind the same
+  detector interface: `--api responses` (auto-detected when the base_url path ends in
+  `/responses`). Translates to/from `input`/`instructions`/`output` + `input_tokens`/
+  `output_tokens` usage; handles streaming and tool calls.
+- **Multimodal (vision) detector.** When a model claims vision, zing sends a
+  known-answer generated image (a solid-color PNG built with the stdlib) and checks
+  the model actually "sees" it — catching a relay that claims vision but routes to a
+  text-only substitute. Builds the image part per protocol (OpenAI / Anthropic /
+  Responses). Verified live against `qwen3-vl-plus`.
+- **Monitoring: `zing watch` + webhook alerts.** Re-audits a relay on a schedule
+  (`--interval`, or `--once` for cron), persists each run to history, compares against
+  the previous run, and POSTs a concise alert to `--webhook` when risk crosses
+  `--alert-on` or regresses. `zing/notify.py` formats alerts for Slack, Feishu (飞书),
+  DingTalk (钉钉), or a generic JSON webhook (auto-detected from the URL).
+- Web console now supports **compare against a baseline** (the form sends a baseline
+  endpoint; the server runs `compare` mode for a corroborated verdict).
+
 ## [0.7.0] — web: Chinese findings, history/trends, advanced console
 
 ### Added

@@ -20,6 +20,7 @@ from zing.detectors import (  # noqa: F401  -- imported for registration side ef
     reliability,
     security,
     streaming,
+    vision,
 )
 from zing.detectors.base import (
     REGISTRY,
