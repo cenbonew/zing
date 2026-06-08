@@ -34,6 +34,14 @@ class OpenAICompatibleClient(BaseHTTPClient):
     def models_url(self) -> str:
         return f"{self.base_url}/models"
 
+    @property
+    def embeddings_url(self) -> str:
+        return f"{self.base_url}/embeddings"
+
+    @property
+    def rerank_url(self) -> str:
+        return f"{self.base_url}/rerank"
+
     def _headers(self) -> dict[str, str]:
         headers = {
             "Content-Type": "application/json",
@@ -100,6 +108,102 @@ class OpenAICompatibleClient(BaseHTTPClient):
                     headers=headers,
                 )
                 return outcome, ids
+        except Exception as exc:
+            return self._exception_outcome(exc, started), []
+
+    async def embeddings(
+        self, inputs: list[str]
+    ) -> tuple[CompletionOutcome, list[list[float]]]:
+        """POST /embeddings. Returns (outcome, list-of-vectors).
+
+        Each vector is a list of floats. On any error the outcome carries the
+        redacted failure and the vector list is empty. This is a non-chat surface,
+        so it never routes through the chat detector pipeline.
+        """
+        body: dict[str, Any] = {"model": self.config.model, "input": inputs}
+        started = time.perf_counter()
+        try:
+            async with self._session() as client:
+                response = await client.post(self.embeddings_url, json=body)
+                duration_ms = (time.perf_counter() - started) * 1000
+                headers = redact_headers(dict(response.headers), extra_secrets=self._extra_secrets())
+                if response.status_code >= 400:
+                    return self._error_from_response(response, duration_ms, headers), []
+
+                data = response.json() if response.content else {}
+                vectors: list[list[float]] = []
+                if isinstance(data, dict):
+                    rows = data.get("data") or []
+                    if isinstance(rows, list):
+                        # OpenAI returns rows out of order under load; honor `index`.
+                        ordered = sorted(
+                            (r for r in rows if isinstance(r, dict)),
+                            key=lambda r: r.get("index", 0),
+                        )
+                        for row in ordered:
+                            emb = row.get("embedding")
+                            if isinstance(emb, list):
+                                vectors.append([float(x) for x in emb])
+                outcome = CompletionOutcome(
+                    ok=True,
+                    status_code=response.status_code,
+                    usage=data.get("usage") if isinstance(data, dict) else None,
+                    duration_ms=duration_ms,
+                    headers=headers,
+                    model_returned=data.get("model") if isinstance(data, dict) else None,
+                )
+                return outcome, vectors
+        except Exception as exc:
+            return self._exception_outcome(exc, started), []
+
+    async def rerank(
+        self, query: str, documents: list[str]
+    ) -> tuple[CompletionOutcome, list[dict[str, Any]]]:
+        """POST /rerank. Returns (outcome, results) sorted by score descending.
+
+        Each result is ``{"index": int, "relevance_score": float}`` where ``index``
+        points into the original ``documents`` list. Non-chat surface — no detector
+        pipeline.
+        """
+        body: dict[str, Any] = {
+            "model": self.config.model,
+            "query": query,
+            "documents": documents,
+        }
+        started = time.perf_counter()
+        try:
+            async with self._session() as client:
+                response = await client.post(self.rerank_url, json=body)
+                duration_ms = (time.perf_counter() - started) * 1000
+                headers = redact_headers(dict(response.headers), extra_secrets=self._extra_secrets())
+                if response.status_code >= 400:
+                    return self._error_from_response(response, duration_ms, headers), []
+
+                data = response.json() if response.content else {}
+                results: list[dict[str, Any]] = []
+                raw = data.get("results") if isinstance(data, dict) else None
+                if isinstance(raw, list):
+                    for row in raw:
+                        if not isinstance(row, dict):
+                            continue
+                        idx = row.get("index")
+                        score = row.get("relevance_score")
+                        if score is None:
+                            score = row.get("score")
+                        if isinstance(idx, int) and score is not None:
+                            results.append(
+                                {"index": idx, "relevance_score": float(score)}
+                            )
+                results.sort(key=lambda r: r["relevance_score"], reverse=True)
+                outcome = CompletionOutcome(
+                    ok=True,
+                    status_code=response.status_code,
+                    usage=data.get("usage") if isinstance(data, dict) else None,
+                    duration_ms=duration_ms,
+                    headers=headers,
+                    model_returned=data.get("model") if isinstance(data, dict) else None,
+                )
+                return outcome, results
         except Exception as exc:
             return self._exception_outcome(exc, started), []
 

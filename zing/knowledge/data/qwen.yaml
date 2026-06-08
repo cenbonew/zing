@@ -10,6 +10,56 @@ base_url_hints:
 - https://cn-hongkong.dashscope.aliyuncs.com/compatible-mode/v1
 default_tool_format: openai_function
 models:
+- id: text-embedding-v4
+  aliases: []
+  family: text-embedding
+  context_window_tokens: 8192
+  max_output_tokens: -1
+  knowledge_cutoff: ~2025 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: false
+  supports_tools: false
+  embedding_dimensions: 1024
+  identity_keywords:
+  - qwen
+  - tongyi
+  - alibaba
+  - 阿里云
+  identity_forbidden:
+  - openai
+  - gpt
+  - cohere
+  - voyage
+  - gemini
+  - google
+  notes: 'DashScope text-embedding model (POST /compatible-mode/v1/embeddings). Default 1024-dim output; selectable dimensions 2048/1536/1024/768/512/256/128/64 via the `dimensions` parameter. 8192-token input limit. Built on the Qwen3-Embedding line; multilingual.'
+- id: text-embedding-v3
+  aliases: []
+  family: text-embedding
+  context_window_tokens: 8192
+  max_output_tokens: -1
+  knowledge_cutoff: ~2024 (undisclosed)
+  tokenizer: qwen (tiktoken-based BPE)
+  modalities:
+  - text
+  reasoning: false
+  supports_tools: false
+  embedding_dimensions: 1024
+  identity_keywords:
+  - qwen
+  - tongyi
+  - alibaba
+  - 阿里云
+  identity_forbidden:
+  - openai
+  - gpt
+  - cohere
+  - voyage
+  - gemini
+  - google
+  notes: 'DashScope text-embedding model (POST /compatible-mode/v1/embeddings). Default 1024-dim output; selectable dimensions 1024/768/512 via the `dimensions` parameter. 8192-token input limit. Multilingual.'
 - id: qwen3.7-max
   aliases:
   - qwen3.7-max-preview

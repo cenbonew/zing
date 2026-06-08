@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>zing — 监控</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#eef2ec;--card:#fffefb;--ink:#0c211e;--ink2:#566460;--faint:#93a09b;--line:#e7ece5;
+    --teal:#0f6f5f;--teal-d:#0a4a40;--lime:#c7f25a;
+    --good:#0f6f5f;--goodbg:#e9f4ee;--warn:#b9831f;--warnbg:#f7eed7;--bad:#cb3b2e;--badbg:#fbe7e2;
+    --sky:#2a7bb8;--skybg:#e4f0f8;--grey:#7c8a85;--greybg:#eef1ec;
+    --disp:"Bricolage Grotesque",system-ui,sans-serif;--sans:"Hanken Grotesk",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
+    background:radial-gradient(700px 460px at 50% -8%,#f4fbef 0,transparent 60%),radial-gradient(760px 760px at 110% 114%,#dcEee2 0,transparent 55%),var(--bg);
+    min-height:100vh}
+  .wrap{max-width:820px;margin:0 auto;padding:0 18px 60px}
+  a{color:var(--teal)}
+
+  header{display:flex;align-items:center;gap:10px;padding:20px 0 4px}
+  .logo{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.4px}
+  .logo .b{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--ink);color:var(--lime);font-size:16px;box-shadow:0 8px 22px -10px var(--teal)}
+  .logo b{color:var(--teal)}
+  header .pill{font-size:12px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;text-decoration:none}
+  header .pill b{color:var(--teal)}
+  header .pill.right{margin-left:auto}
+
+  .hero{padding:24px 0 4px}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(26px,5vw,36px);line-height:1.06;letter-spacing:-1px;margin:0}
+  .hero h1 .u{background:linear-gradient(transparent 62%,var(--lime) 0);padding:0 4px}
+  .hero p{color:var(--ink2);font-size:15px;line-height:1.6;margin:12px 0 0;max-width:60ch}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 26px 60px -42px rgba(15,60,50,.45),0 2px 0 #fff inset;margin-top:20px}
+  form{padding:22px}
+  .lab{font-size:12px;font-weight:700;letter-spacing:.4px;color:var(--faint);text-transform:uppercase;margin:0 0 7px}
+  .in{width:100%;border:1.5px solid var(--line);background:#fbfdfa;border-radius:13px;font-family:var(--sans);font-weight:500;font-size:15px;color:var(--ink);padding:12px 14px;outline:none;transition:.16s}
+  .in:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(15,111,95,.12);background:#fff}
+  textarea.in{font-family:var(--mono);font-size:13px;resize:vertical;min-height:64px}
+  .grp{margin-bottom:13px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:560px){.two,.three{grid-template-columns:1fr}}
+  select.in{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2393a09b' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+  .cta{width:100%;margin-top:6px;border:0;border-radius:15px;padding:15px;cursor:pointer;font-family:var(--disp);font-weight:600;font-size:16px;color:#fff;background:var(--ink);transition:.16s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .cta:hover{background:var(--teal)}.cta:disabled{opacity:.5;cursor:wait}
+  .reassure{text-align:center;font-size:12.5px;color:var(--faint);margin-top:13px}
+  .reassure b{color:var(--ink2)}
+  .formerr{background:var(--badbg);border:1px solid #f2c9c0;color:var(--bad);border-radius:12px;padding:11px 13px;margin-top:12px;font-size:13.5px;display:none}
+  .formerr.show{display:block}
+
+  .sechead{display:flex;align-items:baseline;gap:10px;margin:30px 0 12px}
+  .sechead h2{font-family:var(--disp);font-weight:600;font-size:18px;margin:0}
+  .sechead span{font-size:12px;color:var(--faint)}
+
+  .wlist{display:flex;flex-direction:column;gap:12px}
+  .empty{color:var(--faint);font-size:14px;text-align:center;padding:30px 10px;border:1.5px dashed var(--line);border-radius:16px}
+  .w{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 18px 44px -38px rgba(15,60,50,.4)}
+  .w.off{opacity:.62}
+  .wtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .wname{font-family:var(--disp);font-weight:600;font-size:16px;letter-spacing:-.3px}
+  .wtarget{font-family:var(--mono);font-size:12px;color:var(--ink2);word-break:break-all}
+  .wmeta{display:flex;gap:8px 16px;flex-wrap:wrap;margin-top:9px;font-size:12.5px;color:var(--ink2)}
+  .wmeta code{font-family:var(--mono);background:#f1f5f0;padding:1px 6px;border-radius:5px;font-size:11.5px}
+  .bdg{font-family:var(--sans);font-weight:800;font-size:11px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .bdg.clean{color:var(--good);background:var(--goodbg)}
+  .bdg.low{color:var(--sky);background:var(--skybg)}
+  .bdg.medium{color:var(--warn);background:var(--warnbg)}
+  .bdg.high{color:var(--bad);background:var(--badbg)}
+  .bdg.inconclusive,.bdg.none{color:var(--grey);background:var(--greybg)}
+  .wact{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+  .wact button{font-family:var(--sans);font-weight:700;font-size:12.5px;border-radius:10px;padding:8px 13px;cursor:pointer;border:1.5px solid var(--line);background:#fbfdfa;color:var(--ink);transition:.15s}
+  .wact button:hover{border-color:#cfe0d6}
+  .wact button.run{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .wact button.run:hover{background:var(--teal);border-color:var(--teal)}
+  .wact button.del{color:var(--bad)}
+  .wact button:disabled{opacity:.5;cursor:wait}
+
+  /* toggle */
+  .tg{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer}
+  .tg input{display:none}
+  .tg .track{width:38px;height:22px;border-radius:999px;background:#d6ddd5;position:relative;transition:.18s}
+  .tg .track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.18s}
+  .tg input:checked+.track{background:var(--teal)}
+  .tg input:checked+.track::after{transform:translateX(16px)}
+
+  .foot{text-align:center;color:var(--faint);font-size:12px;padding:24px 0 0;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><span class="b">⚡</span><span>zing<b>.</b></span></div>
+    <a class="pill right" href="/">← 返回检测</a>
+    <a class="pill" href="/history">📊 检测历史</a>
+  </header>
+
+  <div class="hero">
+    <h1>给中转站设个<span class="u">定时哨兵</span></h1>
+    <p>添加一个监控：zing 会在你本地按设定的间隔自动重跑黑盒检测。一旦风险越线或较上次恶化，就向你配置的 Webhook（Slack / 飞书 / 钉钉 / 通用 JSON）推送中文告警。</p>
+  </div>
+
+  <!-- add-watch form -->
+  <div class="card">
+    <form id="form" onsubmit="return false">
+      <div class="grp"><div class="lab">名称</div><input class="in" id="f-name" placeholder="例如：生产中转站 deepseek"></div>
+      <div class="grp"><div class="lab">中转站地址 base_url</div><input class="in" id="f-url" placeholder="https://relay.example.com/v1"></div>
+      <div class="two">
+        <div class="grp"><div class="lab">API Key</div><input class="in" id="f-key" placeholder="sk-... 或 env:ZING_API_KEY"></div>
+        <div class="grp"><div class="lab">声明厂商（可选）</div><input class="in" id="f-prov" placeholder="例如 openai / deepseek"></div>
+      </div>
+      <div class="two">
+        <div class="grp"><div class="lab">请求模型 model</div><input class="in" id="f-model" placeholder="gpt-4o"></div>
+        <div class="grp"><div class="lab">声称模型（可选）</div><input class="in" id="f-claimed" placeholder="默认同 model"></div>
+      </div>
+      <div class="three">
+        <div class="grp"><div class="lab">协议 api</div>
+          <select class="in" id="f-api">
+            <option value="auto">auto</option>
+            <option value="openai">openai</option>
+            <option value="anthropic">anthropic</option>
+            <option value="responses">responses</option>
+          </select>
+        </div>
+        <div class="grp"><div class="lab">套件 suite</div>
+          <select class="in" id="f-suite">
+            <option value="smoke">smoke</option>
+            <option value="standard" selected>standard</option>
+            <option value="deep">deep</option>
+            <option value="full">full</option>
+          </select>
+        </div>
+        <div class="grp"><div class="lab">告警阈值</div>
+          <select class="in" id="f-alert">
+            <option value="low">low 及以上</option>
+            <option value="medium" selected>medium 及以上</option>
+            <option value="high">仅 high</option>
+          </select>
+        </div>
+      </div>
+      <div class="two">
+        <div class="grp"><div class="lab">检测间隔（分钟）</div><input class="in" id="f-interval" type="number" min="1" value="60"></div>
+        <div class="grp" style="align-self:end">
+          <label class="tg" style="margin:0 0 13px"><input type="checkbox" id="f-enabled" checked><span class="track"></span>创建后立即启用</label>
+        </div>
+      </div>
+      <div class="grp"><div class="lab">Webhook 地址（每行一个，可留空）</div>
+        <textarea class="in" id="f-hooks" placeholder="https://hooks.slack.com/services/...&#10;https://open.feishu.cn/open-apis/bot/v2/hook/..."></textarea>
+      </div>
+      <div class="formerr" id="formerr"></div>
+      <button class="cta" id="add">＋ 添加监控</button>
+      <div class="reassure">🔒 全程<b>本地运行</b>。API Key 仅保存在本机 <b>~/.zing</b> 的本地数据库里，<b>绝不</b>出现在监控列表里、也不会发给浏览器。</div>
+    </form>
+  </div>
+
+  <!-- list -->
+  <div class="sechead"><h2>已配置的监控</h2><span id="count"></span></div>
+  <div class="wlist" id="list"><div class="empty">加载中…</div></div>
+
+  <div class="foot">zing · 中转站验真 · 监控由 <code>zing serve</code> 进程在后台调度</div>
+</div>
+
+<script src="/i18n.js"></script>
+<script>
+(function(){
+  "use strict";
+  var RISK_ZH = (window.ZING_I18N && window.ZING_I18N.RISK_LEVEL) || {
+    clean:"一致", low:"基本可信", medium:"存在偏离", high:"货不对板", inconclusive:"信号不足"
+  };
+  var $ = function(id){ return document.getElementById(id); };
+
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function riskBadge(risk){
+    var key = risk || "none";
+    var label = risk ? (RISK_ZH[risk] || risk) : "尚未运行";
+    return '<span class="bdg '+esc(key)+'">'+esc(label)+'</span>';
+  }
+
+  function fmtTime(ts){
+    if(!ts) return "从未运行";
+    try{
+      var d = new Date(ts * 1000);
+      return d.toLocaleString("zh-CN", {hour12:false});
+    }catch(e){ return "—"; }
+  }
+
+  function fmtInterval(sec){
+    sec = Number(sec) || 0;
+    if(sec % 3600 === 0) return (sec/3600) + " 小时";
+    if(sec % 60 === 0) return (sec/60) + " 分钟";
+    return sec + " 秒";
+  }
+
+  function render(watches){
+    var list = $("list");
+    $("count").textContent = watches.length ? ("共 " + watches.length + " 项") : "";
+    if(!watches.length){
+      list.innerHTML = '<div class="empty">还没有任何监控。用上面的表单添加第一个吧。</div>';
+      return;
+    }
+    list.innerHTML = "";
+    watches.forEach(function(w){
+      var el = document.createElement("div");
+      el.className = "w" + (w.enabled ? "" : " off");
+      var claimed = w.claimed_model && w.claimed_model !== w.model ? (" · 声称 " + esc(w.claimed_model)) : "";
+      var scorePart = (w.last_score != null) ? (" · 评分 <b>" + esc(w.last_score) + "</b>/100") : "";
+      var hooks = (w.webhooks && w.webhooks.length) ? (w.webhooks.length + " 个 Webhook") : "无 Webhook";
+      el.innerHTML =
+        '<div class="wtop">' +
+          '<span class="wname">' + esc(w.name || "watch") + '</span> ' +
+          riskBadge(w.last_risk) +
+          '<label class="tg"><input type="checkbox" data-tg="'+w.id+'"'+(w.enabled?" checked":"")+'><span class="track"></span>'+(w.enabled?"启用中":"已暂停")+'</label>' +
+        '</div>' +
+        '<div class="wtarget" style="margin-top:7px">' + esc(w.base_url || "") + '</div>' +
+        '<div class="wmeta">' +
+          '<span>模型 <code>' + esc(w.model || "?") + '</code>' + claimed + '</span>' +
+          '<span>套件 <code>' + esc(w.suite || "standard") + '</code></span>' +
+          '<span>间隔 ' + fmtInterval(w.interval_sec) + '</span>' +
+          '<span>阈值 <code>' + esc(w.alert_on || "medium") + '</code></span>' +
+          '<span>' + esc(hooks) + '</span>' +
+        '</div>' +
+        '<div class="wmeta">' +
+          '<span>上次：' + fmtTime(w.last_run_ts) + scorePart + '</span>' +
+        '</div>' +
+        '<div class="wact">' +
+          '<button class="run" data-run="'+w.id+'">▶ 立即运行</button>' +
+          '<button class="del" data-del="'+w.id+'">删除</button>' +
+        '</div>';
+      list.appendChild(el);
+    });
+  }
+
+  function load(){
+    fetch("/api/watches").then(function(r){ return r.json(); }).then(render).catch(function(){
+      $("list").innerHTML = '<div class="empty">加载失败，请刷新重试。</div>';
+    });
+  }
+
+  function showErr(msg){
+    var box = $("formerr");
+    box.textContent = msg;
+    box.classList.add("show");
+  }
+  function clearErr(){ $("formerr").classList.remove("show"); }
+
+  $("add").addEventListener("click", function(){
+    clearErr();
+    var hooks = $("f-hooks").value.split("\n").map(function(s){ return s.trim(); }).filter(Boolean);
+    var minutes = parseInt($("f-interval").value, 10);
+    if(!minutes || minutes < 1) minutes = 60;
+    var body = {
+      name: $("f-name").value.trim() || "watch",
+      base_url: $("f-url").value.trim(),
+      api_key: $("f-key").value.trim(),
+      model: $("f-model").value.trim(),
+      claimed_model: $("f-claimed").value.trim() || null,
+      declared_provider: $("f-prov").value.trim() || null,
+      api: $("f-api").value,
+      suite: $("f-suite").value,
+      alert_on: $("f-alert").value,
+      interval_sec: minutes * 60,
+      enabled: $("f-enabled").checked,
+      webhooks: hooks
+    };
+    var btn = $("add");
+    btn.disabled = true;
+    fetch("/api/watches", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body)
+    }).then(function(r){
+      return r.json().then(function(j){ return {ok: r.ok, body: j}; });
+    }).then(function(res){
+      btn.disabled = false;
+      if(!res.ok){ showErr(res.body.error || "创建失败"); return; }
+      // reset the key + name so a fresh add is easy; keep target for convenience
+      $("f-name").value = ""; $("f-key").value = "";
+      load();
+    }).catch(function(){ btn.disabled = false; showErr("网络错误，创建失败"); });
+  });
+
+  $("list").addEventListener("click", function(ev){
+    var t = ev.target;
+    var runId = t.getAttribute && t.getAttribute("data-run");
+    var delId = t.getAttribute && t.getAttribute("data-del");
+    if(runId){
+      t.disabled = true;
+      var orig = t.textContent;
+      t.textContent = "运行中…";
+      fetch("/api/watches/"+runId+"/run", {method:"POST"}).then(function(r){
+        return r.json();
+      }).then(function(){ load(); }).catch(function(){
+        t.disabled = false; t.textContent = orig; alert("运行失败");
+      });
+    } else if(delId){
+      if(!confirm("删除这个监控？")) return;
+      fetch("/api/watches/"+delId, {method:"DELETE"}).then(load);
+    }
+  });
+
+  $("list").addEventListener("change", function(ev){
+    var t = ev.target;
+    var tgId = t.getAttribute && t.getAttribute("data-tg");
+    if(tgId){
+      fetch("/api/watches/"+tgId, {
+        method: "PATCH",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({enabled: t.checked})
+      }).then(load);
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

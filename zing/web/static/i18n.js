@@ -342,6 +342,19 @@
       tpl: "重复前缀的 TTFT（~{warm_ms} ms）并未明显快于 cold（~{cold_ms} ms）/ control（~{control_ms} ms）。",
     },
 
+    // -- vision (dimension: capability) ----------------------------------- //
+    "vision.not_claimed": {
+      title: "未声称视觉能力 —— 已跳过",
+      tpl: "解析出的档案未声明视觉/图像模态；未发送多模态探针（modalities={modalities}）。",
+    },
+    "vision.color": {
+      // status-dependent (PASS delivered / WARN not delivered / INCONCLUSIVE);
+      // a single safe template keyed only on the protocol, which is always
+      // present in every branch's evidence.
+      title: "多模态（视觉）能力核验",
+      tpl: "通过已知答案的纯色图片探针核验视觉能力（协议 {protocol}）。",
+    },
+
     // -- quality_judge (dimension: model_identity) ------------------------ //
     "quality_judge.unavailable": {
       title: "没有可供评判的目标答案",
